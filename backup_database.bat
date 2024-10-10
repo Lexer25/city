@@ -1,0 +1,1 @@
+"C:\Program Files (x86)\Firebird\Firebird_1_5_6\bin\gbak.exe" -b -v -ig -g "127.0.0.1:C:\Program Files (x86)\Cardsoft\DuoSE\Access\SHIELDPRO_REST.GDB" C:\service_skud\SHIELDPRO_REST_%date%.FBK -USER sysdba -PASSWORD temp 
