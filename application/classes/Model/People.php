@@ -21,6 +21,24 @@ class Model_People extends Model
 		}
 	}
 	
+	
+	/** 13.01.2025
+	*@id_card -  массив карт
+	*/
+	public function card_people_unactive($id_card)// Изменение активности карты
+	{
+		if(count($id_card)>0) {
+		$count_in=50;
+		
+		$sql='update card c set c."ACTIVE"=0 where c.id_card in ('. implode(",", $id_card).')';
+		Kohana::$log->add(Log::INFO, 'Активность карты установлена в 0. :id_card', array(':id_card' => $sql));
+		$query = DB::query(Database::UPDATE, $sql)
+		->execute(Database::instance('fb'));
+		} else {
+			Kohana::$log->add(Log::INFO, 'Нет данных для выполнения операции по unactive карты.');
+		}
+	}
+	
 	public function setAuthMetod($id_pep, $authMode)// Изменение метода авторизации
 	{
 		
@@ -74,6 +92,66 @@ class Model_People extends Model
 			Kohana::$log->add(Log::INFO, 'Нет данных для выполнения операции по удалению карты.');
 		}
 	}
+	
+	/**13.01.2025
+	*@input - массив карт для удаления 
+	*/
+	public function card_Card_delete ($id_card)// удаление указанных карт.
+	{
+		if(count($id_card)>0) {
+		$t1=microtime(1);
+		$count_in=1500;
+		if (count($id_card)>$count_in)
+		{
+			$id_for_del=array_chunk($id_pep, $count_in);
+			$id_pep=$id_for_del[0];
+		}
+		//$sql='delete from card c where c.id_card in ('. implode(",", '\''.$id_card.'\'').')';
+		$sql='delete from card c where c.id_card in ('. implode(",", $id_card).')';
+		Kohana::$log->add(Log::INFO, 'Удаляются карты :id_pep', array(':id_pep' => $sql));
+		//echo Debug::vars('14', $sql); exit;
+		$query = DB::query(Database::DELETE, $sql)
+		->execute(Database::instance('fb'));
+		$t2=microtime(1)-$t1;
+		Kohana::$log->add(Log::INFO, 'Время выполнения='.$t2);
+		} else {
+			Kohana::$log->add(Log::INFO, 'Нет данных для выполнения операции по удалению карты.');
+		}
+	}
+	
+	
+	/*13.01.2025 Продление срока действия карты
+	*@id_card - массив карт
+	*/
+	public function card_People_long ($id_card, $time_long)
+	{
+		$t1=microtime(1);
+		$isactive=0;
+		if(count($id_card)>0) {
+		
+		$date=date("Y-m-d H:i:s", strtotime($time_long));
+		$count_in=50;
+		if (count($id_card)>$count_in)
+		{
+			$id_for_long=array_chunk($id_card, $count_in);
+			$id_card=$id_card[0];
+		}
+		if(strtotime($time_long)>strtotime("now")) {
+			$isactive=1;
+		}
+		$sql='update card c set c."ACTIVE"='.$isactive.', c.timeend = \''.$date.'\' where c.id_card in ('.implode(",",$id_card).')';
+		$query = DB::query(Database::UPDATE, $sql)
+		->execute(Database::instance('fb'));
+		$t2=microtime(1)-$t1;
+		Kohana::$log->add(Log::INFO, 'Продлен срок действия карты. :id_card', array(':id_card' => $sql));
+		Kohana::$log->add(Log::INFO, 'Время выполнения='.$t2);
+		
+		} else {
+			Kohana::$log->add(Log::INFO, 'Нет данных для выполнения операции по продлению срока действия карт');
+		}
+	
+	}
+	
 	
 	public function People_long ($id_pep, $time_long)
 	{

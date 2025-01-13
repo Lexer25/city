@@ -126,8 +126,6 @@ Lock open, wait for door opening - замок открыт, ждем откры�
 		
 			try{
 				$response=$this->execute($curl );
-				//echo Debug::vars('54', $response); exit;
-				//$this->doorState[0]= $this->minipars(trim($response->body()), 'T');		
 				$this->doorMode[0]= $this->minipars(trim($response), 'A');		
 				$this->doorMode[1]= $this->minipars(trim($response), 'B');		
 				
@@ -342,8 +340,8 @@ Lock open, wait for door opening - замок открыт, ждем откры�
 //echo Debug::vars('325',$url);exit;
 		curl_setopt($this->ch, CURLOPT_URL, $url);
 		curl_setopt($this->ch, CURLOPT_HEADER, 0);
-		curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 5);
-		curl_setopt($this->ch, CURLOPT_TIMEOUT, 60);// Максимально позволенное количество секунд для выполнения cURL-функций. 
+		curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 2);
+		curl_setopt($this->ch, CURLOPT_TIMEOUT, 2);// Максимально позволенное количество секунд для выполнения cURL-функций. 
 		curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
 		
 			

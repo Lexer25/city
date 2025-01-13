@@ -46,10 +46,10 @@ class Controller_People extends Controller_Template {
 	 {
 	 	//echo Debug::vars('23', $_POST); exit;
 	 	if (Arr::get($_POST, 'people_delete')) Model::Factory('People')->People_delete(Arr::get($_POST, 'id_pep'));
-	 	if (Arr::get($_POST, 'people_long')) Model::Factory('People')->People_long(Arr::get($_POST, 'id_pep'), Arr::get($_POST, 'timeTo'));
+	 	if (Arr::get($_POST, 'people_long')) Model::Factory('People')->card_People_long(Arr::get($_POST, 'id_pep'), Arr::get($_POST, 'timeTo'));
 	 	if (Arr::get($_POST, 'card_late_save_to_file')) $this->action_card_late_save_to_file();
-	 	if (Arr::get($_POST, 'people_unactive')) Model::Factory('People')->people_unactive(Arr::get($_POST, 'id_pep'));
-	 	if (Arr::get($_POST, 'card_delete')) Model::Factory('People')->card_delete(Arr::get($_POST, 'id_pep'));
+	 	if (Arr::get($_POST, 'people_unactive')) Model::Factory('People')->card_people_unactive(Arr::get($_POST, 'id_pep'));// обновлено 13.01.2025
+	 	if (Arr::get($_POST, 'card_delete')) Model::Factory('People')->card_card_delete(Arr::get($_POST, 'id_pep'));// обновлено 13.01.2025
 	 	
 	 	$this->redirect('people/find_card_late');
 	 	

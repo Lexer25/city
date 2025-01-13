@@ -76,19 +76,19 @@
 		{
 		echo '<tr>';
 		echo '<td>'.$pp++.'</td>';
-		echo '<td><label>'.Form::checkbox('id_pep[]', Arr::get($contact, 'ID_PEP'), FALSE, array('class'=>'checkbox')).'</label></td>';
-					echo '<td>'.Arr::get($contact, 'ID_PEP').'</td>';
+		echo '<td>
+					<label>'.Form::checkbox('id_pep[]', '\''.Arr::get($contact, 'ID_CARD').'\'', FALSE, array('class'=>'checkbox')).'</label>
+				</td>';
+				echo '<td>'.Arr::get($contact, 'ID_PEP').'</td>';
 				echo '<td>'.HTML::anchor('people/peopleInfo/'.Arr::get($contact, 'ID_PEP'),  Arr::get($contact,'SURNAME').' '.Arr::get($contact, 'NAME').' '.Arr::get($contact,'PATRONYMIC')).'<br>';
 				echo '<td>'.Arr::get($contact, 'ORG_PARENT', __('No_card')); // .'/'. Arr::get($contact, 'ORG_NAME', __('No_card')).'<br>';
 				echo '<td>'.Arr::get($contact, 'NOTE', __('No_card')).'<br>';
 				echo '<td>'.Arr::get($contact, 'ID_CARD', __('No_card')).'<br>';
 				echo '<td>'.date("d.m.Y", strtotime(Arr::get($contact, 'TIMEEND', __('No_card')))).'<br>';
-				//$overlate=strtotime('now') - strtotime(Arr::get($contact, 'TIMEEND'));
 				$overlate = Date::span(strtotime(Arr::get($contact, 'TIMEEND')), strtotime('now'), 'months,days');
-				//echo '<td>'. round($overlate/3600/24).'<br>';
 				echo '<td>'. Arr::get($overlate, 'months').' мес. '.Arr::get($overlate, 'days').' дн.<br>';
 				echo '<td>'. Arr::get($contact, 'ISACTIVE',0).'<br>';
-				
+			
 			echo '</tr>';
 					
 			}
