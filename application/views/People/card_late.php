@@ -14,22 +14,39 @@
       });
 
       $(document).ready(function() {
-    	    $("#check_all3").click(function () {
-    	         if (!$("#check_all3").is(":checked"))
+    	    $("#check_all").click(function () {
+				if (!$("#check_all").is(":checked"))
     	            $(".checkbox").prop("checked",false);
     	        else
     	            $(".checkbox").prop("checked",true);
     	    });
     	});
+		
+	 
+	
+	
+	
+	$(document).ready(function() {
+   // $('#btn1').on('click', function() {
+		 $("#btn1").click(function () {
+			 console.log('test 2 batton');
+        alert('Button 1 clicked');
+
+        $('#btn2').data('btn1-clicked', true);
+		
+    });
+
+    
+});
 
  
   	$(function() {		
-  		$("#tablesorter-demo").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}}});
+  		$("#tablesorter-demo").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}, 1:{sorter: false}}});
   	});	
   	
 </script> 
 
-
+<input type="button" id="btn1" value="button1"></input>
 <div class="panel panel-primary  ">
   <div class="panel-heading">
     <h3 class="panel-title"><?echo __($title)?></h3>
@@ -50,13 +67,13 @@
 		
 		
 		 
-		<table id="tablesorter-demo" class="tablesorter">
+		<table id="tablesorter-demo">
 		
 		<thead>
 		<tr>
 			<th><?echo __('pp');?></th>
 			<th>		
-				<label><input type="checkbox" name="id_pep" id="check_all3"> Выделить всё</label>
+				<label><input type="checkbox" name="id_pep" id="check_all"> </label>
 			</th>
 			<th><?echo __('pep_id');?></th>
 			<th><?echo __('name');?></th>
