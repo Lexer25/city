@@ -13,14 +13,7 @@
 		);
       });
 
-      $(document).ready(function() {
-    	    $("#check_all").click(function () {
-				if (!$("#check_all").is(":checked"))
-    	            $(".checkbox").prop("checked",false);
-    	        else
-    	            $(".checkbox").prop("checked",true);
-    	    });
-    	});
+     
 		
 	 
 	
@@ -43,6 +36,15 @@
   	$(function() {		
   		$("#tablesorter-demo").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}, 1:{sorter: false}}});
   	});	
+	
+	 $(document).ready(function() {
+    	    $("#check_all").click(function () {
+				if (!$("#check_all").is(":checked"))
+    	            $(".checkbox").prop("checked",false);
+    	        else
+    	            $(".checkbox").prop("checked",true);
+    	    });
+    	});
   	
 </script> 
 

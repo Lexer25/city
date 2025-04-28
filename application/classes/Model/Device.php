@@ -1271,7 +1271,8 @@ $ip_address=Arr::get($a, 'ConnectionString');
 	public function getDoorList($id_server=FALSE)// 28.03.2020 список id_dev точек прохода для указанного сервера.
 	{
 		$sql='select d.id_dev from device d where d.id_reader is null and d."ACTIVE">0 and d.id_devtype in (1,2)';
-		
+		echo Debug::vars('1274', Auth::instance());
+		echo Debug::vars('1275', Auth::instance()->get_user());exit;
 		if(!$id_server){
 			$sql='select  d.id_dev from device d
            

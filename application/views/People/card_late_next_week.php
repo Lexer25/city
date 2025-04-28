@@ -13,7 +13,14 @@
 		);
       });
 
-      $(document).ready(function() {
+
+
+ 
+  	$(function() {		
+  		$("#tablesorter-demo").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}}});
+  	});	
+	
+	      $(document).ready(function() {
     	    $("#check_all3").click(function () {
     	         if (!$("#check_all3").is(":checked"))
     	            $(".checkbox").prop("checked",false);
@@ -21,11 +28,6 @@
     	            $(".checkbox").prop("checked",true);
     	    });
     	});
-
- 
-  	$(function() {		
-  		$("#tablesorter-demo").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}}});
-  	});	
   	
 </script>
 
