@@ -48,7 +48,7 @@
   	
 </script> 
 
-<input type="button" id="btn1" value="button1"></input>
+
 <div class="panel panel-primary  ">
   <div class="panel-heading">
     <h3 class="panel-title"><?echo __($title)?></h3>

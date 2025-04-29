@@ -144,7 +144,7 @@ class Controller_Dashboard extends Controller_Template {
 		if(array_key_exists('browser',$_POST)) $_SESSION['brows']=Arr::get($_POST, 'browser');
 
 		//$list=Model::Factory('Stat')->load_table();
-		
+		$this->template->set_filename('templateWidth');
 		$list=Model::Factory('Device')->getDoorList();//список точек прохода (дверей)
 		$countDataBase=Model::Factory('Stat')->getAnyDataFromStdata(8); // выборка данных из st_data для указанного параметра. 8 - это количество карт по базе данных
 		//echo Debug::vars('121', $countDataBase);exit;
