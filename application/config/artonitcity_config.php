@@ -6,7 +6,7 @@ return array(
     'stat_day_befor' => 2,
     'name_device_fro_test' => 'л251 к45 калитка в л254',
 	'city_name' => Arr::get(Arr::get(Arr::get(Kohana::$config->load('skud'),'skud_list'), Session::instance()->get('skud_number')), 'name'), //'Балчуг Вьюпоинт',
-	'ver'=>'1.3.8',
+	'ver'=>'1.3.9',
 	'developer'=>'www.artonit.ru',
 		'main_windows'=>array(
 				'windows1'=>true, // true окно №1  Информация по жильцам и картам
