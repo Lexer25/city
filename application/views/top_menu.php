@@ -41,6 +41,16 @@
 					-->
 		          </ul>
 		   	</li>
+			<li class="dropdown">
+		          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><?php echo __('Настройка');?> <b class="caret"></b></a>
+		          <ul class="dropdown-menu">
+		            <li><?= HTML::anchor('ts', __('Транспортные серверы')) ?></li>
+		            <li><?= HTML::anchor('./', __('reserv')) ?></li>
+		            <li class="divider"></li>
+		            <li><?= HTML::anchor('device', __('Контроллеры')) ?></li>
+					
+		          </ul>
+		   	</li>
 			<li <?if (Arr::get($_SESSION,'menu_active')=='services') echo 'class="active"';?> ><? echo HTML::anchor('dashboard/services', __('services')); 
 		};?></li>
 			

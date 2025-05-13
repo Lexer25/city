@@ -22,19 +22,19 @@
 	<link rel="stylesheet" type="text/css" media="all" href="/city/static/css/theme.blue.css">
 	<link rel="stylesheet" type="text/css" media="all" href="/city/static/css/jquery.dataTables.min.css">
 	<link rel="stylesheet" type="text/css" media="all" href="/city/static/css/theme.default.min.css">
-	<link rel="stylesheet" href="/city/static/css/themes/blue/style.css" type="text/css" media="print, projection, screen" />
+	<link rel="stylesheet" href="/city/static/css/themes/blue/style.css" type="text/css" />
 	 
 <!-- ... -->
   <!-- 1. Подключить библиотеку jQuery -->
-  <!-- <script type="text/javascript" src="/city/static/js/jquery-1.11.1.min.js"></script>  --> 
-   <script type="text/javascript" src="/city/static/js/jquery-2.2.4.js"></script>
+  <!-- <script  src="/city/static/js/jquery-1.11.1.min.js"></script>  --> 
+   <script  src="/city/static/js/jquery-2.2.4.js"></script>
   
   <!-- 2. Подключить скрипт moment-with-locales.min.js для работы с датами -->
-  <script type="text/javascript" src="/city/static/js/moment-with-locales.min.js"></script>
+  <script  src="/city/static/js/moment-with-locales.min.js"></script>
   <!-- 3. Подключить скрипт платформы Twitter Bootstrap 3 -->
-  <script type="text/javascript" src="/city/static/js/bootstrap.min.js"></script>
+  <script  src="/city/static/js/bootstrap.min.js"></script>
   <!-- 4. Подключить скрипт виджета "Bootstrap datetimepicker" -->
-  <script type="text/javascript" src="/city/static/js/bootstrap-datetimepicker.min.js"></script>
+  <script  src="/city/static/js/bootstrap-datetimepicker.min.js"></script>
   <!-- 5. Подключить CSS платформы Twitter Bootstrap 3 -->  
   <link rel="stylesheet" href="/city/static/css/bootstrap.min.css" />
   <!-- 6. Подключить CSS виджета "Bootstrap datetimepicker" -->  
@@ -51,12 +51,12 @@
     
     
    <!--  Скрипты для сортировки таблицы 
-     <script type="text/javascript" src="/city/static/js/sort/jquery-latest.js"></script> --> 
+     <script  src="/city/static/js/sort/jquery-latest.js"></script> --> 
  
-  <script type="text/javascript" src="/city/static/js/jquery.tablesorter.js"></script>
-  <script type="text/javascript" src="/city/static/js/jquery.tablesorter.widgets.js"></script>
-  <script type="text/javascript" src="/city/static/js/jquery.tablesorter.pager.js"></script>
-  <script type="text/javascript" src="/city/static/js/crm2_template_tablesorter.js"></script>
+  <script  src="/city/static/js/jquery.tablesorter.js"></script>
+  <script  src="/city/static/js/jquery.tablesorter.widgets.js"></script>
+  <script  src="/city/static/js/jquery.tablesorter.pager.js"></script>
+  <script  src="/city/static/js/crm2_template_tablesorter.js"></script>
 	 
   </head>
 
@@ -73,7 +73,7 @@
 
 	
 
-  <script type="text/javascript">
+  <script >
   window.onscroll = function() {scrollFunction()};
 
 function scrollFunction() {
