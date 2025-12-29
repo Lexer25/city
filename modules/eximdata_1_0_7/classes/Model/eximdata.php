@@ -27,27 +27,10 @@ class Model_eximdata extends Model
 	}
 	
 	
-	/** 30.11.2025 проверка, что ни один из номеров карт не присутвует в базе данных
-	*@input массив данных для импорта
-	*@output true - все в порядке, номеров карт в базе данных нет, false - номер карты в базе данных есть. Возвращает список карт, которые есть в базе данных
-	*/
-	public static function uniqueListCard($list)
+	public static function unique_card ($card) // проверка наличия номера карты. Вдруг такой идентификатор уже у кого-то есть. True - идентификатор есть в БД, false - идентификатора нет в БД
 	{
-		/* foreach($list as $key=>$value)
-		{
-			
-			
-		} */
-		return true;
-	}
-	
-	
-	public static function unique_card ($card, $type) // проверка наличия номера карты. Вдруг такой идентификатор уже у кого-то есть. True - идентификатор есть в БД, false - идентификатора нет в БД
-	{
-		//echo Debug::vars('47',$card, $type );exit;		
-	$sql='select ID_CARD from CARD where ID_CARD=\''.$card.'\'
-		and ID_CARDTYPE='.$type;
-	//echo Debug::vars('49', $sql);exit;
+				
+	$sql='select ID_CARD from CARD where ID_CARD=\''.$card.'\'';
 	return !($card == DB::query(Database::SELECT, $sql)
 			->execute(Database::instance('fb'))
 			->get('ID_CARD'));
@@ -225,25 +208,21 @@ class Model_eximdata extends Model
 		$list[5] - старый id_card
 		$list[6] - старый id_cardtype
 		 p.surname, p.name, p.patronymic, p.note, c.id_card, c.id_cardtype
-	return new_id_pep
+	
 	*/
 	
 	public function insertPeople($value, $id_org)// добавить ОДНОГО ФИО в таблицы PEOPLE и CARD
 	{
-		//echo Debug::vars('232',$value, $id_org );//exit;
-		//echo Debug::vars('233',$this->keyValidation($value));exit;
-					
+		
 			if(!$this->keyValidation($value)->result)//валидация выполнена успешно, начинаю запись контакта и карты в БД СКУД
 			{
-				
+					
 					$new_id_pep=$this->getNewIdPep();
 					$this->insertFIO($value, $new_id_pep, $id_org);// добавление в СКУД ФИО, Note для указанного id_pep
 					$this->addCard($value, $new_id_pep);// присвоение номера карты указанном пользователю
 					//$this->addSysnote();// добавление записи в поле SYSNOTE по результатам вставки пользователя.
-				
-				return $new_id_pep;
+					return true;
 				} else {
-					echo Debug::vars('243');exit;
 					return false;
 				}
 					
@@ -287,10 +266,10 @@ class Model_eximdata extends Model
 		
 			$data=Validation::factory($key);
 				$data->rule(0, 'digit')
-				//	->rule(0, 'not_empty')
-				//	->rule(1, 'max_length', array(':value', 50))
-				//	->rule(2, 'max_length', array(':value', 50))
-				//	->rule(3, 'max_length', array(':value', 50))
+					->rule(0, 'not_empty')
+					->rule(1, 'max_length', array(':value', 50))
+					->rule(2, 'max_length', array(':value', 50))
+					->rule(3, 'max_length', array(':value', 50))
 					->rule(5, 'regex', array(':value', $rule)) // https://regex101.com/
 					
 					;
@@ -322,24 +301,10 @@ class Model_eximdata extends Model
 
 	public function insertFIO($value, $id_pep, $id_org)
 	{
-		//echo Debug::vars('325',iconv('windows-1251','UTF-8', implode(",",$value)));//exit;
 		$sysnote='Old id_pep='.Arr::get($value, 0).', old card="'.Arr::get($value, 5).'", old cardtype='.Arr::get($value, 6);
-	//echo Debug::vars('329', $value);//exit;	
+		
 		$sql='INSERT INTO PEOPLE (ID_PEP,ID_DB,ID_ORG,SURNAME,NAME,PATRONYMIC,NOTE,SYSNOTE)
 		VALUES ('.$id_pep.',1,'.$id_org.',\''.Arr::get($value, 1).'\',\''.Arr::get($value, 2).'\', \''.Arr::get($value, 3).'\',\''.Arr::get($value, 4).'\', \''.$sysnote.'\')';
-		
-		$sql=__('INSERT INTO PEOPLE (ID_PEP,ID_DB,ID_ORG,SURNAME,NAME,PATRONYMIC,NOTE,SYSNOTE)
-		VALUES (:id_pep, 1,:id_org,\':surname\', \':name\', \':patronymic\',\':note\', \':sysnote\')', array(
-				':id_pep'=>$id_pep,
-				':id_org'=>$id_org,
-				':surname'=>Arr::get($value, 'surname'),
-				':name'=>Arr::get($value, 'name'),
-				':patronymic'=>Arr::get($value, 'patronymic'),
-				':note'=>Arr::get($value, 'note'),
-				':sysnote'=>Arr::get($value, 'sysnote'),
-
-			));	
-
 		try
 			{
 			DB::query(Database::INSERT, $sql)
@@ -355,11 +320,10 @@ class Model_eximdata extends Model
 	{
 		$note='Old id_pep='.Arr::get($value, 0).', old card="'.Arr::get($value, 5).'", old cardtype='.Arr::get($value, 6);
 		$note='Import';
-		//echo Debug::vars('362', $value);exit;
+		
 		$sql='INSERT INTO CARD (ID_CARD,ID_DB,ID_PEP,ID_ACCESSNAME,TIMESTART,TIMEEND,NOTE,STATUS,"ACTIVE",FLAG,ID_CARDTYPE) 
-		VALUES (\''.Arr::get($value, 'key').'\',1,'.$id_pep.',NULL,\'now\',CURRENT_DATE+365,\''.$note.'\',0,1,0,'.Arr::get($value, 'type').')';
-		//echo Debug::vars('365', $sql);exit;
-		Kohana::$log->add(Log::ERROR, '366 ' . $sql);
+		VALUES (\''.Arr::get($value, 5).'\',1,'.$id_pep.',NULL,\'now\',CURRENT_DATE+365,\''.$note.'\',0,1,0,'.Arr::get($value, 6).')';
+		
 		try
 			{
 			DB::query(Database::INSERT, $sql)
@@ -445,7 +409,7 @@ class Model_eximdata extends Model
 			->execute(Database::instance('fb'));
 			
 			} catch (Exception $e) {
-			
+				//return BaseResultCount(422, 'insertTree', 0);
 			
 			}
 		}

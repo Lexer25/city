@@ -169,7 +169,7 @@
 						<th><?echo __('load_insert');?></th>
 				<?
 				$row_count=1;
-				//echo Debug::vars('139', $doors);
+			//	echo Debug::vars('139', $doors);exit;
 				foreach ($doors as $key=>$value)
 				{
 					echo '<tr>';

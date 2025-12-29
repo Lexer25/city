@@ -366,6 +366,7 @@ class Model_People extends Model
 			order by d.id_dev';
 				
 		//4.08.2021
+		//22.18.2025
 		$sql='select distinct dt.standalone,  d.name, d.id_dev, d.id_reader, d2.name as controller_name, cd.devidx, cd.load_result, cd.load_time, cdd.id_pep,  cdd.operation, cdd.attempts, cdd.time_stamp, s.name as SERVER_NAME   from ss_accessuser assu
 			join access ac on assu.id_accessname=ac.id_accessname
 			join device d on ac.id_dev=d.id_dev
@@ -375,7 +376,8 @@ class Model_People extends Model
 			left join cardindev cdd on assu.id_pep=cdd.id_pep and cdd.id_dev=d.id_dev and cdd.operation=1
 			left join cardidx cd on cd.id_card=c.id_card and cd.id_dev=d.id_dev
 			join server s on d2.id_server=s.id_server
-			where assu.id_pep=' . $id_pep;
+			where assu.id_pep=' . $id_pep.'
+			and c.id_card=\''.$id_card.'\'';
 		
 
 		

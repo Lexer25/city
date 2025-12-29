@@ -13,7 +13,14 @@
 		);
       });
 
-     
+      $(document).ready(function() {
+    	    $("#check_all").click(function () {
+				if (!$("#check_all").is(":checked"))
+    	            $(".checkbox").prop("checked",false);
+    	        else
+    	            $(".checkbox").prop("checked",true);
+    	    });
+    	});
 		
 	 
 	
@@ -36,19 +43,10 @@
   	$(function() {		
   		$("#tablesorter-demo").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}, 1:{sorter: false}}});
   	});	
-	
-	 $(document).ready(function() {
-    	    $("#check_all").click(function () {
-				if (!$("#check_all").is(":checked"))
-    	            $(".checkbox").prop("checked",false);
-    	        else
-    	            $(".checkbox").prop("checked",true);
-    	    });
-    	});
   	
 </script> 
 
-
+<input type="button" id="btn1" value="button1"></input>
 <div class="panel panel-primary  ">
   <div class="panel-heading">
     <h3 class="panel-title"><?echo __($title)?></h3>

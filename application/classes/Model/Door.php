@@ -62,10 +62,10 @@ class Model_Door extends Model
 	{
 	$sql='select d.*, d2.id_dev as id_dev_dev, d2.name as device_name, d2."ACTIVE" as device_active, s.name as server_name, s.ip, s.port, s."ACTIVE" as server_active, dt.name as name_door_type from device d
         join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null
-        join server s on d2.id_server=s.id_server
+        left join server s on d2.id_server=s.id_server
 		join devtype dt on dt.id_devtype=d.id_devtype
 		where d.id_dev='.$id_door;
- 
+
 		$query = DB::query(Database::SELECT, $sql)
 			->execute(Database::instance('fb'))
 			->as_array();
@@ -122,7 +122,16 @@ class Model_Door extends Model
 			where cd.id_dev='.$id_dev.' and
 			cd.attempts<200 and
 			cd.operation='.$operation;
-		
+			
+		$sql='select cd.id_cardindev, cd.id_card, cd.operation, cd.attempts, cd.id_pep, cd.time_stamp, cd.id_cardtype, ct.name as card_type_name, p.surname, p.name, p.patronymic, p.note, cx.load_time, cx.load_result from cardindev cd
+            left join people p on p.id_pep=cd.id_pep
+            left join cardidx cx on cd.id_card=cx.id_card and cd.id_dev=cx.id_dev
+            left join cardtype ct on ct.id=cd.id_cardtype
+			where cd.id_dev='.$id_dev.' and
+			cd.operation='.$operation;
+			
+			
+	//echo Debug::vars('125', $sql); exit;	
 		$query = DB::query(Database::SELECT, $sql)
 			->execute(Database::instance('fb'))
 			->as_array();

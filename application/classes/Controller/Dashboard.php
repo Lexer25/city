@@ -3,9 +3,15 @@
 class Controller_Dashboard extends Controller_Template {
 
    public $template = 'template';
-	
+   //Широки шаблон
+   //для использьвания необходимо указать 
+   //$this->template = View::factory($this->template_width);
+   public $template_width = 'template_width';
+   
+  	
 	public function before()
 	{
+			
 			//Log::instance()->add(Log::NOTICE, 'Получил запрос в dashboard');
 			parent::before();
 			$session = Session::instance();
@@ -26,6 +32,7 @@ class Controller_Dashboard extends Controller_Template {
 			
 			Session::instance()->set('peopleEventsTimeFrom', date("d.m.Y H:m:s",strtotime("-1 days")));
 			Session::instance()->set('peopleEventsTimeTo', date("d.m.Y H:m:s",strtotime("now")));
+			
 			
 	}
 	
@@ -139,12 +146,13 @@ class Controller_Dashboard extends Controller_Template {
 	public function action_load() //таблица загрузки контроллеров
 	{
         $_SESSION['menu_active']='load';
-
-		
+	
+		$this->template = View::factory($this->template_width);
+				
 		if(array_key_exists('browser',$_POST)) $_SESSION['brows']=Arr::get($_POST, 'browser');
 
 		//$list=Model::Factory('Stat')->load_table();
-		$this->template->set_filename('templateWidth');
+		
 		$list=Model::Factory('Device')->getDoorList();//список точек прохода (дверей)
 		$countDataBase=Model::Factory('Stat')->getAnyDataFromStdata(8); // выборка данных из st_data для указанного параметра. 8 - это количество карт по базе данных
 		//echo Debug::vars('121', $countDataBase);exit;
@@ -202,17 +210,60 @@ class Controller_Dashboard extends Controller_Template {
 		if(!empty($_POST['stop_load'])) Model::Factory('Stat')->stop_load($_POST['stop_load']);
 		if(Arr::get($_POST, 'reload', 0)) Model::Factory('Stat')->repeat_load(Arr::get($_POST, 'reload'));
 		if(Arr::get($_POST, 'del_queue', 0)) Model::Factory('Stat')->del_queue(Arr::get($_POST, 'reload'));
+	
+		$errArrForDevice=$this->getErrArrForDevice();//список ошибок при записи
+	//echo Debug::vars('205', $errArrForDevice); exit;	
+		$b=array();
+		$c=array();
 		
 		$b=Model::Factory('Stat')->load_order(); // вывод очереди карт на загрузку
-		$c=Model::Factory('Stat')->load_order_overcount(); // вывод очереди карт на загрузку с превышенным количеством попыток
-		
+		//$c=Model::Factory('Stat')->load_order_overcount(); // вывод очереди карт на загрузку с превышенным количеством попыток
+		//echo Debug::vars('221', $b); exit;
+		$c=array();
 		$content = View::factory('order_table', array(
 			'list' => $b,
 			'overcount'=>$c,
+			'errArrForDevice'=>$errArrForDevice,
 		));
         $this->template->content = $content;
 		
 		
+	}
+	
+	
+	//подготовка списка ошибок для каждого устройтва
+	
+	public function  getErrArrForDevice()
+	{
+		$sql='select distinct cdx.id_dev, cdx.load_result from cardidx cdx
+			where cdx.load_result containing \'err\'';
+			
+		$sql2='select distinct
+			cdx.id_dev,
+			case
+				when (cdx.load_result containing \'Device return error, code is 1\') then (SELECT \'is_1\' FROM RDB$DATABASE)
+				when (cdx.load_result containing \'UDP recv() error\') then (SELECT \'udp_err\' FROM RDB$DATABASE)
+				when (cdx.load_result containing \'not found\') then (SELECT \'not_found\' FROM RDB$DATABASE)
+				else  cdx.load_result
+			end as load_result
+			from cardidx cdx
+            where cdx.load_result containing \'err\'';
+			
+		$query = DB::query(Database::SELECT, $sql)
+		->execute(Database::instance('fb'));
+		$mess=array(
+			'is_1'=>'234_mess',
+			'udp_err'=>'235_mess_mess',
+			'not_found'=>'235_mess_mess'
+		);
+		$result=array();	
+			foreach($query as $key=>$value)
+			{
+				
+				$result[Arr::get($value, 'ID_DEV')][]=Arr::get($value, 'LOAD_RESULT');
+
+			}	
+		return $result;
 	}
     
 	public function ErrMess ($err=false)

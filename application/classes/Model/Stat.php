@@ -721,6 +721,17 @@ class Model_Stat extends Model
 		
 		//посдчет количество карт для загрузки в контроллеры. 16.02.2020 вместо индекса 6 указан card_for_load
 		$res['order']['card_for_load']['name']=__('loading_card_rfid');
+		/* $sql='select count(*) from cardindev cd
+			join devtype_cardtype dc on dc.id_cardtype=cd.id_cardtype
+			join device d on d.id_dev=cd.id_dev and d.id_devtype=dc.id_devtype
+			join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null and d2.id_devtype=dc.id_devtype
+			join DEVTYPE dt on dt.id_devtype=dc.id_devtype
+			where d."ACTIVE">0
+			and d2."ACTIVE">0
+			and dt.standalone in (0, 1)
+			and cd.id_cardtype=1
+			and cd.attempts<'.$this->getmaxAttempts(); */
+			
 		$sql='select count(*) from cardindev cd
 			join devtype_cardtype dc on dc.id_cardtype=cd.id_cardtype
 			join device d on d.id_dev=cd.id_dev and d.id_devtype=dc.id_devtype
@@ -730,7 +741,9 @@ class Model_Stat extends Model
 			and d2."ACTIVE">0
 			and dt.standalone in (0, 1)
 			and cd.id_cardtype=1
-			and cd.attempts<'.$this->getmaxAttempts();
+			';
+			
+			
 
 		$res['order']['card_for_load']['count']=DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
@@ -739,27 +752,32 @@ class Model_Stat extends Model
 		
 		
 		//количество карт с ошибкой загрузки. 16.02.2020 вместо индекса 7 указан card_overload
-		$res['order']['card_overload']['name']=__('overcount_card');
+		//23.12.2025 disabled
+		/* $res['order']['card_overload']['name']=__('overcount_card');
 		$res['order']['card_overload']['count']=DB::query(Database::SELECT, 'select count(*) from cardindev cd where cd.attempts>='.$this->getmaxAttempts())
 		->execute(Database::instance('fb'))
 		->get('COUNT');
+		$res['order']['card_overload']['count']='---'; */
 		
 		
 		//подсчет количества карт для неактивных устройств. 16.02.2020 вместо индекса 8 указан card_for_not_active
-		$res['order']['card_for_not_active']['name']=__('load_order_for_notactive');
-		$res['order']['card_for_not_active']['count']=$this->count_order_for_notactive();
+		//23.12.2025 disabled
+	/* 	$res['order']['card_for_not_active']['name']=__('load_order_for_notactive');
+		$res['order']['card_for_not_active']['count']=$this->count_order_for_notactive(); */
 		
 		//подсчет количества карт, загруженных в контроллеры за последние 24 часа
-		$res['device'][9]['name']=__('load_card_in_device');
+		//23.12.2025 disabled
+		/* $res['device'][9]['name']=__('load_card_in_device');
 		$res['device'][9]['count']=DB::query(Database::SELECT, 'select count(*) from cardidx cd where cd.load_time>\''.date("d.m.Y H:i:s",strtotime("-1 days")).'\'')
 		->execute(Database::instance('fb'))
-		->get('COUNT');
+		->get('COUNT'); */
 		
 		//подсчет количества карт, которые не удалось загрузить в контроллеры.
-		$res['device'][10]['name']=__('load_card_in_device_with_error');
+		//23.12.2025 disabled
+		/* $res['device'][10]['name']=__('load_card_in_device_with_error');
 		$res['device'][10]['count']=DB::query(Database::SELECT, 'select count(*) from cardidx cd where cd.load_time>\''.date("d.m.Y H:i:s",strtotime("-1 days")).'\' and cd.load_result containing \'ERR\'')
 		->execute(Database::instance('fb'))
-		->get('COUNT');
+		->get('COUNT'); */
 		
 		
 		
@@ -785,6 +803,18 @@ class Model_Stat extends Model
  where d."ACTIVE">0 and d2."ACTIVE">0 and cd.attempts<'.$this->getmaxAttempts().'
   and d2.id_devtype in (1,2, 6)
  group by cd.operation , cd.id_dev, d.name , d2.name, s.name';
+ 
+	//22.12.2025 при использовании ТС4 нет ограничений на количество попыток
+ 	$sql='select distinct cd.operation, cd.id_dev, d.name, d2.name as device, s.name as server, count (*) from cardindev cd
+ join device d on d.id_dev=cd.id_dev
+ join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null
+ join server s on d2.id_server=s.id_server
+ where d."ACTIVE">0 and d2."ACTIVE">0 
+  and d2.id_devtype in (1,2, 6)
+ group by cd.operation , cd.id_dev, d.name , d2.name, s.name';
+ 
+ //echo Debug::vars(); exit;
+ 
 		$query = DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
 		->as_array();

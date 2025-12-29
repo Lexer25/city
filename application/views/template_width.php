@@ -61,17 +61,13 @@
   </head>
 
   <body>
-  <!--container-fluid -->
-<div class="container">
+
 	<div class="row">
    		<?
 			include Kohana::find_file('views','top_menu');
 			echo $content;?>
 			<button onclick="topFunction()" id="myBtn" title="Go to top"><?php echo __('top'); ?></button> 
 	</div>
-</div>  
-
-	
 
   <script type="text/javascript">
   window.onscroll = function() {scrollFunction()};

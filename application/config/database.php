@@ -8,6 +8,7 @@ return array
 		'type'			=> 'pdo',
 		'connection'	=> array(
 			'dsn'		=> 'firebird:dbname=localhost:C:\\Program Files (x86)\\Cardsoft\\DuoSE\\Access\\SHIELDPRO_REST.GDB',
+			//'dsn'		=> 'odbc:SDUO_235',
 			'username'	=> 'SYSDBA',
 			'password'	=> 'temp',
 			'charset'   => 'windows-1251',
@@ -16,8 +17,8 @@ return array
 		'fb' => array(
 				'type'			=> 'pdo',
 				'connection'	=> array(
-					//'dsn'		=> 'odbc:SDUO',
-					'dsn'		=> 'odbc:VNII_local',
+					'dsn'		=> 'odbc:SDUO',
+					//'dsn'		=> 'odbc:VNII_local',
 					'charset'   => 'windows-1251',
 					)
 				),

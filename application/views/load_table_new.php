@@ -72,6 +72,7 @@ echo Form::open('Dashboard/device_control');?>
 			echo '<th>'.__('DEVICE_IsActive').'</th>'; //22
 			echo '<th>'.__('DEVICE_TYPE').'</th>'; //5
 			echo '<th>'.__('isOnLine').'</th>'; //5
+			echo '<th>'.__('IP').'</th>'; //5
 			echo '<th>'.__('isWp').'</th>'; //50
 			echo '<th>'.__('isTest').'</th>'; //52
 			echo '<th>'.__('DOOR_NAME').'</th>'; //6
@@ -187,13 +188,7 @@ echo Form::open('Dashboard/device_control');?>
 				echo '<td>'.$device->id //21
 					.' '
 					.HTML::anchor('device/deviceinfo/'.$device->id,iconv('windows-1251','UTF-8',$device->name));
-					echo '<p>';
-					if (is_null($device->connectionString)){
-						echo ' <span class="label label-danger">'.__('no_ip').'</span><br>';
-					} else {
-						echo HTML::anchor('http://'.$device->connectionString ,$device->connectionString, array('target' => '_blank'));
-					}
-					echo '</p></td>';//21
+					echo '</td>';//21
 					
 				echo '<td>';
 					if($device->is_active == 1) {
@@ -230,6 +225,15 @@ echo Form::open('Dashboard/device_control');?>
 					
 					
 				echo '</td>';//50
+				echo '<td>';//IP
+					echo '<p>';
+					if (is_null($device->connectionString)){
+						echo ' <span class="label label-danger">'.__('no_ip').'</span><br>';
+					} else {
+						echo HTML::anchor('http://'.$device->connectionString ,$device->connectionString, array('target' => '_blank'));
+					}
+					echo '</p>';
+				echo '</td>';//
 				
 				if($deviceInfo->onLine){
 					echo '<td>'.Form::checkbox('', 1, $deviceInfo->isWP == True, array('disabled'=>'disabled')).'<span class="hidden">1</span></td>';//51

@@ -6,25 +6,12 @@
 class Controller_eximdata extends Controller_Template{
 	
 	public $template = 'template';
-	public $cache_dir = APPPATH . 'cache/';
-	public $cacheFileName='dataimport';
-	private $nameLen;
-	private $surNameLen;
-	private $patronymicLen;
-	private $noteLen;
-	
 	
 	public function before()
 	{
 			parent::before();
 			$session = Session::instance();
 			if(!Session::instance()->get('skud_number')) $this->redirect('errorpage?err=no SKUD select.');
-			$this->nameLen=$this->_getFieldLen('NAME');
-			$this->surNameLen=$this->_getFieldLen('SURNAME');
-			$this->patronymicLen=$this->_getFieldLen('PATRONYMIC');
-			$this->noteLen=$this->_getFieldLen('NOTE');
-		//echo Debug::vars('24', $this->_getFieldLen('NAME'));exit;	
-		//	echo Debug::vars('25', $this);exit;
 	}
 	
 	
@@ -55,7 +42,7 @@ class Controller_eximdata extends Controller_Template{
          
         } elseif ($request->method() === HTTP_Request::POST) {
             // Обработка POST запроса
-          return $this->action_import();
+          return $this->action_upload();
 
         } elseif ($request->method() === HTTP_Request::PUT) {
             // Обработка PUT запроса
@@ -126,8 +113,13 @@ class Controller_eximdata extends Controller_Template{
 			Session::instance()->set('e_mess', $post->errors('eximdata'));
 			$this->redirect('/eximdata');
 		}
+		
+		
+		
 	}
-
+	
+	
+	
 	public function action_export()
 	{
 		$id=$this->request->param('id');
@@ -213,15 +205,45 @@ class Controller_eximdata extends Controller_Template{
 	
 	public function action_importTree()
 	{
-			$id_org=Arr::get($_POST, 'id_org2');
-			
-		 	$sourceFile = Arr::get($_FILES[$this->cacheFileName], 'name');//сохраняю имя файла для последующих комментариев
-					
-			$filename = $this->_uploadFile('json');//загружаю файл типа json
-			$current = unserialize(file_get_contents($filename));		
-	
-	//запись дерева организаций в место вставки
 		
+		
+		
+		//https://www.programmerall.com/article/372759554/
+			//Внимание: 'dataimport' - это название массива с параметрами файла:
+			// "dataimport" => array(5) (
+			// "name" => string(22) "Корпус_06(3).txt"
+			// "type" => string(10) "text/plain"
+			// "tmp_name" => string(23) "C:\xampp\tmp\phpED2.tmp"
+			// "error" => integer 0
+			// "size" => integer 96658
+			// )
+		//именно этот dataimport используется в параметрах валидации
+			
+			$id_org=Arr::get($_POST, 'id_org2');
+			$sourceFile = Arr::get($_FILES['dataimport'], 'name');
+			$validation = Validation::factory($_FILES);
+			$validation->rule('dataimport', 'Upload::not_empty');
+			$validation->rule('dataimport', 'Upload::valid');
+			$validation->rule('dataimport', 'Upload::size', array(':value', '3M'));
+			$validation->rule('dataimport', 'Upload::type', array(':value', array('json')));
+				
+			if ($validation->check())
+			{
+				$cache_dir = APPPATH . 'cache/';
+				$filename='dataimport.tmp';
+				Upload::save($validation['dataimport'], $filename, $cache_dir);//сохраняю файл в указанную папку
+				$current = unserialize(file_get_contents($cache_dir.'\\'.$filename));
+				
+			} else {
+				// set user errors
+				Session::instance()->set('e_mess', $validation->errors('eximdata'));
+				$this->redirect('/eximdata');// если не удалось сохранить файл, то будет выведено сообщение об ошибке
+				
+			}
+
+					
+			//запись дерева организаций в место вставки
+				
 			$eximdata=Model::factory('eximdata');
 			
 			$uid=Arr::get(Arr::get($current, 'about'), 'uid');//уникальный идентификатор пакета для вставки данных
@@ -342,142 +364,127 @@ class Controller_eximdata extends Controller_Template{
 		exit;
 	}
 	
-	public function action_import()
+	public function action_upload()
 	{
 			$id_org=Arr::get($_POST, 'id_org1');
-			$data=array();
-			$list=array();
-			$sourceFile = Arr::get($_FILES[$this->cacheFileName], 'name');//сохраняю имя файла для последующих комментариев
 			
-			$filename = $this->_uploadFile('csv');//загружаю файл типа csv
-			
-			$countrow=1;
-			//чтение данных из файла и преобразование их в массив			
+			// create validation object
+			$validation = Validation::factory($_FILES)
+				->rules('csv', array(
+					array('Upload::not_empty'),
+				));
+
+			if ($validation->check())
+			{
+				$cache_dir = APPPATH . 'cache/';
 				
-				if (($fp = fopen($filename, "r")) !== FALSE) {
+				// Создаем директорию если её нет
+				if (!is_dir($cache_dir)) {
+					mkdir($cache_dir, 0755, true);
+				}
+
+				Upload::save($validation['csv'], 'file.csv', $cache_dir);//сохраняю файл в указанную папку
+				
+			} else {
+				// set user errors
+				Session::instance()->set('e_mess', $validation->errors('eximdata'));
+				$this->redirect('/eximdata');// если не удалось сохранить файл, то будет выведено сообщение об ошибке
+				
+			}
+
+			
+			//чтение данных из файла и преобразование их в массив			
+						
+				$cache_file = $cache_dir . 'file.csv';
+
+				
+				if (($fp = fopen($cache_file, "r")) !== FALSE) {
 					while (($data = fgetcsv($fp, 0, ";")) !== FALSE) {
 						$list[] = $data;
-						
 					}
 					fclose($fp);
-				} else {
-					
-					echo Debug::vars('364');exit;
 				}
-	//	echo Debug::vars('407',$data, $list);exit;	
-			//валидация полученных данных. Цель валидации - убедиться, что номеро карт нет в базе данных.
-		$list_error=array();
+			
+			//валидация полученных данных
 			foreach($list as $key=>$value)
 			{
-			$countrow++;
-			//echo Debug::vars('374', $value);//exit;
+				$data=Validation::factory($list);
+				
 				$data=Validation::factory($value);
 				$data->rule(0, 'digit')
 					->rule(0, 'not_empty')
-					->rule(1, 'max_length', array(':value', $this->nameLen))
-					->rule(2, 'max_length', array(':value', $this->surNameLen))
-					->rule(3, 'max_length', array(':value', $this->patronymicLen))
-					->rule(4, 'max_length', array(':value', $this->noteLen))
-					
+					->rule(1, 'max_length', array(':value', 50))
+					->rule(2, 'max_length', array(':value', 50))
+					->rule(3, 'max_length', array(':value', 50))
 					//->rule(5, 'regex', array(':value', '/^[A-F\d]{10}+$/')) // https://regex101.com/
-					//->rule(5, 'Model_eximdata::unique_card') //проверка идентификатора на уникальность.
-					->rule(5, 'not_empty')
-					->rule(5, array('Model_eximdata', 'unique_card'), array(':value', Arr::get($value, 6)))
-					->rule(6, 'not_empty')
+					->rule(5, 'Model_eximdata::unique_card') //проверка идентификатора на уникальность.
 					->rule(6, 'regex', array(':value', '/^[1-5]{1}+$/')) //^[1-5]{1}+$ https://regex101.com/
 					;
 				$keyTypeList=$this->_getCardtype();//получил список типов карт.
 				
-				//echo Debug::vars('427', $data);exit;
 				if($data->check())//если карты нет в БД, то добавляем ее в базу данных
 				{
+					if(Model::factory('eximdata')->insertPeople($value, $id_org))
+					{
 					
-					$keyNameList=array('id', 'name', 'surname', 'patronymic', 'note', 'key', 'type');
-					$list2[]=array_combine($keyNameList, $value);
-			
-			
-				
+						$fioo = Model::factory('eximdata')->getInforForCard(Arr::get($data, 5));
+
+					$list_error[]= __('377 ok Карта :card пользователя :f :i :o тип :cardType зарегистрирована успешно в организацию :orgName.',
+						array(
+							':ffrom'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'SURNAME')),
+							':ifrom'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'NAME')),
+							':ofrom'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'PATRONYMIC')),
+							':orgName'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'ORGNAME')),
+							':f'=>iconv('windows-1251','UTF-8',Arr::get($value, 1)),
+							':i'=>iconv('windows-1251','UTF-8',Arr::get($value, 2)),
+							':o'=>iconv('windows-1251','UTF-8',Arr::get($value, 3)),
+							':card'=>Arr::get($value, 5),
+							':cardType'=>Arr::get($keyTypeList, Arr::get($value, 6)),
+							));
+					} else {
+						
+						$list_error[]= __('391 err Карта :card пользователя :f :i :o тип :cardType  ошибка валидации. Проверьте номер идентификатора.',
+						array(
+							':ffrom'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'SURNAME')),
+							':ifrom'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'NAME')),
+							':ofrom'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'PATRONYMIC')),
+							':orgName'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'ORGNAME')),
+							':f'=>iconv('windows-1251','UTF-8',Arr::get($value, 1)),
+							':i'=>iconv('windows-1251','UTF-8',Arr::get($value, 2)),
+							':o'=>iconv('windows-1251','UTF-8',Arr::get($value, 3)),
+							':card'=>Arr::get($value, 5),
+							':cardType'=>Arr::get($keyTypeList, Arr::get($value, 6)),
+							));
+					}
 				} else {
 					 
 					$fioo = Model::factory('eximdata')->getInforForCard(Arr::get($data, 5));
 
-					
-						$list_error[]= __('481 err Ошибка в строке :countrow исходных данных :errstring. Ошибка :errMess',
+					$list_error[]= __('380 err Карта :card пользователя :f :i :o тип :cardType  уже выдана пользователю :ffrom :ifrom :ofrom из организации :orgName.',
 						array(
-							':errstring'=>iconv('windows-1251','UTF-8',implode(",", $value)),
-							':errMess'=>implode(",", $data->errors('eximdata')),
-							':countrow'=>$countrow,							
+							':ffrom'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'SURNAME')),
+							':ifrom'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'NAME')),
+							':ofrom'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'PATRONYMIC')),
+							':orgName'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'ORGNAME')),
+							':f'=>iconv('windows-1251','UTF-8',Arr::get($value, 1)),
+							':i'=>iconv('windows-1251','UTF-8',Arr::get($value, 2)),
+							':o'=>iconv('windows-1251','UTF-8',Arr::get($value, 3)),
+							':card'=>Arr::get($value, 5),
+							':cardType'=>Arr::get($keyTypeList, Arr::get($value, 6)),
 							));
-							Kohana::$log->add(Log::ERROR, '440 ' . Debug::vars($list_error));
+					//Session::instance()->set('e_mess', $list_error);
+					//$this->redirect('/eximdata');// если не удалось сохранить файл, то,  будет выведено сообщение об ошибке
 				}
-			}
-			//echo Debug::vars('442',$list_error );exit;
-			$var415=count($list_error);
-			if($var415>0) //есть ошибки в исходных данных. Импорт прекращается.
-			{
 				
-				$list_error[]= __('481 err Выявлены ошибки в исходном файле в :count строк(-ах). Импорт невозможен.',
-						array(
-						':count'=>$var415,
-							
-							));
-				Session::instance()->set('result_mess', $list_error);
-				$this->redirect('/eximdata');
-			} 
-			
-			//проверка данных в массиве list пройдена успешно, теперь можно вставлять данные в организацию
-			$keyNameList=array('id', 'name', 'name2', 'name3', 'note', 'key', 'type');
-			//echo Debug::vars('452 все в порядке, вставляю данные', $list);//exit;
-			//echo Debug::vars('452 все в порядке, вставляю данные', $list2);exit;
-		//	echo Debug::vars('453 все в порядке, вставляю данные', array_combine($keyNameList, $list));exit;
-			$addIdPep=array();//список уже вставленных контактов в формате
-			//'id из файла' =>id_pep 
-			foreach($list2 as $key2=>$value2)
-			{
-				//echo Debug::vars('463',iconv('windows-1251','UTF-8', implode(",",$value2)), $addIdPep);exit;
-				$insertIdPep=Arr::get($addIdPep, Arr::get($value2, 'id'));
-				//echo Debug::vars('465', $insertIdPep);exit;
-				if(!$insertIdPep)
-				{	//если не существует ;insertIdPep - значит, этот контакт еще не вставляли
+				
+			}
 
-						$insertPeople=Model::factory('eximdata')->insertPeople($value2, $id_org);//получил ID_PEP вставленного пипла
-						$addIdPep[Arr::get($value2, 'id')]=$insertPeople;//добавил в массив id_pep для вновь вставленного контакта
-						
-						if($insertPeople>0)//если не нуль, т.е. вставка прошла успешно, то 
-						{
-						//	echo Debug::vars('445',$insertPeople, $value2, Arr::get($value2, 'key'));exit;
-							$fioo = Model::factory('eximdata')->getInforForCard(Arr::get($value2, 'key'));
-
-						$result_mess[]= __('377 ok Карта :card пользователя :f :i :o тип :cardType зарегистрирована успешно в организацию :orgName.',
-							array(
-								':ffrom'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'SURNAME')),
-								':ifrom'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'NAME')),
-								':ofrom'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'PATRONYMIC')),
-								':orgName'=>iconv('windows-1251','UTF-8',Arr::get($fioo, 'ORGNAME')),
-								':f'=>iconv('windows-1251','UTF-8',Arr::get($value, 1)),
-								':i'=>iconv('windows-1251','UTF-8',Arr::get($value, 2)),
-								':o'=>iconv('windows-1251','UTF-8',Arr::get($value, 3)),
-								':card'=>Arr::get($value, 5),
-								':cardType'=>Arr::get($keyTypeList, Arr::get($value, 6)),
-								));
-						} else {
-							
-						}
-					
-						
-						
-				} else {//а если уже есть такой контакто, то просто добавляю ему карту
-					//echo Debug::vars('472');exit;
-					Model::factory('eximdata')->addCard($value2, $insertIdPep);//получил ID_PEP вставленного пипла
-				}
-			}				
+			Session::instance()->set('result_mess', $list_error);
 			
+			//Model::factory('eximdata')->insertPeople($list);
 			
-	//		echo Debug::vars('476', $addIdPep);exit;
-			
-			
-			Session::instance()->set('result_mess', $result_mess);
-			
+		
+		
 
 		// redirect to home page
 		$this->redirect('/eximdata');
@@ -501,68 +508,7 @@ class Controller_eximdata extends Controller_Template{
 			return $list;
 		}
 	
-	/**30.11.2025 Загрузка файла с веб-формы
-	* @param typeFile csv, json
-	*/
-	public function _uploadFile($typeFile)
-	{
-			if (!isset($_FILES['dataimport'])) {
-				Session::instance()->set('e_mess', array('file_required' => 'File is required'));
-				$this->redirect('/eximdata');
-				return false;
-			}
-			
-			$validation = Validation::factory($_FILES)
-				->rule('dataimport', 'Upload::not_empty')
-				->rule('dataimport', 'Upload::valid')
-				->rule('dataimport', 'Upload::size', array(':value', '3M'))
-				->rule('dataimport', 'Upload::type', array(':value', array($typeFile)));
-			
-			if (!$validation->check()) {
-				Session::instance()->set('e_mess', $validation->errors('eximdata'));
-				$this->redirect('/eximdata');
-				return false;
-			}
-			
-			try {
-				$saved = Upload::save($_FILES['dataimport'], $this->cacheFileName, $this->cache_dir);
-				if ($saved) {
-					return $this->cache_dir . DIRECTORY_SEPARATOR . $this->cacheFileName;
-				}
-			} catch (Exception $e) {
-				Kohana::$log->add(Log::ERROR, 'File upload error: ' . $e->getMessage());
-				Session::instance()->set('e_mess', array('upload_error' => 'File upload failed'));
-			}
-			
-			$this->redirect('/eximdata');
-			return false;
-	}
 	
 	
-	private function _getFieldLen($nameField)
-	{
-		$sql=__('SELECT 
-				f.rdb$field_length as byte_length as len,
-				f.rdb$character_length as char_length
-			FROM rdb$relation_fields rf
-			JOIN rdb$fields f ON rf.rdb$field_source = f.rdb$field_name
-			WHERE rf.rdb$relation_name = \'PEOPLE\' 
-			  AND rf.rdb$field_name = \':name\'', array(':name'=>$nameField));
-		
-		
-		$sql=__('SELECT 
-				f.rdb$field_length as byte_length 				
-			FROM rdb$relation_fields rf
-			JOIN rdb$fields f ON rf.rdb$field_source = f.rdb$field_name
-			WHERE rf.rdb$relation_name = \'PEOPLE\' 
-			  AND rf.rdb$field_name = \':name\'', array(':name'=>$nameField));
-			  
-			  
-			return DB::query(Database::SELECT, $sql)
-			->execute(Database::instance('fb'))
-			->get('BYTE_LENGTH');
-			
-		
-	}
 }
 
