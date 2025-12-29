@@ -8,6 +8,7 @@ return array(
 	'city_name' => Arr::get(Arr::get(Arr::get(Kohana::$config->load('skud'),'skud_list'), Session::instance()->get('skud_number')), 'name'), //'Балчуг Вьюпоинт',
 	'ver'=>'1.3.6b',//исправлены C:\xampp\htdocs\city\application\classes\Model\People.php->getPeopleDoor теперь с учетом карты, удален раздел Кол-во карт с превышением, удалена кнопка "Прекратить запись".
 	'ver'=>'1.3.6с',//очередь загрузки - имя контроллера - выводит список ошибок; IP адрес теперь в отдельной колонке;Исправлен вывод информации по контроллеру если не указан id сервера.
+	'ver'=>'2.0.1',// Новая версия в расчете на ТС4. 
 	'developer'=>'www.artonit.ru',
 		'main_windows'=>array(
 				'windows1'=>true, // true окно №1  Информация по жильцам и картам

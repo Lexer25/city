@@ -93,7 +93,7 @@
 			<h3 class="panel-title"><?php echo __('system_info');?></h3>
 		  </div>
 		  <div class="panel-body">
-			<table class="table table-striped table-hover table-condensed">
+		<!--	<table class="table table-striped table-hover table-condensed">
 			<tr>
 				<td>Имя</td>
 				<td><?php echo iconv('CP1251','UTF-8',  Arr::get($about, 'connectName')); ?></td>
@@ -124,6 +124,19 @@
 			</tr>
 
 		</table>
+		-->
+		
+			<?php
+				echo __('Имя :connectName<br>Тип :dsn<br>БД :pathDB<br>IP :Server<br>Событий :EVENTS<br>Min_date :minEventDate<br>', 
+					array(
+						':connectName'=>iconv('CP1251','UTF-8',  Arr::get($about, 'connectName')),
+						':dsn'=>iconv('CP1251','UTF-8',  Arr::get($about, 'dsn')),
+						':pathDB'=>iconv('cp866','UTF-8//IGNORE', Arr::get($about, 'pathDB')),
+						':Server'=>iconv('CP1251','UTF-8',  Arr::get($about, 'Server')),
+						':EVENTS'=>number_format(Arr::get(Arr::get($about, 'countTable'), 'EVENTS'),  0, '', ' '),
+						':minEventDate'=>Arr::get($about, 'minEventDate'),
+					));
+			?>
 			
 		  </div>
 		</div>
