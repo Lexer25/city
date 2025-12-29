@@ -47,7 +47,7 @@ if(!is_null($serverList))
 	
 }
 
-if(true){
+if(false){
 
 	// $t1=microtime(true);
 	// $ip_address='10.25.16.70';
@@ -59,7 +59,7 @@ if(true){
 	$deviceHard->getScudMode();
 	$deviceHard->disconnect();
 	
-	echo Debug::vars('61', $deviceHard); exit;
+	//echo Debug::vars('61', $deviceHard); exit;
 	// $deviceHard = new artonitHTTP($ip_address);
 						
 						

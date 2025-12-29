@@ -83,32 +83,47 @@
 		  </div>
 		</div>
 		
-<!--  Панель №4. События. -->
+<!--  Панель №4. сведени о системе. -->
+		<?php
+			//echo Debug::vars('114', Arr::get($about, 'countTable'));exit;
 		
+		?>
 		<div class="panel panel-info col-md-3">
 		  <div class="panel-heading  row">
-			<h3 class="panel-title"><?php echo __('event_stat');?></h3>
+			<h3 class="panel-title"><?php echo __('system_info');?></h3>
 		  </div>
 		  <div class="panel-body">
-			<?
-			if($event_stat_enable){
-				if(isset($event_stat) and count($event_stat))
-				{
-					foreach ($event_stat as $key=>$value)
-					{
-						echo __('event_stat_for_dashboard', array(
-							':name'	=> $value['NAME_EVENT'], 
-							':count'	=> $value['COUNT_EVENT'], 
-							)).'<br>';
-					}
-				}	 else {
-					echo __('no_dashboard_events');	
-				}
-			} else {
-				echo __('windows_disable');
-			}
-			echo '<br>'.HTML::anchor('/event', __('view_events'));
-			?>
+			<table class="table table-striped table-hover table-condensed">
+			<tr>
+				<td>Имя</td>
+				<td><?php echo iconv('CP1251','UTF-8',  Arr::get($about, 'connectName')); ?></td>
+			</tr>
+			<tr>
+				<td>Тип</td>
+				<td><?php echo iconv('CP1251','UTF-8', Arr::get($about, 'dsn')); ?></td>
+			</tr>
+			<tr>
+				<td>БД</td>
+				<td><?php echo iconv('cp866','UTF-8//IGNORE', Arr::get($about, 'pathDB'));?>
+				
+			</td>
+			<tr>
+				<td>IP</td>
+				<td><?php echo iconv('cp866','UTF-8//IGNORE', Arr::get($about, 'Server'));?>
+				
+			</tr>
+			<tr>
+				<td>Событий</td>
+				<td><?php echo number_format(Arr::get(Arr::get($about, 'countTable'), 'EVENTS'),  0, '', ' ');?>
+				
+			</tr>
+			<tr>
+				<td> <?php echo __('Min_date');?></td>
+				<td><?php echo Arr::get($about, 'minEventDate');?>
+				
+			</tr>
+
+		</table>
 			
 		  </div>
 		</div>

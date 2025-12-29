@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Сontroller extends Controller_Template {
+class Controller_Dev extends Controller_Template {
    public $template = 'template';
    //Широки шаблон
    //для использьвания необходимо указать 
@@ -13,28 +13,21 @@ class Controller_Сontroller extends Controller_Template {
 			
 			parent::before();
 			$session = Session::instance();
-	echo Debug::vars('18');exit;		
-	}
-	
-	
-	public function action_index()
-	{
 		
-	echo Debug::vars('23');exit;	
 	}
+	
+	
+	
 	
 	
 	
 	public function action_load() //таблица загрузки контроллеров
 	{
         $_SESSION['menu_active']='load';
-	echo Debug::vars('41');exit;
+	
 		$this->template = View::factory($this->template_width);
 				
 		if(array_key_exists('browser',$_POST)) $_SESSION['brows']=Arr::get($_POST, 'browser');
-
-		//$list=Model::Factory('Stat')->load_table();
-		
 		$list=Model::Factory('Device')->getDoorList();//список точек прохода (дверей)
 		$countDataBase=Model::Factory('Stat')->getAnyDataFromStdata(8); // выборка данных из st_data для указанного параметра. 8 - это количество карт по базе данных
 		//echo Debug::vars('121', $countDataBase);exit;
@@ -82,6 +75,43 @@ class Controller_Сontroller extends Controller_Template {
 		
 		
 	}
+	
+	//подготовка списка ошибок для каждого устройтва
+	
+	public function  getErrArrForDevice()
+	{
+		$sql='select distinct cdx.id_dev, cdx.load_result from cardidx cdx
+			where cdx.load_result containing \'err\'';
+			
+		$sql2='select distinct
+			cdx.id_dev,
+			case
+				when (cdx.load_result containing \'Device return error, code is 1\') then (SELECT \'is_1\' FROM RDB$DATABASE)
+				when (cdx.load_result containing \'UDP recv() error\') then (SELECT \'udp_err\' FROM RDB$DATABASE)
+				when (cdx.load_result containing \'not found\') then (SELECT \'not_found\' FROM RDB$DATABASE)
+				else  cdx.load_result
+			end as load_result
+			from cardidx cdx
+            where cdx.load_result containing \'err\'';
+			
+		$query = DB::query(Database::SELECT, $sql)
+		->execute(Database::instance('fb'));
+		$mess=array(
+			'is_1'=>'234_mess',
+			'udp_err'=>'235_mess_mess',
+			'not_found'=>'235_mess_mess'
+		);
+		$result=array();	
+			foreach($query as $key=>$value)
+			{
+				
+				$result[Arr::get($value, 'ID_DEV')][]=Arr::get($value, 'LOAD_RESULT');
+
+			}	
+		return $result;
+	}
+	
+	
 	
 	public function action_device_control()// обработка кнопок рыботы с контролерами
 	{

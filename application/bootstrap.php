@@ -135,10 +135,11 @@ Kohana::modules(array(
 	 'dashboard'  => MODPATH.'dashboard',  // оформление основного окна и верхнего меню
 	 'events'  => MODPATH.'events',  // форма для вывода различных событий
 	 'people'  => MODPATH.'people',  // форма для работы с контактами
-	 'controller'  => MODPATH.'controller',  // форма для работы с контроллерами
 	 'door'  => MODPATH.'door',  // форма для работы с точкой прохода
 	 'email' => MODPATH.'email',
-	 'eximdata' => MODPATH.'eximdata' //'экспорт и импорт данных
+	 'eximdata' => MODPATH.'eximdata', //'экспорт и импорт данных
+	 'dev' => MODPATH.'dev', //'форма для работы с контроллерами
+	 'apb' => MODPATH.'apb', //'раздел для работы с периметральным антипассбеком
 	 
 	));
 

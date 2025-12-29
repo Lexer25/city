@@ -99,7 +99,7 @@ class Model_Apb extends Model {
 		$query = DB::query(Database::SELECT, $sql)
 			->execute(Database::instance('fb'))
 			->as_array();
-		//echo Debug::vars('11', $query); exit;
+		echo Debug::vars('11', $query); exit;
 		foreach ($query as $key => $value)
 		{
 			$res[$key]['ID']=$value['ID'];

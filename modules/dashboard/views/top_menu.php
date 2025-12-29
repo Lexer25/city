@@ -16,10 +16,10 @@
 		{
 			//echo Debug::vars('15', Kohana::$config->load('artonitcity_config')->view_without_auth['load'], Auth::instance()->logged_in()); exit;
 
-			if((Kohana::$config->load('artonitcity_config')->view_without_auth['load']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='load') echo 'class="active"';?> ><?= HTML::anchor('controller/load', __('Load')) ?></li><?};
+			if((Kohana::$config->load('artonitcity_config')->view_without_auth['load']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='load') echo 'class="active"';?> ><?= HTML::anchor('dev/load', __('Load')) ?></li><?};
 						
-			if((Kohana::$config->load('artonitcity_config')->view_without_auth['load_order']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='load_order') echo 'class="active"';?> ><?= HTML::anchor('controller/load_order', __('Load_order')) ?></li><?};
-			if((Kohana::$config->load('artonitcity_config')->view_without_auth['device_control']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='device_control') echo 'class="active"';?> ><?= HTML::anchor('controller/device_control', __('device_control')) ?></li><?};
+			if((Kohana::$config->load('artonitcity_config')->view_without_auth['load_order']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='load_order') echo 'class="active"';?> ><?= HTML::anchor('dev/load_order', __('Load_order')) ?></li><?};
+			if((Kohana::$config->load('artonitcity_config')->view_without_auth['device_control']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='device_control') echo 'class="active"';?> ><?= HTML::anchor('dev/device_control', __('device_control')) ?></li><?};
 
 			//echo Debug::vars('20', $_SESSION); exit;
 			if((Kohana::$config->load('artonitcity_config')->view_without_auth['events']) OR (Auth::instance()->logged_in())) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='events') echo 'class="active"';?> ><?= HTML::anchor('event', __('events')) ?></li><?};
@@ -51,7 +51,7 @@
 				{?>
 			</li>
 			<li> <?php echo  HTML::anchor('eximdata', __('Экспорт/импорт'));?></li>
-			<?php //include Kohana::find_file('views','apb', 'menu');?>
+			<?php include Kohana::find_file('views','apb', 'menu');?>
         </ul>
   
             
@@ -90,7 +90,7 @@
     </div>
 	<div class="navbar-collapse collapse">
       <?php 
-	  
+	 
 	  if(!is_null(Session::instance()->get('skud_number')))
 	  {
       echo __('string_about', array(
