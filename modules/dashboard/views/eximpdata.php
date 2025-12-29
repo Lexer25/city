@@ -13,7 +13,7 @@
     </style>
 <?php
 	
-	//echo Debug::vars('16', Session::instance() );exit;
+	//echo Debug::vars('16', Session::instance() );//exit;
 	
 	
 	// Получить список всех модулей
@@ -265,7 +265,7 @@ $modules = Kohana::modules();
                 
                 <form action="" method="post" enctype="multipart/form-data">
                     <div class="form-group">
-                        <input type="file" name="csv" accept=".csv,.txt" required>
+                        <input type="file" name="dataimport" accept=".csv,.txt" required>
                     </div>
                     <input type="hidden" name="id_org1" id="id_org1">
                     <div class="form-actions">

@@ -132,6 +132,11 @@ Kohana::modules(array(
 	// 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
 	// 'unittest'   => MODPATH.'unittest',   // Unit testing
 	 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
+	 'dashboard'  => MODPATH.'dashboard',  // оформление основного окна и верхнего меню
+	 'events'  => MODPATH.'events',  // форма для вывода различных событий
+	 'people'  => MODPATH.'people',  // форма для работы с контактами
+	 'controller'  => MODPATH.'controller',  // форма для работы с контроллерами
+	 'door'  => MODPATH.'door',  // форма для работы с точкой прохода
 	 'email' => MODPATH.'email',
 	 'eximdata' => MODPATH.'eximdata' //'экспорт и импорт данных
 	 
@@ -157,8 +162,4 @@ Route::set('default', '(<controller>(/<action>(/<id>)))')
 		'controller' => 'dashboard',
 		'action'     => 'index',
 	));
-Route::set('peoplesearcch', '(<controller>(/<action>(/<id>)(/<card>)))')
-	->defaults(array(
-		'controller' => 'people',
-		'action'     => 'peopleinfo',
-	));
+

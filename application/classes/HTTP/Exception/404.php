@@ -4,7 +4,8 @@
          
         public function get_response()
         {
-            $view = View::factory('HTTP/404');
+            echo Debug::vars('7', $this);exit;
+			$view = View::factory('HTTP/404');
             $view->message = $this->getMessage();
             $response = Response::factory()
                 ->status(404)
