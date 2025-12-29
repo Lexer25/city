@@ -134,6 +134,8 @@ Kohana::modules(array(
 	 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
 	 'email' => MODPATH.'email',
 	 'ts' => MODPATH.'cfg/ts',
+	 'eximdata' => MODPATH.'eximdata',
+	
 	 
 	));
 
@@ -157,6 +159,10 @@ Route::set('default', '(<controller>(/<action>(/<id>)))')
 		'controller' => 'dashboard',
 		'action'     => 'index',
 	));
+	
+
+	
+	
 Route::set('peoplesearcch', '(<controller>(/<action>(/<id>)(/<card>)))')
 	->defaults(array(
 		'controller' => 'people',
