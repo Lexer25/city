@@ -43,7 +43,7 @@
   
 <?php 
 
-	echo Form::open('Dashboard/saveStateSkud');
+	echo Form::open('Dev/saveStateSkud');
 
 		?>
 	<button type="submit" class="btn btn-primary pull-right " name="refresh"  value="stateExport"><?php echo __('stateExport')?></button>
@@ -55,7 +55,7 @@
 
 echo __('load_table', array('count_door'=>count($list)));
 
-echo Form::open('Dashboard/device_control');?>	
+echo Form::open('Dev/device_control');?>	
 
    <!-- <table class="table table-striped table-hover table-condensed">  -->
    <table id="tablesorter" class="table table-striped table-hover table-condensed tablesorter">
@@ -71,8 +71,8 @@ echo Form::open('Dashboard/device_control');?>
 			echo '<th>'.__('DEVICE_NAME').'</th>'; //21
 			echo '<th>'.__('DEVICE_IsActive').'</th>'; //22
 			echo '<th>'.__('DEVICE_TYPE').'</th>'; //5
-			echo '<th>'.__('isOnLine').'</th>'; //5
 			echo '<th>'.__('IP').'</th>'; //5
+			echo '<th>'.__('isOnLine').'</th>'; //5
 			echo '<th>'.__('isWp').'</th>'; //50
 			echo '<th>'.__('isTest').'</th>'; //52
 			echo '<th>'.__('DOOR_NAME').'</th>'; //6
@@ -202,7 +202,15 @@ echo Form::open('Dashboard/device_control');?>
 					}
 				echo '</td>';//22
 				echo '<td>'.Arr::get($devtypeList, $device->type).'</td>';//5
-				
+				echo '<td>';//IP
+					echo '<p>';
+					if (is_null($device->connectionString)){
+						echo ' <span class="label label-danger">'.__('no_ip').'</span><br>';
+					} else {
+						echo HTML::anchor('http://'.$device->connectionString ,$device->connectionString, array('target' => '_blank'));
+					}
+					echo '</p>';
+				echo '</td>';//
 				echo '<td>';
 				if($deviceInfo->mac != '00-00-00-00-00-00') {
 					if ($deviceInfo->onLine) {
@@ -225,15 +233,7 @@ echo Form::open('Dashboard/device_control');?>
 					
 					
 				echo '</td>';//50
-				echo '<td>';//IP
-					echo '<p>';
-					if (is_null($device->connectionString)){
-						echo ' <span class="label label-danger">'.__('no_ip').'</span><br>';
-					} else {
-						echo HTML::anchor('http://'.$device->connectionString ,$device->connectionString, array('target' => '_blank'));
-					}
-					echo '</p>';
-				echo '</td>';//
+				
 				
 				if($deviceInfo->onLine){
 					echo '<td>'.Form::checkbox('', 1, $deviceInfo->isWP == True, array('disabled'=>'disabled')).'<span class="hidden">1</span></td>';//51
@@ -275,6 +275,7 @@ echo Form::open('Dashboard/device_control');?>
 				}
 				
 				//echo '<td>'.$doorMode.'</td>';//11
+				//колонка Режим работы
 				echo '<td>';
 						
 							switch($doorMode){
@@ -402,7 +403,7 @@ echo Debug::vars('162',(microtime(true)-$t1));//exit;
 <br>
 <nav class="navbar navbar-default navbar-fixed-bottom disable" role="navigation">
   <div class="container">
-  	<button type="submit" class="btn btn-primary sm" name="synctime" value="1" title = "Синхронизация времени в контроллерах"><?php echo __('synctime')?></button>
+  	<button type="submit" class="btn btn-primary sm" name="synctime" value="1" title = "Синхронизация времени в контроллерах"><?php echo __('synctime_dev')?></button>
 	<button type="submit" class="btn btn-primary sm" name="settz"  value="1" title = "Установить временные зоны для выбранных контроллеров"><?php echo __('settz')?></button>
 	<button type="submit" class="btn btn-danger sm" name="clear_device"  value="1" title = "Удалить карты из выбранных точек прохода"><?php echo __('clear_device')?></button>
 	<button type="submit" class="btn btn-danger sm" name="load_card"  value="1" title = "Загрузить карты в выбранные точки прохода"><?php echo __('load_card')?></button>
