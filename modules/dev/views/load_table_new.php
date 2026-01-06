@@ -55,6 +55,8 @@
 
 echo __('load_table', array('count_door'=>count($list)));
 
+echo $dataListView;
+
 echo Form::open('Dev/device_control');?>	
 
    <!-- <table class="table table-striped table-hover table-condensed">  -->

@@ -42,16 +42,29 @@ class DeviceInfo
 			$this->inputPortState=Arr::get($deviceInfo, 'InputPortState');
 			$this->softVersion=Arr::get($deviceInfo, 'sver');
 			$this->keyCount=Arr::get($deviceInfo, 'kc');
-			$this->timeGetData=Arr::get($deviceInfo, 'timef');
-			$this->timeExecute=Arr::get($deviceInfo, 'te');
+			//$this->timeGetData=Arr::get($deviceInfo, 'timef');
+			$this->timeGetData=$this->standardizeNumber(Arr::get($deviceInfo, 'timef'));
+			//$this->timeExecute=Arr::get($deviceInfo, 'te');
+			$this->timeExecute=$this->standardizeNumber(Arr::get($deviceInfo, 'te'));
 			$this->scud=Arr::get($deviceInfo, 'scud');
-			
-			
-			
-
+		} else {
 			
 		}
 	}
 	
-	
+	public function standardizeNumber($input) {
+    // Может быть строкой или числом
+    if (is_numeric($input)) {
+        return (string)$input; // уже число
+    }
+    
+    if (is_string($input)) {
+        // Заменяем запятую на точку и убираем лишнее
+        $normalized = str_replace(',', '.', $input);
+        $normalized = preg_replace('/[^0-9\.\-]/', '', $normalized);
+        return $normalized;
+    }
+    
+    return '0';
+}
 }

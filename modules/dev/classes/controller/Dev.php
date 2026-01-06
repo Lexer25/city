@@ -28,15 +28,29 @@ class Controller_Dev extends Controller_Template {
 		$this->template = View::factory($this->template_width);
 				
 		if(array_key_exists('browser',$_POST)) $_SESSION['brows']=Arr::get($_POST, 'browser');
+		
+		//набор данных предоствляется в виде нескольких массивов:
+		//$list - набор точек прохода (дверей)
+		//countDataBase - набор данных для контроллера, в который точки прохода входят.
 		$list=Model::Factory('Device')->getDoorList();//список точек прохода (дверей)
 		$countDataBase=Model::Factory('Stat')->getAnyDataFromStdata(8); // выборка данных из st_data для указанного параметра. 8 - это количество карт по базе данных
-		//echo Debug::vars('121', $countDataBase);exit;
+	
+		$dataList=Model::Factory('dev')->getDevData(); // 
+		$dataList=Model::Factory('dev')->getDevDataDetail(); // 
+		
+		echo Debug::vars('41', $dataList);exit;
+		$dataListView = View::factory('load_table_new2', array(
+			'list' => $dataList,
+					));
+		
+		//	echo Debug::vars('121', $dataList);exit;
 		$date_stat=Model::Factory('Stat')->date_stat();//получение даты и времени выбора статистики
 
 		$devtypeList=Model::Factory('Device')->getDevtypeList();//получить типы устройств
 
 		
 		$content = View::factory('load_table_new', array(
+			'dataListView' => $dataListView,
 			'list' => $list,
 			'countDataBase' => $countDataBase,
 			'date_stat' =>$date_stat,
