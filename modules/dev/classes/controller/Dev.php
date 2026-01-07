@@ -29,19 +29,25 @@ class Controller_Dev extends Controller_Template {
 				
 		if(array_key_exists('browser',$_POST)) $_SESSION['brows']=Arr::get($_POST, 'browser');
 		
+		//новый "быстрый" вариант
+		//$dataList=Model::Factory('dev')->getDevData(); // 
+		//$dataList=Model::Factory('dev')->getDevDataDetail(); // 
+		$dataList=Model::Factory('dev')->getDataList(); // 
+		
+		//echo Debug::vars('41', $dataList);exit;
+		$dataListView = View::factory('load_table_new2', array(
+			'list' => $dataList,
+			
+					));
+					
+		
 		//набор данных предоствляется в виде нескольких массивов:
 		//$list - набор точек прохода (дверей)
 		//countDataBase - набор данных для контроллера, в который точки прохода входят.
-		$list=Model::Factory('Device')->getDoorList();//список точек прохода (дверей)
+	/* 	$list=Model::Factory('Device')->getDoorList();//список точек прохода (дверей)
 		$countDataBase=Model::Factory('Stat')->getAnyDataFromStdata(8); // выборка данных из st_data для указанного параметра. 8 - это количество карт по базе данных
 	
-		$dataList=Model::Factory('dev')->getDevData(); // 
-		$dataList=Model::Factory('dev')->getDevDataDetail(); // 
 		
-		echo Debug::vars('41', $dataList);exit;
-		$dataListView = View::factory('load_table_new2', array(
-			'list' => $dataList,
-					));
 		
 		//	echo Debug::vars('121', $dataList);exit;
 		$date_stat=Model::Factory('Stat')->date_stat();//получение даты и времени выбора статистики
@@ -57,7 +63,8 @@ class Controller_Dev extends Controller_Template {
 			'devtypeList' =>$devtypeList,
 		));
 
-        $this->template->content = $content;
+        $this->template->content = $content; */
+        $this->template->content = $dataListView;
         //echo View::factory('profiler/stats');
 	}
 	

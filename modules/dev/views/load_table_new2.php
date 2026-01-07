@@ -2,8 +2,6 @@
    <!-- <table class="table table-striped table-hover table-condensed">  -->
    <table id="tablesorter" class="table table-striped table-hover table-condensed tablesorter">
    <thead allign="center">
-
-		
 		<tr>
 			<th>
 				Выделить<br><label><input type="checkbox" name="id_dev" id="check_all3"></label>
@@ -32,43 +30,272 @@
 			?>
 			
 		</tr>
+		<tr>
+			<?php for ($i=1; $i<22; $i++){
+				echo '<th>'.$i.'</th>';
+				
+			}
+			?>
+			
+		</tr>
 	
 		</thead>
 		<tbody>
 		<? 
-		$tr_class='success';
-			
-		//	if($deltacard<0) $tr_class='danger';
-		//	if($deltacard>0) $tr_class='warning';
-			
-		foreach ($list as $key => $value)//для каждой точки прохода набираю данные
+				
+		foreach ($list as $key => $deviceInfo)//для каждой точки прохода набираю данные
 		{
-			$deviceInfo=new DeviceInfo(Arr::get($value, 'ID_DEV'), Arr::get($value, 'FACTS'));
-			//echo Debug::vars('47', Arr::get($value, 'FACTS'));//exit;
-			//echo Debug::vars('48', $deviceInfo);
+
+			//$deviceInfo=new DeviceInfo(Arr::get($value, 'ID_DEV'), Arr::get($value, 'facts2'));//набор данных из статистики
+			//echo Debug::vars('48', $value);
+			//echo Debug::vars('48', $deviceInfo);exit;
+					
+			
+				
+			//рзаница в картах
+			$deltacard=($deviceInfo->keyCount_reader - $deviceInfo->countDataBase);
+			//$deltacard=(($deviceInfo->keyCount_reader));
+			$tr_class='success';	
+			
+			/** собираю сигнла ;collectAttention - знак общего внимания.
+			*/
+			$collectAttention=false;
+			if($deviceInfo->isBlocked 
+				OR $deviceInfo->isAlarm 
+				OR (!$deviceInfo->onLine)
+				OR ($deltacard<>0) 
+				OR ($deviceInfo->doorMode == 'Fire') 
+				OR ($deviceInfo->doorMode == 'Blocked') 
+				OR ($deviceInfo->doorMode == 'Alarm')) $collectAttention = TRUE;
+				
+			if(!$deviceInfo->onLine){
+					$tr_class='active';
+				} elseif ($deltacard>0){
+					$tr_class='warning';
+					}
+					elseif ($deltacard<0){
+						$tr_class='danger';
+					}
+						elseif ($collectAttention){
+							$tr_class='danger';
+						}
+			if($deltacard<0) $tr_class='danger';
+			if($deltacard>0) $tr_class='warning';
+			
+			
+			
 			echo '<tr class="'.$tr_class.'">';
 				//echo '<td>'.Debug::vars('47', $value, $deviceInfo).'</td>';
 				echo '<td><label>'.Form::checkbox('id_dev['.$key.']', $key, FALSE, array('class'=>'checkbox')).'</label></td>'; //1
-				echo '<td>2/'.iconv('CP1251', 'UTF-8', Arr::get($value, 'SERVERNAME')).'</td>';
-				echo '<td>3/'.iconv('CP1251', 'UTF-8', Arr::get($value, 'DEVNAME')).'</td>';
-				echo '<td>4/'.$deviceInfo->ip.'</td>';
-				echo '<td>5/'.$deviceInfo->isWP .'</td>';
-				echo '<td>6/'.$deviceInfo->ip .'</td>';
-				echo '<td>7/'.$deviceInfo->isWP .'</td>';
-				echo '<td>8/'.$deviceInfo->isTest .'</td>';
-				echo '<td>9/'.$deviceInfo->isWP .'</td>';
-				echo '<td>'.iconv('CP1251', 'UTF-8', Arr::get($value, 'DOORNAME')).'</td>';
-				echo '<td>10/'.$deviceInfo->softVersion  .'</td>';
-				echo '<td>11/'.$deviceInfo->isWP .'</td>';
-				echo '<td>12/'.$deviceInfo->isWP .'</td>';
-				echo '<td>13/'.$deviceInfo->isWP .'</td>';
-				echo '<td>14/'.$deviceInfo->isWP .'</td>';
-				echo '<td>15/'.$deviceInfo->isWP .'</td>';
-				echo '<td>16/'.$deviceInfo->isWP .'</td>';
-				echo '<td>17/'.$deviceInfo->isWP .'</td>';
-				echo '<td>18/'.$deviceInfo->isWP .'</td>';
-				echo '<td>19/'.$deviceInfo->isWP .'</td>';
-				echo '<td>20/'.$deviceInfo->isWP .'</td>';
+				echo '<td>'. iconv('CP1251', 'UTF-8', $deviceInfo->servername).'</td>';
+				echo '<td>'.$deviceInfo->parentid
+					. ' '
+					.HTML::anchor('device/deviceinfo/'.$deviceInfo->parentid,iconv('windows-1251','UTF-8',$deviceInfo->parentname))
+					.'</td>';
+				echo '<td>';
+					//iconv('CP1251', 'UTF-8', Arr::get($value, 'ACTIVE'))
+					if($deviceInfo->active  == 1) {
+						echo '<span class="hidden">1</span>';
+						echo  HTML::image("static/images/Card_on.png", array('height' => 20, 'alt' => 'Включено', 'title'=>'Устройство включено в БД СКУД.'));
+						echo __('On');
+					} else {
+						echo '<span class="hidden">0</span>';
+						echo  HTML::image("static/images/Card_off.png", array('height' => 20, 'alt' => 'Выключено', 'title'=>'Устройство выключено в БД СКУД.'));
+						echo __('Off');
+					}
+				echo '</td>';
+				echo '<td>'.iconv('CP1251', 'UTF-8', $deviceInfo->devtypename).'</td>';
+				echo '<td>';
+					if (is_null($deviceInfo->ip)){
+						echo ' <span class="label label-danger">'.__('no_ip').'</span><br>';
+					} else {
+						echo HTML::anchor('http://'.$deviceInfo->ip ,$deviceInfo->ip, array('target' => '_blank'));
+					};
+					
+					//echo $deviceInfo->ip
+				echo '</td>';
+				echo '<td>';
+					if($deviceInfo->mac != '00-00-00-00-00-00') {
+					if ($deviceInfo->onLine) {
+							echo '<span class="hidden">0</span>';
+							echo HTML::image("static/images/dot_green_n.png", array('height' => 20, 'alt' => 'Да'));
+							
+					} else {
+							 echo '<span class="hidden">1</span>';
+							echo HTML::image("static/images/dot_red_h.png", array('height' => 20, 'alt' => 'Нет'))
+							. HTML::image("static/images/attention.png", array('height' => 20, 'alt' => 'Требует внимания'))
+							;
+							
+					}
+				} else {
+							 echo '<span class="hidden">2</span>';
+							echo HTML::image("static/images/dot_yellow_h.png", array('height' => 20, 'alt' => 'Плохая связь'))
+							. HTML::image("static/images/attention.png", array('height' => 20, 'alt' => 'Плохая связь', 'title'=>'Плохая связь.'))
+							; 
+				}
+					
+
+				echo '</td>';//на связи
+//заполняю сразу две колонки				
+					if($deviceInfo->onLine){
+					echo '<td>'.Form::checkbox('', 1, $deviceInfo->isWP == True, array('disabled'=>'disabled')).'<span class="hidden">1</span></td>';//51
+					echo '<td>'.Form::checkbox('', 1, $deviceInfo->isTest == True, array('disabled'=>'disabled')).'<span class="hidden">1</span></td>';//52
+					
+					
+				} else {
+					echo '<td>-</td>';//51
+					echo '<td>-</td>';//52
+				};
+
+//название точки прохода
+				//echo '<td>'.iconv('CP1251', 'UTF-8', Arr::get($value, 'NAME')) .'</td>';
+				//echo '<td>'.Arr::get($value, 'ID_DEV').' '.HTML::anchor('door/doorInfo/'.Arr::get($value, 'ID_DEV'), iconv('CP1251', 'UTF-8',Arr::get($value, 'NAME'))).'</td>';//6
+				echo '<td>'.$deviceInfo->id_dev.' '.HTML::anchor('door/doorInfo/'.$deviceInfo->id_dev, iconv('CP1251', 'UTF-8',$deviceInfo->name)).'</td>';//6
+
+//версия контроллера СКУД
+				echo '<td>'.$deviceInfo->softVersion  .'</td>';
+//SCUD MODE
+				echo '<td>/';
+					//.$deviceInfo->scud.
+					//echo $deviceInfo->scud.' '.Arr::get($value, 'ID_READER');
+					echo $deviceInfo->scud.' '.$deviceInfo->id_reader;
+					if(($deviceInfo->scud == 'd1') AND ($deviceInfo->id_reader == 1) AND($deviceInfo->doorMode != 'Disabled')) {
+							echo HTML::image("static/images/attention.png", array('height' => 20, 'alt' => 'Требует внимания', 'title'=>'Для настройки Одна дверь вторую точку прохода необходимо выключить.')); 
+							echo HTML::image("static/images/star_red.png", array('height' => 20, 'alt' => 'Требует внимания', 'title'=>'Недопустимая комбинация настроек.')); 
+					}
+					
+				echo '</td>';//12
+//карт по базе данных
+				echo '<td>'.iconv('CP1251', 'UTF-8', $deviceInfo->countDataBase).'</td>';//
+//карт в точке прохода в контроллере
+				//echo '<td>14/'.$deviceInfo->keyCount_reader.'</td>';
+//различия
+	if($deviceInfo->onLine){
+					echo '<td>'.$deviceInfo->keyCount_reader.'</td>';//90
+					
+					if ($deltacard ==0){
+						echo '<td class="success">'.$deltacard. '</td>';//91
+						} else {
+							 
+							 echo '<td>'.$deltacard;
+								 echo HTML::image("static/images/attention.png", array('height' => 20, 'alt' => 'Требует внимания'));
+							echo '</td>';//91
+							 
+						}
+					
+				}else {
+					echo '<td>-</td>';//91
+					echo '<td>-</td>';//91
+				}
+//режим работы
+				echo '<td>';
+						switch($deviceInfo->doorMode){
+								case 'Fire':
+									 echo '<span class="hidden">1</span>';
+									echo __('<acronym title=":doorMode">Откр всегда</acronym>', array(':doorMode'=>$deviceInfo->doorMode))
+										.' '
+										. HTML::image("static/images/replace2.png", array('height' => 20, 'alt' => 'Откр всегда'))
+										. HTML::image("static/images/attention.png", array('height' => 20, 'alt' => 'Требует внимания', 'title'=>'Дверь открыта навсегда командой с компьютера.'))
+										;
+								break;
+								
+								case 'Blocked':
+									 echo '<span class="hidden">1</span>';
+									echo __('Закр всегда <acronym>:doorMode</acronym>', array(':doorMode'=>$deviceInfo->doorMode))
+										.' '
+										. HTML::image("static/images/replace2.png", array('height' => 20, 'alt' => 'Закр всегда'))
+										. HTML::image("static/images/attention.png", array('height' => 20, 'alt' => 'Требует внимания', 'title'=>'Дверь закрыта навсегда командой с компьютера.'))
+										;
+								break;
+								
+								case 'Closed':
+									echo __('<acronym title =":doorMode">Рабочий режим</acronym>', array(':doorMode'=>$deviceInfo->doorMode));
+									
+								break;
+								
+								case 'Open':
+									echo __('<acronym title =":doorMode">Рабочий режим</acronym>', array(':doorMode'=>$deviceInfo->doorMode)).' '. HTML::image("static/images/green-check.png", array('height' => 20, 'alt' => 'Рабочий режим'));
+								break;
+								
+								case 'Alarm':
+									 echo '<span class="hidden">1</span>';
+									echo __('<acronym title =":doorMode">Взлом</acronym>', array(':doorMode'=>$deviceInfo->doorMode))
+										.' '
+										. HTML::image("static/images/docs-point-big2.png", array('height' => 20, 'alt' => 'Взлом'))
+										. HTML::image("static/images/attention.png", array('height' => 20, 'alt' => 'Требует внимания', 'title'=>'Взлом двери. Проверьте состояние геркона.'))
+										;
+								break;
+								
+								case 'Disabled':
+									echo __('<acronym title =":doorMode">Отключен</acronym>', array(':doorMode'=>$deviceInfo->doorMode));
+								break;
+								
+								case 'no':
+									echo __('<acronym title =":doorMode">-</acronym>', array(':doorMode'=>$deviceInfo->doorMode));
+								break;
+								
+								default: //не определено
+									echo __('<acronym title =":doorMode">Не определен</acronym>', array(':doorMode'=>$deviceInfo->doorMode)).' '. HTML::image("static/images/man-says.png", array('height' => 20, 'alt' => 'Не определен'));
+								break;
+								
+				
+								
+							};
+				
+				echo '</td>';
+//режим блокировки
+				if($deviceInfo->onLine){
+					echo '<td>';
+						echo Form::checkbox('', 1, $deviceInfo->isBlocked == True, array('disabled'=>'disabled'));
+						if ($deviceInfo->isBlocked == True) {
+							echo '<span class="hidden">1</span>';
+							echo HTML::image("static/images/attention.png", array('height' => 20, 'alt' => 'Требует внимания','title'=>'Вход блокировки замкнут на "землю". Дверь закрыта, на карты и нажатие кнопок не открывается.'))
+							.'1'
+							;
+						}
+					echo '</td>';//12
+					echo '<td>';
+						echo Form::checkbox('', 1, $deviceInfo->isAlarm == True, array('disabled'=>'disabled'));
+						if ($deviceInfo->isAlarm == True) {
+							 echo '<span class="hidden">1</span>';
+								echo  HTML::image("static/images/attention.png", array('height' => 20, 'alt' => 'Требует внимания', 'title'=>'Вход Alarm замкнут на "землю". Дверь постоянно открыта.'))
+								.''
+								;
+						}
+					echo '</td>';//13
+				} else {
+					echo '<td>-</td>';//12
+					echo '<td>-</td>';//13
+					
+				}
+//время выполнения запроса
+				echo '<td>/'.number_format($deviceInfo->timeExecute, 3,'.','').'</td>';//timeExecute 
+				echo '<td>'.date('d.m.Y H:m:s',$deviceInfo->timeGetData);//15
+				// progress-bar-success, progress-bar-info, progress-bar-warning и progress-bar-danger
+				$tt3=time();
+				$pbmax=100;
+				
+				$pbmin=10;
+				$pbcolor='progress-bar-danger';
+				
+				$pbvalue=intval((($deviceInfo->timeGetData+60*60*24-$tt3)*100)/(60*60*24));
+				
+				if($pbvalue>=76) $pbcolor='progress-bar-success';
+				if($pbvalue>=51 and $pbvalue<75) $pbcolor='progress-bar-info';
+				if($pbvalue>=26 and $pbvalue<51) $pbcolor='progress-bar-warning';
+				if($pbvalue<26) $pbcolor='progress-bar-danger';
+				echo '<div class="progress">
+					<div class="progress-bar '.$pbcolor.'" role="progressbar" style="width: '.$pbvalue.'%" ></div>
+					
+					</div>
+					';
+					
+				echo '</td>';//15
+//сводная информация				
+				echo '<td>';
+					if($collectAttention)echo HTML::image("static/images/attention.png", array('height' => 30, 'alt' => 'Требует внимания')).'<span class="hidden">1</span>';
+				echo '</td>';
+				
 							
 			echo '</tr>';
 			

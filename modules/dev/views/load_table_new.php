@@ -190,7 +190,7 @@ echo Form::open('Dev/device_control');?>
 				echo '<td>'.$device->id //21
 					.' '
 					.HTML::anchor('device/deviceinfo/'.$device->id,iconv('windows-1251','UTF-8',$device->name));
-					echo '</td>';//21
+					echo '</td>';//поле 3 название контроллера
 					
 				echo '<td>';
 					if($device->is_active == 1) {
@@ -202,7 +202,7 @@ echo Form::open('Dev/device_control');?>
 						echo  HTML::image("static/images/Card_off.png", array('height' => 20, 'alt' => 'Выключено', 'title'=>'Устройство выключено в БД СКУД.'));
 						echo __('Off');
 					}
-				echo '</td>';//22
+				echo '</td>';//поле 4 включен в СКУД
 				echo '<td>'.Arr::get($devtypeList, $device->type).'</td>';//5
 				echo '<td>';//IP
 					echo '<p>';
@@ -236,7 +236,7 @@ echo Form::open('Dev/device_control');?>
 					
 				echo '</td>';//50
 				
-				
+		//заполняю сразу две колонки		
 				if($deviceInfo->onLine){
 					echo '<td>'.Form::checkbox('', 1, $deviceInfo->isWP == True, array('disabled'=>'disabled')).'<span class="hidden">1</span></td>';//51
 					echo '<td>'.Form::checkbox('', 1, $deviceInfo->isTest == True, array('disabled'=>'disabled')).'<span class="hidden">1</span></td>';//52
@@ -246,6 +246,8 @@ echo Form::open('Dev/device_control');?>
 					echo '<td>-</td>';//51
 					echo '<td>-</td>';//52
 				}
+				
+		//название точки прохода
 				echo '<td>'.Arr::get($door, 'ID_DEV').' '.HTML::anchor('door/doorInfo/'.Arr::get($door, 'ID_DEV'),Arr::get($door, 'NAME')).'</td>';//6
 				echo '<td>'.$deviceInfo->softVersion.'</td>';//8
 				echo '<td>';
