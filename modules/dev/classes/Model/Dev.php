@@ -5,6 +5,25 @@
 class Model_Dev extends Model
 {
 	
+	/**9.01.2025
+	*/
+	public function date_stat()//получение даты и времени выбора статистики
+	{
+		$sql='select min (std.time_insert), max (std.time_insert) from st_data std';
+		$query = DB::query(Database::SELECT, $sql)
+		->execute(Database::instance('fb'))
+		->as_array();
+		//echo Debug::vars('12',$sql, $query ); exit;
+		$res=array();
+		foreach ($query as $key=>$value)
+		{
+			$res['min'] = Arr::get($value, 'MIN', 'not');
+			$res['max'] = Arr::get($value, 'MAX', 'not');
+		}
+		return $res;
+		
+	}
+	
 	public function getDevData()
 	{
 		

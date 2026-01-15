@@ -12,26 +12,12 @@ class Controller_Dashboard extends Controller_Template {
 	public function before()
 	{
 			
-			//Log::instance()->add(Log::NOTICE, 'Получил запрос в dashboard');
 			parent::before();
 			$session = Session::instance();
-			
-			if(!Session::instance()->get('skud_number')) 
-			{
-				if(count($skud_list=Model::Factory('skud')->getSkudList()) == 1)
-				{
-					Session::instance()->set('skud_number', Arr::get(array_keys($skud_list=Model::Factory('skud')->getSkudList()),0)) ;
-					
-				} else {
-				
-					$this->redirect('errorpage?err=no SKUD select.');
-				}
-			}		
-			//Log::instance()->add(Log::NOTICE, 'База данных вот какая: '.Session::instance()->get('skud_number'));
 			include Kohana::find_file('classes/controller','check_db_connect');
 			
-			Session::instance()->set('peopleEventsTimeFrom', date("d.m.Y H:m:s",strtotime("-1 days")));
-			Session::instance()->set('peopleEventsTimeTo', date("d.m.Y H:m:s",strtotime("now")));
+			Session::instance()->set('peopleEventsTimeFrom', date("d.m.Y H:i:s",strtotime("-1 days")));
+			Session::instance()->set('peopleEventsTimeTo', date("d.m.Y H:i:s",strtotime("now")));
 			
 			
 	}

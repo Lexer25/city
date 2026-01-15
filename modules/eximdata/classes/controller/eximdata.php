@@ -18,7 +18,7 @@ class Controller_eximdata extends Controller_Template{
 	{
 			parent::before();
 			$session = Session::instance();
-			if(!Session::instance()->get('skud_number')) $this->redirect('errorpage?err=no SKUD select.');
+			
 			$this->nameLen=$this->_getFieldLen('NAME');
 			$this->surNameLen=$this->_getFieldLen('SURNAME');
 			$this->patronymicLen=$this->_getFieldLen('PATRONYMIC');

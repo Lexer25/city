@@ -12,14 +12,13 @@
 	<div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
             <? 
-		if(Session::instance()->get('skud_number'))	
-		{
+
 			//echo Debug::vars('15', Kohana::$config->load('artonitcity_config')->view_without_auth['load'], Auth::instance()->logged_in()); exit;
 
-			if((Kohana::$config->load('artonitcity_config')->view_without_auth['load']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='load') echo 'class="active"';?> ><?= HTML::anchor('dashboard/load', __('Load')) ?></li><?};
+			if((Kohana::$config->load('artonitcity_config')->view_without_auth['load']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='load') echo 'class="active"';?> ><?= HTML::anchor('dev/load', __('Load')) ?></li><?};
 						
-			if((Kohana::$config->load('artonitcity_config')->view_without_auth['load_order']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='load_order') echo 'class="active"';?> ><?= HTML::anchor('dashboard/load_order', __('Load_order')) ?></li><?};
-			if((Kohana::$config->load('artonitcity_config')->view_without_auth['device_control']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='device_control') echo 'class="active"';?> ><?= HTML::anchor('dashboard/device_control', __('device_control')) ?></li><?};
+			if((Kohana::$config->load('artonitcity_config')->view_without_auth['load_order']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='load_order') echo 'class="active"';?> ><?= HTML::anchor('dev/load_order', __('Load_order')) ?></li><?};
+			if((Kohana::$config->load('artonitcity_config')->view_without_auth['device_control']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='device_control') echo 'class="active"';?> ><?= HTML::anchor('dev/device_control', __('device_control')) ?></li><?};
 
 			//echo Debug::vars('20', $_SESSION); exit;
 			if((Kohana::$config->load('artonitcity_config')->view_without_auth['events']) OR (Auth::instance()->logged_in())) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='events') echo 'class="active"';?> ><?= HTML::anchor('event', __('events')) ?></li><?};
@@ -42,16 +41,15 @@
 		          </ul>
 		   	</li>
 			<li <?if (Arr::get($_SESSION,'menu_active')=='services') echo 'class="active"';?> ><? echo HTML::anchor('dashboard/services', __('services')); 
-		};?></li>
+		?></li>
 			
 			<li <?if (Arr::get($_SESSION,'menu_active')=='skud') echo 'class="active"';?> ><? echo  HTML::anchor('skud', __('сводная'));
 			
 			
-				if(Session::instance()->get('skud_number'))	
-				{?>
+				?>
 			</li>
 			<li> <?php echo  HTML::anchor('eximdata', __('Экспорт/импорт'));?></li>
-			<?php //include Kohana::find_file('views','apb', 'menu');?>
+			<?php include Kohana::find_file('views','apb', 'menu');?>
         </ul>
   
             
@@ -83,33 +81,63 @@
 			<?echo Form::close();
 			}
 
-		}?>
+		?>
 		</li>
 		</ul>
 						
     </div>
 	<div class="navbar-collapse collapse">
       <?php 
-	  
-	  if(!is_null(Session::instance()->get('skud_number')))
-	  {
-      echo __('string_about', array(
-      		'db'=> Arr::get(
-      			Arr::get(
-      					Kohana::$config->load('database')->fb,
-      					'connection'
-      					),
-      		'dsn'),
-      		'ver'=> Kohana::$config->load('artonitcity_config')->ver,
-      		'developer'=> Kohana::$config->load('artonitcity_config')->developer,
-      		)).'<br>';
+	
+	// подсветка версии в течении 3 суток после обновления.
+	//если дата обновления отсутвует, то выводится только версия, без даты обновления
+	
+		$color=null;
+		//$timeUpdate
+		if(!empty(Kohana::$config->load('artonitcity_config')->timeUpdate)){
+			$current_date = new DateTime();
+			$update_date = new DateTime(Kohana::$config->load('artonitcity_config')->timeUpdate); // $timeUpdate = '2026-01-14'
+
+			// Вычисляем разницу
+			$interval = $current_date->diff($update_date);
+
+			// Получаем разницу в днях
+			$days_diff = $interval->days;
+			// Проверяем разницу
+			if ($days_diff < 3) {
+				
+				$color = 'label-success';
+				 echo __('<span class="label :color">Версия :ver обновление :timeUpdate</span>',array(
+					':ver'=> Kohana::$config->load('artonitcity_config')->ver,
+					':timeUpdate'=> Kohana::$config->load('artonitcity_config')->timeUpdate,
+					':color'=> $color,
+					));
+			} else {
+				 echo __('Версия :ver обновление :timeUpdate',array(
+					':ver'=> Kohana::$config->load('artonitcity_config')->ver,
+					':timeUpdate'=> Kohana::$config->load('artonitcity_config')->timeUpdate,
+					));
+			}
+		}	else {		
+				echo __('Версия :ver',array(
+					':ver'=> Kohana::$config->load('artonitcity_config')->ver,
+					
+					));
+			}
+		
+		echo '<br>';
+		  // echo __('string_about', array(
+      		// 'db'=> Arr::get(
+      			// Arr::get(
+      					// Kohana::$config->load('database')->fb,
+      					// 'connection'
+      					// ),
+      		// 'dsn'),
+      		// 'ver'=> Kohana::$config->load('artonitcity_config')->ver,
+      		// 'developer'=> Kohana::$config->load('artonitcity_config')->developer,
+      		// )).'<br>';
 			echo __('timerefresh', array ('tr'=> date("d.m.Y H:i",time())));
-			//echo '<br>'.__('skud_number ').Session::instance()->get('skud_number');//.Debug::vars('92', $_SESSION);;
-			//echo '<br>'.__('peopleEventsTimeFrom').Session::instance()->get('peopleEventsTimeFrom');
-			//echo '<br>'.__('peopleEventsTimeTo').Session::instance()->get('peopleEventsTimeTo');
-	  } else {
-		  echo __('no_select_skud');
-	  }
+	
       ?>
 	  </div>
 	  

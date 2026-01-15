@@ -33,10 +33,11 @@ class Controller_Dev extends Controller_Template {
 		//$dataList=Model::Factory('dev')->getDevData(); // 
 		//$dataList=Model::Factory('dev')->getDevDataDetail(); // 
 		$dataList=Model::Factory('dev')->getDataList(); // 
-		
+		$date_stat=Model::Factory('dev')->date_stat();//получение даты и времени выбора статистики
 		//echo Debug::vars('41', $dataList);exit;
 		$dataListView = View::factory('load_table_new2', array(
 			'list' => $dataList,
+			'date_stat' => $date_stat,
 			
 					));
 					
@@ -210,7 +211,8 @@ class Controller_Dev extends Controller_Template {
 										$deviceHard->disconnect();
 										
 									} else {
-										echo Debug::vars('1179 Неправильно указан IP адрес устройства id_dev='.$key);exit;					
+										//echo Debug::vars('214 Неправильно указан IP адрес устройства id_dev='.$key);exit;		
+										Log::instance()->add(Log::DEBUG, '214 Неправильно указан IP адрес устройства id_dev='.$key);										
 								}
 								//echo Debug::vars('336', $deviceHard); exit;
 								$deviceState=array(

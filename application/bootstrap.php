@@ -132,7 +132,6 @@ Kohana::modules(array(
 	// 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
 	// 'unittest'   => MODPATH.'unittest',   // Unit testing
 	 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
-	 'dashboard'  => MODPATH.'dashboard',  // оформление основного окна и верхнего меню
 	 'events'  => MODPATH.'events',  // форма для вывода различных событий
 	 'people'  => MODPATH.'people',  // форма для работы с контактами
 	 'door'  => MODPATH.'door',  // форма для работы с точкой прохода
@@ -156,11 +155,16 @@ Kohana::modules(array(
  * Set the routes. Each route must have a minimum of a name, a URI and a set of
  * defaults for the URI.
  */
-
+Route::set('peoplesearcch', '(people(/peopleinfo(/<id>)(/<card>)))')
+	->defaults(array(
+		'controller' => 'people',
+		'action'     => 'peopleinfo',
+	));
     
 Route::set('default', '(<controller>(/<action>(/<id>)))')
 	->defaults(array(
 		'controller' => 'dashboard',
 		'action'     => 'index',
 	));
+
 

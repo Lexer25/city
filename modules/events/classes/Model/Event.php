@@ -479,7 +479,7 @@ and e.id_eventtype='.$eventtype;
 		join eventtype et on et.id_eventtype=e.id_eventtype
 		join device d on d.id_dev=e.id_dev
 		where e.datetime>\''.Arr::get($_SESSION, 'peopleEventsTimeFrom', date("d.m.Y",strtotime("-2 days"))).'\'
-		and e.datetime<\''.Arr::get($_SESSION, 'peopleEventsTimeTo', date("d.m.Y H:m:s")).'\'
+		and e.datetime<\''.Arr::get($_SESSION, 'peopleEventsTimeTo', date("d.m.Y H:i:s")).'\'
 		and e.ess1='.$id_pep.'
 		and e.id_card=\''.$id_card.'\'';
 		//echo Debug::vars('361', $sql, $_SESSION); exit;
@@ -489,7 +489,7 @@ and e.id_eventtype='.$eventtype;
 		join eventtype et on et.id_eventtype=e.id_eventtype
 		join device d on d.id_dev=e.id_dev
 		where e.datetime>\''.Arr::get($_SESSION, 'peopleEventsTimeFrom', date("d.m.Y",strtotime("-2 days"))).'\'
-		and e.datetime<\''.Arr::get($_SESSION, 'peopleEventsTimeTo', date("d.m.Y H:m:s")).'\'
+		and e.datetime<\''.Arr::get($_SESSION, 'peopleEventsTimeTo', date("d.m.Y H:i:s")).'\'
 		and e.ess1='.$id_pep;
 		
 		

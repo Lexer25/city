@@ -91,7 +91,7 @@
 <?// таблица последний событий жильца?>
 	<div class="panel panel-primary">
 		<div class="panel-heading">
-			<h3 class="panel-title"><?echo __('people_event_title', array(':dateFrom'=>Arr::get($_SESSION, 'peopleEventsTimeFrom', date("d.m.Y H:m:s",strtotime("-1 days"))), ':dateTo'=>Arr::get($_SESSION, 'peopleEventsTimeTo', date("d.m.Y H:m:s"))))?></h3>
+			<h3 class="panel-title"><?echo __('people_event_title', array(':dateFrom'=>Arr::get($_SESSION, 'peopleEventsTimeFrom', date("d.m.Y H:i:s",strtotime("-1 days"))), ':dateTo'=>Arr::get($_SESSION, 'peopleEventsTimeTo', date("d.m.Y H:i:s"))))?></h3>
 		</div>	
 	<? //echo Debug::vars('88', $events);?>
 	<table class="table table-striped table-hover table-condensed table-bordered">

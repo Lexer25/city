@@ -356,7 +356,7 @@ echo Form::open('Dashboard/device_control');?>
 					
 				}
 				echo '<td>'.number_format($deviceInfo->timeExecute, 3,'.','').'</td>';//14
-				echo '<td>'.date('d.m.Y H:m:s',$deviceInfo->timeGetData);//15
+				echo '<td>'.date('d.m.Y H:i:s',$deviceInfo->timeGetData);//15
 				// progress-bar-success, progress-bar-info, progress-bar-warning и progress-bar-danger
 				$tt3=time();
 				$pbmax=100;

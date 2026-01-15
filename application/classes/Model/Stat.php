@@ -28,7 +28,7 @@ class Model_Stat extends Model
 	
 	
 	
-	public function date_stat()//получение даты и времени выбора статистики
+	public function _date_stat()//получение даты и времени выбора статистики
 	{
 		$sql='select min (std.time_insert), max (std.time_insert) from st_data std';
 		$query = DB::query(Database::SELECT, $sql)

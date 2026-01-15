@@ -1,4 +1,25 @@
-<?php $t1=microtime(true);?>
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3 class="panel-title"><?php echo __('device_panel_title').' '.date('Y-m-d H:i:s')?></h3>
+  </div>
+  
+
+  
+  <div class="panel-body">
+  
+     <div class="panel panel-danger">
+
+  <div class="panel-body">
+    <?php 
+		echo __('device_panel_title_desc', array('date_from'=>$date_stat['min'], 'date_to'=>$date_stat['max']));
+		
+		?>
+  </div>
+  </div>
+<?php
+	$t1=microtime(true);
+	echo Form::open('Dev/device_control');
+?>
    <!-- <table class="table table-striped table-hover table-condensed">  -->
    <table id="tablesorter" class="table table-striped table-hover table-condensed tablesorter">
    <thead allign="center">
@@ -86,7 +107,10 @@
 			
 			echo '<tr class="'.$tr_class.'">';
 				//echo '<td>'.Debug::vars('47', $value, $deviceInfo).'</td>';
-				echo '<td><label>'.Form::checkbox('id_dev['.$key.']', $key, FALSE, array('class'=>'checkbox')).'</label></td>'; //1
+				echo '<td><label>';
+					echo Form::checkbox('id_dev['.$deviceInfo->id_dev.']', $deviceInfo->id_dev, FALSE, array('class'=>'checkbox'));
+					//echo Debug::vars($deviceInfo);
+				echo '</label></td>'; //1
 				echo '<td>'. iconv('CP1251', 'UTF-8', $deviceInfo->servername).'</td>';
 				echo '<td>'.$deviceInfo->parentid
 					. ' '
@@ -270,7 +294,11 @@
 				}
 //время выполнения запроса
 				echo '<td>/'.number_format($deviceInfo->timeExecute, 3,'.','').'</td>';//timeExecute 
-				echo '<td>'.date('d.m.Y H:m:s',$deviceInfo->timeGetData);//15
+//дата получения данных
+				echo '<td>';
+					//echo $deviceInfo->timeGetData.'<br>';
+					
+					echo date('d.m.Y H:i:s',$deviceInfo->timeGetData);//15
 				// progress-bar-success, progress-bar-info, progress-bar-warning и progress-bar-danger
 				$tt3=time();
 				$pbmax=100;
