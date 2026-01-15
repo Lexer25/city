@@ -94,7 +94,12 @@
 	
 		$color=null;
 		//$timeUpdate
+		$lightVerDay=3;
+		
 		if(!empty(Kohana::$config->load('artonitcity_config')->timeUpdate)){
+			
+			$lightVerDay = Arr::get(Kohana::$config->load('artonitcity_config'), 'lightVerDay', 3);//если количество дней не указано, то по умолчанию 3 суток
+			
 			$current_date = new DateTime();
 			$update_date = new DateTime(Kohana::$config->load('artonitcity_config')->timeUpdate); // $timeUpdate = '2026-01-14'
 
@@ -104,7 +109,7 @@
 			// Получаем разницу в днях
 			$days_diff = $interval->days;
 			// Проверяем разницу
-			if ($days_diff < 3) {
+			if ($days_diff < $lightVerDay) {
 				
 				$color = 'label-success';
 				 echo __('<span class="label :color">Версия :ver обновление :timeUpdate</span>',array(
