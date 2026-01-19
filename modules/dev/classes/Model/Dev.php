@@ -46,8 +46,8 @@ class Model_Dev extends Model
 		{
 
 			$deviceInfo=new DeviceInfo(Arr::get($value, 'ID_DEV'), Arr::get($value, 'facts2'));//набор данных из статистики
-			//echo Debug::vars('48', $value);
-			//echo Debug::vars('48', $deviceInfo);exit;
+			//echo Debug::vars('49', $value);
+			//echo Debug::vars('50', $deviceInfo);exit;
 			$deviceInfo->isBlocked = false;
 			$deviceInfo->isAlarm = false;
 				
@@ -73,6 +73,7 @@ class Model_Dev extends Model
 			}
 		//	echo Debug::vars('51', $value);exit;
 		 $deviceInfo->id = Arr::get($value, 'ID_DEV');
+		 $deviceInfo->ip = Arr::get($value, 'NETADDR');
 		 $deviceInfo->id_dev = $deviceInfo->id;
 		 $deviceInfo->name = Arr::get($value, 'NAME');
          $deviceInfo->parentid = Arr::get($value, 'PARENTID');
@@ -119,14 +120,9 @@ class Model_Dev extends Model
 	
 	public function getDevDataDetail()
 	{
-	//массив точек прохода 
-	$sql='select d.id_dev, d.id_reader, d.name, d.netaddr, d."ACTIVE", d2.id_dev as parentId, d2.name as parentName,  s.id_server, s.name as serverName from device d
-		join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null
-		left join server s on d2.id_server=s.id_server
-		where d.id_reader is not null
-		order by d.id_dev';
-	
-	$sql='select d.id_dev, d.id_devtype, dt.name as devTypename, d.id_reader, d.name, d.netaddr, d."ACTIVE", d2.id_dev as parentId, d2.name as parentName,  s.id_server, s.name as serverName, std.facts as dbCount from device d
+	//массив точек прохода
+	$result=array();
+	$sql='select d.id_dev, d.id_devtype, dt.name as devTypename, d.id_reader, d.name, d2.netaddr, d."ACTIVE", d2.id_dev as parentId, d2.name as parentName,  s.id_server, s.name as serverName, std.facts as dbCount from device d
         join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null
         join devtype dt on d2.id_devtype=dt.id_devtype
         left join server s on d2.id_server=s.id_server
@@ -136,7 +132,7 @@ class Model_Dev extends Model
 	
 	
 	
-	$query = DB::query(Database::SELECT, iconv('UTF-8', 'CP1251',$sql))
+	$query = DB::query(Database::SELECT, $sql)
 					->execute(Database::instance('fb'))
 					->as_array();
 					
@@ -157,11 +153,7 @@ class Model_Dev extends Model
 	foreach($result as $key=>$value)
 	{
 		
-		/* if(Arr::get($value, 'PARENTID')==743){
-			
-			echo Debug::vars('54', $value);//exit;
-			echo Debug::vars('55',Arr::get(Arr::get($temp, Arr::get($value, 'PARENTID')), 'FACTS'));exit;
-		} */
+		
 		$result[$key]['facts2']=Arr::get(Arr::get($temp, Arr::get($value, 'PARENTID')), 'FACTS');
 		
 	}

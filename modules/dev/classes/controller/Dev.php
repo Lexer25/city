@@ -29,9 +29,7 @@ class Controller_Dev extends Controller_Template {
 				
 		if(array_key_exists('browser',$_POST)) $_SESSION['brows']=Arr::get($_POST, 'browser');
 		
-		//новый "быстрый" вариант
-		//$dataList=Model::Factory('dev')->getDevData(); // 
-		//$dataList=Model::Factory('dev')->getDevDataDetail(); // 
+		
 		$dataList=Model::Factory('dev')->getDataList(); // 
 		$date_stat=Model::Factory('dev')->date_stat();//получение даты и времени выбора статистики
 		//echo Debug::vars('41', $dataList);exit;

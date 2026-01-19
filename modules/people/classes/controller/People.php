@@ -6,6 +6,7 @@ class Controller_People extends Controller_Template {
 			
 			parent::before();
 			$session = Session::instance();
+			echo Debug::vars('9');//exit;
 			
 	}
 	

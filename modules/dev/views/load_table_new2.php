@@ -67,12 +67,6 @@
 		foreach ($list as $key => $deviceInfo)//для каждой точки прохода набираю данные
 		{
 
-			//$deviceInfo=new DeviceInfo(Arr::get($value, 'ID_DEV'), Arr::get($value, 'facts2'));//набор данных из статистики
-			//echo Debug::vars('48', $value);
-			//echo Debug::vars('48', $deviceInfo);exit;
-					
-			
-				
 			//рзаница в картах
 			$deltacard=($deviceInfo->keyCount_reader - $deviceInfo->countDataBase);
 			//$deltacard=(($deviceInfo->keyCount_reader));
@@ -106,7 +100,6 @@
 			
 			
 			echo '<tr class="'.$tr_class.'">';
-				//echo '<td>'.Debug::vars('47', $value, $deviceInfo).'</td>';
 				echo '<td><label>';
 					echo Form::checkbox('id_dev['.$deviceInfo->id_dev.']', $deviceInfo->id_dev, FALSE, array('class'=>'checkbox'));
 					//echo Debug::vars($deviceInfo);
