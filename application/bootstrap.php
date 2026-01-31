@@ -139,7 +139,8 @@ Kohana::modules(array(
 	 'eximdata' => MODPATH.'eximdata', //'экспорт и импорт данных
 	 'dev' => MODPATH.'dev', //'форма для работы с контроллерами
 	 'apb' => MODPATH.'apb', //'раздел для работы с периметральным антипассбеком
-	 'controller_analyzer' => MODPATH.'controller_analyzer',
+	 //'controller_analyzer' => MODPATH.'controller_analyzer',
+	 'identifier' => MODPATH.'identifier',
 	 
 	));
 
@@ -163,24 +164,7 @@ Route::set('peoplesearcch', '(people(/peopleInfo(/<id>)(/<card>)))')
 	));
 	
 	
-	
 
-
-Route::set('controller_analyzer', 'controller-analyzer(/<action>)')
-    ->defaults(array(
-        'controller' => 'analyzer',
-        'action'     => 'index',
-    ));
-
-Route::set('controller_map', 'controller-map(/<format>)')
-    ->defaults(array(
-        'controller' => 'camap',
-        'action'     => 'index',
-        'format'     => 'html'
-    ));
-	
-	
-	
     
 Route::set('default', '(<controller>(/<action>(/<id>)))')
 	->defaults(array(
