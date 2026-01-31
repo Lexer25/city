@@ -124,7 +124,7 @@ Kohana::$config->attach(new Config_File);
  */
 Kohana::modules(array(
 	 'auth'       => MODPATH.'auth',       // Basic authentication
-	// 'cache'      => MODPATH.'cache',      // Caching with multiple backends
+	 'cache'      => MODPATH.'cache',      // Caching with multiple backends
 	// 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
 	 'database'   => MODPATH.'database',   // Database access
 	 'image'      => MODPATH.'image',      // Image manipulation
@@ -139,6 +139,7 @@ Kohana::modules(array(
 	 'eximdata' => MODPATH.'eximdata', //'экспорт и импорт данных
 	 'dev' => MODPATH.'dev', //'форма для работы с контроллерами
 	 'apb' => MODPATH.'apb', //'раздел для работы с периметральным антипассбеком
+	 'controller_analyzer' => MODPATH.'controller_analyzer',
 	 
 	));
 
@@ -160,6 +161,26 @@ Route::set('peoplesearcch', '(people(/peopleInfo(/<id>)(/<card>)))')
 		'controller' => 'people',
 		'action'     => 'peopleInfo',
 	));
+	
+	
+	
+
+
+Route::set('controller_analyzer', 'controller-analyzer(/<action>)')
+    ->defaults(array(
+        'controller' => 'analyzer',
+        'action'     => 'index',
+    ));
+
+Route::set('controller_map', 'controller-map(/<format>)')
+    ->defaults(array(
+        'controller' => 'camap',
+        'action'     => 'index',
+        'format'     => 'html'
+    ));
+	
+	
+	
     
 Route::set('default', '(<controller>(/<action>(/<id>)))')
 	->defaults(array(
