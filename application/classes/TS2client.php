@@ -186,8 +186,7 @@ class TS2client {
      */
     public function startServer() {
 
-        
-		$this->debug('Try start server...');
+       	$this->debug('Try start server...');
 		if ($this->logging) Log::instance()->add(Log::DEBUG, 'Try start server...');
 					
 

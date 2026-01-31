@@ -42,6 +42,7 @@ class Model_Dev extends Model
 	public function getDataList()
 	{
 		$getCardidxStat=$this->getCardidxStat();
+		$result=array();
 		foreach ($this->getDevDataDetail() as $key => $value)//для каждой точки прохода набираю данные
 		{
 
@@ -106,6 +107,7 @@ class Model_Dev extends Model
 					->as_array();
 					
 					//echo Debug::vars('85', array_column($query, null, 'ID_DEV'));exit;
+		$result=array();
 		foreach($query as $key=>$value)
 		{
 			
