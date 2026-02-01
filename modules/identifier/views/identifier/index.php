@@ -37,6 +37,7 @@
 	$title=array('ID_CARD'
     ,'TIMESTART'
     ,'TIMEEND'
+	,'"ACTIVE"'
     ,'IDTYPE'
     ,'CREATEDAT'
     ,'ID_PEP'
@@ -50,6 +51,16 @@
 	
 ?>	
   <div class="panel-body">
+  
+	<?echo __('total_count').' ';
+		echo isset($list)? count($list) : '0';?>	
+	
+	<?echo Form::open('people/card_late_save_to_file');?>
+		<button type="submit" class="btn btn-primary" name="card_late_save_to_file"  value="1"><?echo __('card_late_save_to_file')?></button>
+	<?echo Form::close();?>
+
+	<?echo Form::open('identifier/control', array('class'=>'form-inline'));?>
+	
 		<table id="tablesorter" class="table table-striped table-hover table-condensed tablesorter">
 		<thead allign="center">
 			<tr>
@@ -78,6 +89,7 @@
 			$sn=0;
 			foreach(array_slice($list, 0, 100) as $key=>$value)
 			{
+				//echo Debug::vars('110', $value);exit;
 				echo '<tr>';
 					echo '<td>';
 						echo ++$sn;
@@ -93,6 +105,9 @@
 						echo '</td>';
 					echo '<td>';
 							echo iconv('windows-1251','UTF-8', Arr::get($value, 'TIMEEND'));
+						echo '</td>';
+					echo '<td>';
+							echo Arr::get($value, 'ACTIVE');
 						echo '</td>';
 					echo '<td>';
 							echo iconv('windows-1251','UTF-8', Arr::get($value, 'IDTYPE'));
@@ -140,7 +155,31 @@
 		</tr>
 		</table>
  
-							  
+	  <nav class="navbar navbar-default navbar-fixed-bottom disable" role="navigation">
+  <div class="container">
+  <div class="row">
+
+
+
+	<button 
+		  	type="submit" 
+		  	class="btn btn-success" 
+		  	name="todo"  
+		  	value="unactive" 
+		  	<?php if(!Auth::instance()->logged_in()) echo 'disabled'?>
+		  	onclick="return confirm('<?echo __('people_unactive_alert')?>') ? true : false;"><?echo __('people_unactive')?>
+	</button>
+  	  
+  	<button type="submit" 
+			class="btn btn-danger pull-right" 
+			name="todo"  
+			value="delete" 
+			<?php if(!Auth::instance()->logged_in()) echo 'disabled'?> onclick="return confirm('<?echo __('people_delete_alert')?>') ? true : false;"><?echo __('card_delete')?>
+	</button>
+	
+	</div>
+	</div>
+</nav>						  
 							
 	</div>
 </div>

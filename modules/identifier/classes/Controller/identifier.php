@@ -34,6 +34,47 @@ class Controller_identifier extends Controller_Template {
 		
 	}
 	
+	public function action_control()
+	{
+		//echo Debug::vars('39', $_POST);exit;
+		$post=Validation::factory($_POST);
+		$post->rule('identifier', 'not_empty')
+				 ->rule('todo', 'not_empty')
+				->rule('todo', 'in_array', array(':value', array('unactive', 'delete')));
+		if($post->check())
+		{
+			switch(Arr::get($post, 'todo')){
+				case 'unactive'://вызов метода сделать карту неактивной.
+					//делю массив на блоки по 1024 записи - более в параметры SQL передавать нельзя.
+					$chunks = array_chunk(Arr::get($post, 'identifier'), 1024);
+
+					foreach ($chunks as $chunk) {
+						//вызываю метод unactive
+						$model=Model::factory('identifier');
+						if($model->setUnactive($chunk))
+						{
+							$result[]='OK';
+							
+						} else {
+							
+							$result[]='err '. $model->mess;
+						};
+						
+						
+					}
+				
+				break;
+				case 'delete'://вызов метода удаления карт
+				
+				
+				break;
+				
+			}
+			
+			
+		}
+		$this->redirect('identifier');
+	}
 	
 	
 }

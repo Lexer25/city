@@ -4,6 +4,8 @@
 */
 class Model_identifier extends Model
 {
+	public $mess;//сообщения разные
+	
 	public function getLastEvent()
 	{
 		
@@ -32,8 +34,6 @@ class Model_identifier extends Model
     ,o.name as orgname
     ,o.id_parent
     ,o2.name as orgparentname
-
-
      from card c
      join people p on c.id_pep=p.id_pep
      join organization o on p.id_org=o.id_org
@@ -43,21 +43,6 @@ class Model_identifier extends Model
 					->execute(Database::instance('fb'))
 					->as_array(), null, 'ID_CARD');
 
-
-/* 	 foreach ($result as &$r) {
-            $check_id = array_key_exists('id_guest', $r) ? $r['id_guest'] : 
-                       (array_key_exists('ID_GUEST', $r) ? $r['ID_GUEST'] : null);
-            
-            if ($check_id !== null && array_key_exists($check_id, $filelist)) {
-                $r['has_signature'] = true;
-                $r['signature_filename'] = $filelist[$check_id]; // добавляем название файла в результат
-            } else {
-                $r['has_signature'] = false;
-                $r['signature_filename'] = null;
-            }
-        }
-        unset($r); */
-		
 		
 	//теперь для каждого элемента добавляю время прохода
 	foreach ($listIdentifier as &$key)
@@ -75,6 +60,32 @@ class Model_identifier extends Model
 			
 			
 		//теперь из этих массивов мне надо выбрать ключи, у которых нет отметы о выходе
+		
+	}
+	
+	
+	/**1.02.2026 функция устанавилвает ACTIVE=0 для указанного массива карт.
+		*/	
+	public function setUnactive($cards)
+	{
+		$sql=__('update card c 
+			set c."ACTIVE"=0 
+			where c.id_card in (:card_array)
+			', array(
+			':card_array'=>implode(",", $cards)));
+			
+		//echo Debug::vars('77', $sql);exit;	
+		try
+			{
+			$query = DB::query(Database::UPDATE, $sql)
+			->execute(Database::instance('fb'));
+			return true;
+			} catch (Exception $e) {
+				Log::instance()->add(Log::DEBUG, $e->getMessage());
+				$this->mess=$e->getMessage();
+				return 	false;
+			}
+			
 		
 	}
 }
