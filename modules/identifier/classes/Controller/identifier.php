@@ -77,4 +77,45 @@ class Controller_identifier extends Controller_Template {
 	}
 	
 	
+	public function action_save_csv() {
+		if ($this->request->method() === 'POST') {
+			
+			// Важно: полностью отключаем все шаблоны
+			$this->auto_render = FALSE;
+			
+			// Не должно быть никакого вывода ДО заголовков!
+			
+			$big_array = Model::factory('identifier')->getLastEvent();
+			$filename = 'export_' . date('Y-m-d_H-i-s') . '.csv';
+			
+			// 1. Очищаем все буферы вывода
+			while (ob_get_level()) {
+				ob_end_clean();
+			}
+			
+			// 2. Устанавливаем заголовки
+			header('Content-Type: application/octet-stream');
+			header('Content-Disposition: attachment; filename="' . $filename . '"');
+			header('Content-Transfer-Encoding: binary');
+			header('Expires: 0');
+			header('Cache-Control: must-revalidate');
+			header('Pragma: public');
+			
+			// 3. Выводим BOM
+			//echo "\xEF\xBB\xBF";
+			
+			// 4. Выводим CSV данные
+			$output = fopen('php://output', 'w');
+			
+			foreach ($big_array as $row) {
+				fputcsv($output, $row, ';', '"');
+			}
+			
+			fclose($output);
+			
+			// 5. Завершаем скрипт
+			exit;
+		}
+	}
+	
 }

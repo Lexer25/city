@@ -15,12 +15,12 @@
 
 <div class="panel panel-primary">
   <div class="panel-heading">
-    <h3 class="panel-title"><?php echo __('Список мертвых душ');?></h3>
+    <h3 class="panel-title"><?php echo __('Список карт, не имеющих отметки о проходе');?></h3>
   </div>
   
 
  <?php
-	$title=array('ID_CARD'
+/* 	$title=array('ID_CARD'
     ,'TIMESTART'
     ,'TIMEEND'
     ,'"ACTIVE"'
@@ -32,7 +32,7 @@
     ,'ID_ORG'
     ,'ORGNAME'
     ,'ID_PARENT'
-    ,'ORGPARENTNAME');
+    ,'ORGPARENTNAME'); */
 	
 	$title=array('ID_CARD'
     ,'TIMESTART'
@@ -55,9 +55,12 @@
 	<?echo __('total_count').' ';
 		echo isset($list)? count($list) : '0';?>	
 	
-	<?echo Form::open('people/card_late_save_to_file');?>
+	<?echo Form::open('identifier/save_csv');?>
 		<button type="submit" class="btn btn-primary" name="card_late_save_to_file"  value="1"><?echo __('card_late_save_to_file')?></button>
 	<?echo Form::close();?>
+	
+
+
 
 	<?echo Form::open('identifier/control', array('class'=>'form-inline'));?>
 	
