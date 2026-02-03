@@ -98,49 +98,42 @@
 		$color=null;
 		//$timeUpdate
 		$lightVerDay=3;
-		$updateDate=version::get_date();
 		
-	//echo Modal::simple();
-	echo Modal::bootstrap();
-		
-						
-		if(!empty($updateDate)){
-			
-			$lightVerDay = Arr::get(Kohana::$config->load('artonitcity_config'), 'lightVerDay', 3);//если количество дней не указано, то по умолчанию 3 суток
-			
-			$current_date = new DateTime();
-				$update_date = new DateTime($updateDate); // $timeUpdate = '2026-01-14'
 
-			// Вычисляем разницу
-			$interval = $current_date->diff($update_date);
+// 1. Основной способ (рекомендуется)
+echo Version::render_full();
 
-			// Получаем разницу в днях
-			$days_diff = $interval->days;
-			// Проверяем разницу
-			if ($days_diff < $lightVerDay) {
-				
-				$color = 'label-success';
-				 echo __('<span class="label :color" title=":title">Версия :ver обновление :timeUpdate</span>',array(
-					':ver'=> Kohana::$config->load('artonitcity_config')->ver,
-					':timeUpdate'=> Kohana::$config->load('artonitcity_config')->timeUpdate,
-					':color'=> $color,
-				//	':title'=> implode("\n", Version::get_changelog()),
-					));
-			} else {
-				 echo __('<span title=":title">Версия :ver обновление :timeUpdate</span>',array(
-					':ver'=> Kohana::$config->load('artonitcity_config')->ver,
-					':timeUpdate'=> Kohana::$config->load('artonitcity_config')->timeUpdate,
-					':title'=> implode("\n", Version::get_changelog()),
-					));
-			}
-		}	else {		
-				echo __('Версия :ver',array(
-					':ver'=> Kohana::$config->load('artonitcity_config')->ver,
-					
-					));
-			}
-		
-		echo '<br>';
+// 2. Только бейдж с popover
+echo Version::render_badge();
+
+// 3. Для футера
+echo Version::render_footer();
+
+// 4. Кнопка с подсветкой свежей версии
+echo Version::render_fresh_button();
+
+// 5. Получить информацию
+$info = Version::get_info();
+echo 'Версия: ' . $info['version'];
+
+// 6. Проверить свежесть
+if (Version::is_fresh(3)) {
+    echo 'У вас свежая версия!';
+}
+
+// 7. Уведомление
+echo Version::show_fresh_alert();
+
+// 8. Кастомизированная версия
+echo Version::render_full(array(
+    'link_text' => 'Показать изменения',
+    'link_btn_class' => 'btn-info',
+    'link_btn_size' => 'btn-lg',
+    'modal_title' => 'Что нового в приложении?',
+    'limit_versions' => 3,
+    'fresh_days' => 7
+));	
+			echo '<br>';
 		  // echo __('string_about', array(
       		// 'db'=> Arr::get(
       			// Arr::get(
