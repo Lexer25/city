@@ -41,7 +41,7 @@ class phpArtonitTS2
     public function connect($ip = null, $port=null)
     {
      
-	$this->ts2client=new TS2client($ip, $port);
+	$this->ts2client=new TS2client();
 		
 	
 		$this->ts2client->startServer();

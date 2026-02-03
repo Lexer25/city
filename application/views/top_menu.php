@@ -23,10 +23,7 @@
 			//echo Debug::vars('20', $_SESSION); exit;
 			if((Kohana::$config->load('artonitcity_config')->view_without_auth['events']) OR (Auth::instance()->logged_in())) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='events') echo 'class="active"';?> ><?= HTML::anchor('event', __('events')) ?></li><?};
             if((Kohana::$config->load('artonitcity_config')->view_without_auth['people']) OR (Auth::instance()->logged_in())) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='people') echo 'class="active"';?> ><?= HTML::anchor('people/peopleInfo', __('people')) ?></li><?};
-            
-			if(Auth::instance()->logged_in()) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='identifier') echo 'class="active"';?> ><?= HTML::anchor('identifier', __('identifier')) ?></li><?};
-            
-			if((Kohana::$config->load('artonitcity_config')->view_without_auth['door']) OR (Auth::instance()->logged_in())) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='door') echo 'class="active"';?> ><?= HTML::anchor('door/doorInfo', __('door')) ?></li><?};
+            if((Kohana::$config->load('artonitcity_config')->view_without_auth['door']) OR (Auth::instance()->logged_in())) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='door') echo 'class="active"';?> ><?= HTML::anchor('door/doorInfo', __('door')) ?></li><?};
             if((Kohana::$config->load('artonitcity_config')->view_without_auth['log']) OR (Auth::instance()->logged_in())) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='log') echo 'class="active"';?> ><?= HTML::anchor('dashboard/log', __('log')) ?></li><?};
 				?>
 			<li><?= HTML::anchor('', __('__')) ?></li>

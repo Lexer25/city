@@ -327,7 +327,7 @@ class Controller_Dev extends Controller_Template {
 		{
 			$errKeyFormat=0;	
 			$errKeyFormat=Model::factory('dbskud')->checkRfidKeyFormat();
-	//echo Debug::vars('421', $errKeyFormat, $_POST);exit;
+	//echo Debug::vars('421', $errKeyFormat);exit;
 			if(count($errKeyFormat)>0) throw new Exception ('Ошибка в номерах идентификаторов RFID. Проверьте RFID '.implode(",", $errKeyFormat));
 				$post=Validation::factory($_POST);
 				$post->rule('id_dev', 'not_empty')
@@ -339,18 +339,16 @@ class Controller_Dev extends Controller_Template {
 				$t1=microtime(true);
 					
 			
-			//получаю ip адреса контроллеров, тип контроллеров для точек прохода, с которыми надо работать, IP и port адрес транспортного сервера 
-					$sql='select distinct d.id_dev, d2.id_devtype, d2.netaddr, d2.name, d.id_reader, s.ip, s.port from device d
-                    join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null
-                    left join server s on d2.id_server=s.id_server
+			//получаю ip адреса контроллеров, тип контроллеров для точек прохода, с которыми надо работать.
+					$sql='select distinct d.id_dev, d2.id_devtype, d2.netaddr, d2.name, d.id_reader from device d
+					join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null
 					where d.id_dev in ('.implode(",", $id_dev).')';
 					
 			$query = DB::query(Database::SELECT, $sql)
 				->execute(Database::instance('fb'))
 				->as_array();	
 				
-				//echo Debug::vars('420',$sql, $query);exit;
-				
+				//echo Debug::vars('420', $query);exit;
 				//для каждой точки прохода (а не контроллера!) организую цикл вычитки номеров ключей 
 				$result='Старт процесса сверки для контроллеров '. implode(",", $id_dev);
 				$res=array();//массив, в который будут записыватьяс карты, вычитанные из контроллера.
@@ -358,7 +356,7 @@ class Controller_Dev extends Controller_Template {
 								
 				foreach($query as $key)
 				{
-					//echo Debug::vars('361',Model::Factory('Stat')->IntToIP(Arr::get($key, 'IP', 'no')));exit;
+					
 						switch(Arr::get($key, 'ID_DEVTYPE')){
 							case 1: //контроллеры типа Артонит
 							case 2: //контроллеры типа Артонит
@@ -370,8 +368,8 @@ class Controller_Dev extends Controller_Template {
 							
 								$dev->dev_name=Arr::get($key, 'NAME');
 
-		//тут надо указать IP адрес Транспортного сервера и его порт
-								$dev->connect(Model::Factory('Stat')->IntToIP(Arr::get($key, 'IP')),Arr::get($key, 'PORT') );
+		
+								$dev->connect();
 								
 							//echo Debug::vars('463', $dev);exit;
 						
