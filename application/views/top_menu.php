@@ -25,7 +25,10 @@
             if((Kohana::$config->load('artonitcity_config')->view_without_auth['people']) OR (Auth::instance()->logged_in())) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='people') echo 'class="active"';?> ><?= HTML::anchor('people/peopleInfo', __('people')) ?></li><?};
             if((Kohana::$config->load('artonitcity_config')->view_without_auth['door']) OR (Auth::instance()->logged_in())) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='door') echo 'class="active"';?> ><?= HTML::anchor('door/doorInfo', __('door')) ?></li><?};
             if((Kohana::$config->load('artonitcity_config')->view_without_auth['log']) OR (Auth::instance()->logged_in())) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='log') echo 'class="active"';?> ><?= HTML::anchor('dashboard/log', __('log')) ?></li><?};
-				?>
+			
+			if(Auth::instance()->logged_in()) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='identifier') echo 'class="active"';?> ><?= HTML::anchor('identifier', __('identifier')) ?></li><?};
+         
+			?>
 			<li><?= HTML::anchor('', __('__')) ?></li>
             <li <? //if (Arr::get($_SESSION,'menu_active')=='check') echo 'class="active"';?> ><?//= HTML::anchor('check', __('check')) ?></li>
             <li><?//= HTML::anchor('guide', __('guide')) ?></li>
@@ -95,13 +98,18 @@
 		$color=null;
 		//$timeUpdate
 		$lightVerDay=3;
+		$updateDate=version::get_date();
 		
-		if(!empty(Kohana::$config->load('artonitcity_config')->timeUpdate)){
+	//echo Modal::simple();
+	echo Modal::bootstrap();
+		
+						
+		if(!empty($updateDate)){
 			
 			$lightVerDay = Arr::get(Kohana::$config->load('artonitcity_config'), 'lightVerDay', 3);//если количество дней не указано, то по умолчанию 3 суток
 			
 			$current_date = new DateTime();
-			$update_date = new DateTime(Kohana::$config->load('artonitcity_config')->timeUpdate); // $timeUpdate = '2026-01-14'
+				$update_date = new DateTime($updateDate); // $timeUpdate = '2026-01-14'
 
 			// Вычисляем разницу
 			$interval = $current_date->diff($update_date);
@@ -112,15 +120,17 @@
 			if ($days_diff < $lightVerDay) {
 				
 				$color = 'label-success';
-				 echo __('<span class="label :color">Версия :ver обновление :timeUpdate</span>',array(
+				 echo __('<span class="label :color" title=":title">Версия :ver обновление :timeUpdate</span>',array(
 					':ver'=> Kohana::$config->load('artonitcity_config')->ver,
 					':timeUpdate'=> Kohana::$config->load('artonitcity_config')->timeUpdate,
 					':color'=> $color,
+				//	':title'=> implode("\n", Version::get_changelog()),
 					));
 			} else {
-				 echo __('Версия :ver обновление :timeUpdate',array(
+				 echo __('<span title=":title">Версия :ver обновление :timeUpdate</span>',array(
 					':ver'=> Kohana::$config->load('artonitcity_config')->ver,
 					':timeUpdate'=> Kohana::$config->load('artonitcity_config')->timeUpdate,
+					':title'=> implode("\n", Version::get_changelog()),
 					));
 			}
 		}	else {		

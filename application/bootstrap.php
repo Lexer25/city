@@ -139,6 +139,7 @@ Kohana::modules(array(
 	 'eximdata' => MODPATH.'eximdata', //'экспорт и импорт данных
 	 'dev' => MODPATH.'dev', //'форма для работы с контроллерами
 	 'apb' => MODPATH.'apb', //'раздел для работы с периметральным антипассбеком
+	 'identifier' => MODPATH.'identifier', //'раздел для работы с идентификаторами
 	 
 	));
 
