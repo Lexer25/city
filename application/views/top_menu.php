@@ -1,152 +1,214 @@
+<?php defined('SYSPATH') OR die('No direct access allowed.'); ?>
 
 <!-- Static navbar -->
- <div class="navbar navbar-default navbar-fixed-top disable">
-    <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-			<span class="icon-bar"></span>
-			<span class="icon-bar"></span>
-			<span class="icon-bar"></span>
-		</button>
-		  <?= HTML::anchor('dashboard', __('City'),  array('class'=>'navbar-brand')) ?>
-    </div>
-	<div class="navbar-collapse collapse">
-        <ul class="nav navbar-nav">
-            <? 
-
-			//echo Debug::vars('15', Kohana::$config->load('artonitcity_config')->view_without_auth['load'], Auth::instance()->logged_in()); exit;
-
-			if((Kohana::$config->load('artonitcity_config')->view_without_auth['load']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='load') echo 'class="active"';?> ><?= HTML::anchor('dev/load', __('Load')) ?></li><?};
-						
-			if((Kohana::$config->load('artonitcity_config')->view_without_auth['load_order']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='load_order') echo 'class="active"';?> ><?= HTML::anchor('dev/load_order', __('Load_order')) ?></li><?};
-			if((Kohana::$config->load('artonitcity_config')->view_without_auth['device_control']) OR (Auth::instance()->logged_in())) {?> <li <?if ($_SESSION['menu_active']=='device_control') echo 'class="active"';?> ><?= HTML::anchor('dev/device_control', __('device_control')) ?></li><?};
-
-			//echo Debug::vars('20', $_SESSION); exit;
-			if((Kohana::$config->load('artonitcity_config')->view_without_auth['events']) OR (Auth::instance()->logged_in())) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='events') echo 'class="active"';?> ><?= HTML::anchor('event', __('events')) ?></li><?};
-            if((Kohana::$config->load('artonitcity_config')->view_without_auth['people']) OR (Auth::instance()->logged_in())) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='people') echo 'class="active"';?> ><?= HTML::anchor('people/peopleInfo', __('people')) ?></li><?};
-            if((Kohana::$config->load('artonitcity_config')->view_without_auth['door']) OR (Auth::instance()->logged_in())) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='door') echo 'class="active"';?> ><?= HTML::anchor('door/doorInfo', __('door')) ?></li><?};
-            if((Kohana::$config->load('artonitcity_config')->view_without_auth['log']) OR (Auth::instance()->logged_in())) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='log') echo 'class="active"';?> ><?= HTML::anchor('dashboard/log', __('log')) ?></li><?};
-			
-			if(Auth::instance()->logged_in()) {?> <li <?if (Arr::get($_SESSION,'menu_active')=='identifier') echo 'class="active"';?> ><?= HTML::anchor('identifier', __('identifier')) ?></li><?};
-         
-			?>
-			<li><?= HTML::anchor('', __('__')) ?></li>
-            <li <? //if (Arr::get($_SESSION,'menu_active')=='check') echo 'class="active"';?> ><?//= HTML::anchor('check', __('check')) ?></li>
-            <li><?//= HTML::anchor('guide', __('guide')) ?></li>
-            <li class="dropdown">
-		          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><?php echo __('guide');?> <b class="caret"></b></a>
-		          <ul class="dropdown-menu">
-		            <li><?= HTML::anchor('guide', __('guide')) ?></li>
-		            <!--
-					<li><?= HTML::anchor('./', __('reserv')) ?></li>
-		             <li class="divider"></li>
-		            <li><?= HTML::anchor('guide', __('about')) ?></li>
-					-->
-		          </ul>
-		   	</li>
-			<li <?if (Arr::get($_SESSION,'menu_active')=='services') echo 'class="active"';?> ><? echo HTML::anchor('dashboard/services', __('services')); 
-		?></li>
-			
-			<li <?if (Arr::get($_SESSION,'menu_active')=='skud') echo 'class="active"';?> ><? echo  HTML::anchor('skud', __('сводная'));
-			
-			
-				?>
-			</li>
-			<li> <?php echo  HTML::anchor('eximdata', __('Экспорт/импорт'));?></li>
-			<?php include Kohana::find_file('views','apb', 'menu');?>
-        </ul>
-  
+<nav class="navbar navbar-default navbar-fixed-top disable" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only"><?php echo HTML::chars(__('Toggle navigation')) ?></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <?php echo HTML::anchor('dashboard', HTML::chars(__('City')), array('class' => 'navbar-brand')) ?>
+        </div>
+        
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <?php
+                // ВЫНЕСЕНО ИЗ ЦИКЛА: конфигурация загружается один раз
+                $config = Kohana::$config->load('artonitcity_config');
+                $view_without_auth = (array) $config->get('view_without_auth', array());
+                $logged_in = Auth::instance()->logged_in();
+                $menu_active = Arr::get($_SESSION, 'menu_active', '');
+                
+                // Массив пунктов меню вынесен в отдельную переменную для ясности
+                $menu_items = array(
+                    'load' => array(
+                        'title' => __('Load'),
+                        'url' => 'dev/load',
+                        'condition' => (isset($view_without_auth['load']) && $view_without_auth['load']) ? true : $logged_in
+                    ),
+                    'load_order' => array(
+                        'title' => __('Load_order'),
+                        'url' => 'dev/load_order',
+                        'condition' => (isset($view_without_auth['load_order']) && $view_without_auth['load_order']) ? true : $logged_in
+                    ),
+                    'device_control' => array(
+                        'title' => __('device_control'),
+                        'url' => 'dev/device_control',
+                        'condition' => (isset($view_without_auth['device_control']) && $view_without_auth['device_control']) ? true : $logged_in
+                    ),
+                    'events' => array(
+                        'title' => __('events'),
+                        'url' => 'event',
+                        'condition' => (isset($view_without_auth['events']) && $view_without_auth['events']) ? true : $logged_in
+                    ),
+                    'people' => array(
+                        'title' => __('people'),
+                        'url' => 'people/peopleInfo',
+                        'condition' => (isset($view_without_auth['people']) && $view_without_auth['people']) ? true : $logged_in
+                    ),
+                    'door' => array(
+                        'title' => __('door'),
+                        'url' => 'door/doorInfo',
+                        'condition' => (isset($view_without_auth['door']) && $view_without_auth['door']) ? true : $logged_in
+                    ),
+                    'log' => array(
+                        'title' => __('log'),
+                        'url' => 'dashboard/log',
+                        'condition' => (isset($view_without_auth['log']) && $view_without_auth['log']) ? true : $logged_in
+                    ),
+                    'identifier' => array(
+                        'title' => __('identifier'),
+                        'url' => 'identifier',
+                        'condition' => $logged_in
+                    ),
+                    'services' => array(
+                        'title' => __('services'),
+                        'url' => 'dashboard/services',
+                        'condition' => true
+                    ),
+                    'skud' => array(
+                        'title' => __('сводная'),
+                        'url' => 'skud',
+                        'condition' => true
+                    )
+                );
+                
+                // Вывод основных пунктов меню с безопасным экранированием
+                foreach ($menu_items as $key => $item) {
+                    // Более читаемое условие
+                    $is_visible = false;
+                    if (isset($item['condition'])) {
+                        if (is_bool($item['condition'])) {
+                            $is_visible = $item['condition'];
+                        } elseif (isset($view_without_auth[$key])) {
+                            $is_visible = (bool)$view_without_auth[$key];
+                        } else {
+                            $is_visible = $logged_in;
+                        }
+                    }
+                    
+                    if ($is_visible) {
+                        $active_class = ($menu_active == $key) ? ' class="active"' : '';
+                        $url = URL::site($item['url'], Request::current()->protocol());
+                        $title = HTML::chars($item['title']);
+                        echo '<li' . $active_class . '>' . HTML::anchor($url, $title) . '</li>';
+                    }
+                }
+                
+                // Пункт экспорт/импорт с безопасным URL
+                echo '<li>' . HTML::anchor(
+                    URL::site('eximdata', Request::current()->protocol()), 
+                    HTML::chars(__('Экспорт/импорт'))
+                ) . '</li>';
+                
+                // Включение дополнительного меню БЕЗОПАСНО
+                $apb_menu = '';
+                // Проверяем, существует ли файл через безопасный механизм Kohana
+                try {
+                    // Используем View вместо прямого include
+                    $apb_view = View::factory('apb/menu');
+                    if ($apb_view->file_exists()) {
+                        $apb_menu = $apb_view->render();
+                    }
+                } catch (Exception $e) {
+                    // Логируем ошибку, но не прерываем выполнение
+                    Kohana::$log->add(Log::ERROR, 'Error loading APB menu: ' . $e->getMessage());
+                }
+                
+                echo $apb_menu;
+                ?>
+            </ul>
             
-		<ul class="nav navbar-nav navbar-right">
-			<li>
-			<?
-			//echo Debug::vars('5.05.2017 Пример подготовки пароля для 123', Auth::instance()->hash_password('123'));
-			//echo Debug::vars('60', Auth::instance()->get_user() );	 exit;	
-			if(Auth::Instance()->logged_in())
-			{
-				echo 'Пользователь '.Auth::instance()->get_user();
-					//echo Debug::vars('5.05.2017 Пример подготовки пароля для 123', Auth::instance()->hash_password('123'));
-					echo '<div>'.HTML::anchor('logout', __('logout'), array('onclick' => 'return confirm(\'' . __('confirm.delete').'\')')).'</div>';
-			} else {
-			echo Form::open('dashboard', array('method' => 'post', 'class'=>'form-inline'));?>
-				<div class="form-group">
-					<label for="inputEmail" class="sr-only">Имя</label>
-					<input type="text" class="form-control input-sm" id="inputEmail" placeholder="Имя" name="username">
-					
-				</div>
-				<div class="form-group">	    
-					<label for="inputPassword" class="sr-only">Пароль</label>
-					<input type="password" class="form-control input-sm" id="inputPassword" placeholder="Пароль" name="password">
-				</div>
-				<div class="checkbox input-sm">
-						<label><input type="checkbox" name="remember"> Запомнить</label>
-				</div>
-					<button type="submit" class="btn btn-primary input-sm">Войти</button>
-			<?echo Form::close();
-			}
+            <!-- Правая часть меню (авторизация) -->
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <?php if (Auth::instance()->logged_in()): ?>
+                       <div class="navbar-text" style="padding-right: 15px;">
+							<span class="glyphicon glyphicon-user" style="margin-right: 5px;"></span>
+							<span style="display: inline-block; margin-right: 10px; vertical-align: middle;">
+								<?php echo HTML::chars(Auth::instance()->get_user()) ?>
+							</span>
+							<span style="display: inline-block; vertical-align: middle;">
+								<?php echo HTML::anchor(
+									URL::site('logout', Request::current()->protocol()), 
+									HTML::chars(__('logout')), 
+									array(
+										'class' => 'btn btn-xs btn-default',
+										'onclick' => 'return confirm(\'' . HTML::chars(__('confirm.delete')) . '\')'
+									)
+								) ?>
+							</span>
+						</div>
+                    <?php else: ?>
+                        <?php echo Form::open('dashboard', array('method' => 'post', 'class' => 'navbar-form form-inline')) ?>
+                            <?php 
+                            // Добавляем CSRF защиту если она включена в Kohana
+                            if (class_exists('Security') && method_exists('Security', 'token')) {
+                                echo Form::hidden('csrf', Security::token());
+                            }
+                            ?>
+                            <div class="form-group">
+                                <label for="inputUsername" class="sr-only"><?php echo HTML::chars(__('Username')) ?></label>
+                                <input type="text" class="form-control input-sm" id="inputUsername" 
+                                       placeholder="<?php echo HTML::chars(__('Username')) ?>" 
+                                       name="username"
+                                       value="<?php echo HTML::chars(Arr::get($_POST, 'username', '')) ?>"
+                                       required>
+                            </div>
+                            <div class="form-group">    
+                                <label for="inputPassword" class="sr-only"><?php echo HTML::chars(__('Password')) ?></label>
+                                <input type="password" class="form-control input-sm" id="inputPassword" 
+                                       placeholder="<?php echo HTML::chars(__('Password')) ?>" 
+                                       name="password"
+                                       required>
+                            </div>
+                            <div class="checkbox input-sm">
+                                <label>
+                                    <input type="checkbox" name="remember" 
+                                           <?php echo (Arr::get($_POST, 'remember') ? 'checked' : '') ?>>
+                                    <?php echo HTML::chars(__('Remember me')) ?>
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <span class="glyphicon glyphicon-log-in"></span> 
+                                <?php echo HTML::chars(__('Login')) ?>
+                            </button>
+                        <?php echo Form::close() ?>
+                        <?php
+                        // Отображение ошибок входа (если есть)
+                        $errors = Session::instance()->get_once('login_errors', array());
+                        if (!empty($errors)) {
+                            echo '<div class="alert alert-danger alert-dismissible" style="margin-top: 5px;">';
+                            echo '<button type="button" class="close" data-dismiss="alert" aria-label="Close">';
+                            echo '<span aria-hidden="true">&times;</span>';
+                            echo '</button>';
+                            foreach ($errors as $error) {
+                                echo '<p style="margin: 0;">' . HTML::chars($error) . '</p>';
+                            }
+                            echo '</div>';
+                        }
+                        ?>
+                    <?php endif; ?>
+                </li>
+            </ul>
+        </div>
+        
 
-		?>
-		</li>
-		</ul>
-						
-    </div>
-	<div class="navbar-collapse collapse">
-      <?php 
-	
-	// подсветка версии в течении 3 суток после обновления.
-	//если дата обновления отсутвует, то выводится только версия, без даты обновления
-	
-		$color=null;
-		//$timeUpdate
-		$lightVerDay=3;
-		
 
-// 1. Основной способ (рекомендуется)
-echo Version::render_full();
-
-// 2. Только бейдж с popover
-echo Version::render_badge();
-
-// 3. Для футера
-echo Version::render_footer();
-
-// 4. Кнопка с подсветкой свежей версии
-echo Version::render_fresh_button();
-
-// 5. Получить информацию
-$info = Version::get_info();
-echo 'Версия: ' . $info['version'];
-
-// 6. Проверить свежесть
-if (Version::is_fresh(3)) {
-    echo 'У вас свежая версия!';
-}
-
-// 7. Уведомление
-echo Version::show_fresh_alert();
-
-// 8. Кастомизированная версия
-echo Version::render_full(array(
-    'link_text' => 'Показать изменения',
-    'link_btn_class' => 'btn-info',
-    'link_btn_size' => 'btn-lg',
-    'modal_title' => 'Что нового в приложении?',
-    'limit_versions' => 3,
-    'fresh_days' => 7
-));	
-			echo '<br>';
-		  // echo __('string_about', array(
-      		// 'db'=> Arr::get(
-      			// Arr::get(
-      					// Kohana::$config->load('database')->fb,
-      					// 'connection'
-      					// ),
-      		// 'dsn'),
-      		// 'ver'=> Kohana::$config->load('artonitcity_config')->ver,
-      		// 'developer'=> Kohana::$config->load('artonitcity_config')->developer,
-      		// )).'<br>';
-			echo __('timerefresh', array ('tr'=> date("d.m.Y H:i",time())));
-	
-      ?>
-	  </div>
-	  
+<!-- Версия и время - с отступом сверху -->
+<div style="margin-top: 10px; padding-left: 15px; font-size: 12px; line-height: 1.2;">
+    <?php
+    // Отображение версии
+    if (class_exists('Version')) {
+        echo Version::render_full() . '<br>';
+    }
+    
+    // Время обновления
+    echo HTML::chars(__('timerefresh', array('tr' => date("d.m.Y H:i", time()))));
+    ?>
 </div>
+    </div>
+</nav>
