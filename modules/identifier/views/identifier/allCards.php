@@ -52,7 +52,7 @@
     ,'ORGPARENTNAME'
 	,'lastevent');
 	
-	$title=array_keys(reset($list));
+	//$title=array_keys(reset($list));
 	
 ?>	
   <div class="panel-body">

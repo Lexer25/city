@@ -111,8 +111,8 @@
                 // Проверяем, существует ли файл через безопасный механизм Kohana
                 try {
                     // Используем View вместо прямого include
-                    $apb_view = View::factory('apb/menu');
-                    if ($apb_view->file_exists()) {
+                    ;
+                    if ($apb_view = View::factory('apb/menu')) {
                         $apb_menu = $apb_view->render();
                     }
                 } catch (Exception $e) {

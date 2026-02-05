@@ -34,7 +34,7 @@ class Controller_identifier extends Controller_Template {
 			
 			parent::before();
 			$session = Session::instance();
-			//$this->template = View::factory($this->template_width);//во всю ширину экрана
+			$this->template = View::factory($this->template_width);//во всю ширину экрана
 		
 	}
 	

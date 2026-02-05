@@ -1,5 +1,5 @@
 <? //http://itchief.ru/lessons/bootstrap-3/30-bootstrap-3-tables;
-// страница отображения данных по парковочной системе
+
 echo Form::open('apb/apb_control');
 ?>
 
