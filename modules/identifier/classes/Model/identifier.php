@@ -5,6 +5,7 @@
 class Model_identifier extends Model
 {
 	public $mess;//сообщения разные
+	public $arg=array();//аргументы
 	
 	/**1.02.2026 карты без событий о проходе
 	*/
@@ -53,23 +54,25 @@ class Model_identifier extends Model
 	
 	/**5.02.2026 вывод списка карт, у которых нет отметок о проходах до указанной даты
 	*/
-	public function cardNoEventDate($dateBefor)
+	public function cardNoEventDate($dateBefor=null)
 	{
-			if (is_null($dateBefor)) {
+		
+		$dateBefor=Arr::get($this->arg,'event_date');
+		if (is_null(Arr::get($this->arg,'event_date'))) {
 			$dateBefor = date('Y-m-d');
 		}
 		
-		$cutoffDate = DateTime::createFromFormat('Y-m-d', $dateBefor);
 		
+		$cutoffDate = DateTime::createFromFormat('Y-m-d', $dateBefor);
+	
 		//получаю весь список карт с метками прохода
 		$cardsArray =$this->allCards();
-		//и выбираю те записи, у которых метка времени lastevent меньше указанной или null
-		//echo Debug::vars('67', $cutoffDate);//exit;
-		//echo Debug::vars('68', $cardsArray);exit;
+		//и выбираю те записи, у которых метка времени lastevent меньше указанной
+		
 		$filteredArray = array_filter($cardsArray, function($card) use ($cutoffDate) {
 			// Если lastevent пустое или null
 			if (empty($card['lastevent'])) {
-				return true;
+				return false;
 			}
 			
 			// Преобразуем lastevent в объект DateTime
@@ -77,16 +80,15 @@ class Model_identifier extends Model
 			
 			// Если преобразование не удалось, пропускаем запись
 			if (!$lasteventDate) {
+				
 				return false;
 			}
-			
-			
 			
 			// Сравниваем даты
 			return $lasteventDate < $cutoffDate;
 			});
 		
-		//echo Debug::vars('88', $filteredArray);exit;
+		
 		return $filteredArray;
 		
 	}
@@ -158,7 +160,7 @@ class Model_identifier extends Model
 			', array(
 			':card_array'=>implode(",", $cards)));
 			
-		//echo Debug::vars('77', $sql);exit;	
+		
 		try
 			{
 			$query = DB::query(Database::UPDATE, $sql)

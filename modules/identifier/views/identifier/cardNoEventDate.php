@@ -12,10 +12,12 @@
     	});
   	
 </script> 
-
+<br>
+<br>
+<br>
 <div class="panel panel-primary">
   <div class="panel-heading">
-    <h3 class="panel-title"><?php echo __('Список карт, не имеющих отметки о проходе');?></h3>
+    <h3 class="panel-title"><?php echo __('Список карт, не имеющих отметки о проходе до указанной даты :date', array(':date'=>Arr::get($arg, 'event_date')));?></h3>
   </div>
   
 

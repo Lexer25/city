@@ -29,13 +29,13 @@
             ?>
             <div class="input-group-append">
                 <?php
-                echo Form::button('todo', 'Идентификаторы без событий до указанной даты', [
+               /*  echo Form::button('todo', 'Дата последнего прохода', [
                     'type' => 'submit',
                     'class' => 'btn btn-info',
                     'name' => 'cardNoEvent',
                     'value' => 'cardNoEventDate',
                     'id' => 'dateSubmitBtn'
-                ]);
+                ]); */
                 ?>
             </div>
         </div>
@@ -44,8 +44,8 @@
        
     </fieldset>
 	<?php
-	echo Form::close();
-	echo Form::open('identifier/action');
+	/* echo Form::close();
+	echo Form::open('identifier/action'); */
 	?>
 
     <!-- Второй fieldset: выбор действия -->

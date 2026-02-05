@@ -13,19 +13,19 @@ class Controller_identifier extends Controller_Template {
    public $template_width = 'template_width';
    
    
-  public $options1 = array(
+ /*  public $options = array(
 				'cardNoEvent' => 'Список идентификаторов, не имеющих отметки о событиях.',
 				'cardNoEventDate' => 'Список идентификаторов, не имеющих отметки о событиях до указанной даты.',
 				'allCards' => 'Список всех идентификаторов.',
 				'expiredCards' => 'Список всех идентификаторов срок действия закончился',
 				'inactiveCards' => 'Список всех неактивных идентификаторов',
 				'invalidFormat' => 'Список всех идентификаторов неправильного формата'
-			);
+			); */
    
   public $options = array(
 				'cardNoEvent' => 'Список идентификаторов, не имеющих отметки о событиях.',
 				'allCards' => 'Список всех идентификаторов.',
-				//'cardNoEventDate' => 'Список идентификаторов, не имеющих отметки о событиях до указанной даты.',
+				'cardNoEventDate' => 'Список идентификаторов с событиями ДО указанной даты.',
 				
 			);
    
@@ -65,15 +65,17 @@ class Controller_identifier extends Controller_Template {
 	}
 	
 	
+	/** 5.02.2026 тут ожидаю команды для выполнения каких-либо действий
+	*/
 	public function action_action()
 	{
-		//echo Debug::vars('39', $_POST);//exit;
+		//echo Debug::vars('39', $_POST);exit;
 				
 
 			// Создаем валидацию
 			$post = Validation::factory($_POST)
 				->rule('todo', 'not_empty', array(':value'))
-				->rule('todo', 'in_array', array(':value', array_keys($this->options1)));
+				->rule('todo', 'in_array', array(':value', array_keys($this->options)));
 
 			// Если форма отправлена и нажата кнопка карт без событий до даты
 			if (isset($_POST['cardNoEventDate'])) {
@@ -81,7 +83,7 @@ class Controller_identifier extends Controller_Template {
 				$post->rule('event_date', 'not_empty')
 					 ->rule('event_date', 'date');
 			}
-
+			$arg=array();
 			// Проверяем данные
 			if ($_POST && $post->check()) {
 				// Данные валидны
@@ -96,10 +98,13 @@ class Controller_identifier extends Controller_Template {
 						break;
 					case 'cardNoEventDate':
 						// Обработка для cardNoEventDate (нужна дата)
-						//echo Debug::vars('98');exit;
-						$event_date = $post['event_date'];
-						$data=Model::factory('identifier')->cardNoEventDate($event_date);
-						$view='cardNoEvent';
+						//параметры (в т.ч. дата) передаются в модель в свойства arg
+						$model=Model::factory('identifier');
+						$model->arg=$_POST;//передал аргументы
+						
+						$data = $model->cardNoEventDate();//получил результат
+						$arg=$model->arg;//запоминаю аргументы для передачи в view
+						$view='cardNoEventDate';//форма для вывода результата
 						break;
 					case 'allCards':
 						// Обработка для allCards
@@ -124,17 +129,13 @@ class Controller_identifier extends Controller_Template {
 											
 					
 				}
-			//echo Debug::vars('126');exit;
+			
 				$content = View::factory(__('identifier/:view', array(':view'=>$view)), array(//начальная страница для работы с идентификаторами.
 					'list'=>$data,
 					'type'=>$todo,
+					'arg'=>$arg,
 				));
-			/* 	$content = View::factory(__('identifier/:view', array(':view'=>$view)))
-					->bind('list', $data);
-				; */
-				
-				
-				//echo Debug::vars('128');exit;
+			
 				$this->template->content = $content;
 		
 		
@@ -194,7 +195,7 @@ class Controller_identifier extends Controller_Template {
 	*@input название модели, передается в POST
 	*/
 	public function action_save_csv() {
-		echo Debug::vars('191', $_POST);exit;
+		//echo Debug::vars('191', $_POST);exit;
 		$post = Validation::factory($_POST)
 				->rule('todo', 'not_empty', array(':value'))
 				->rule('todo', 'in_array', array(':value', array_keys($this->options)));
@@ -208,15 +209,19 @@ class Controller_identifier extends Controller_Template {
 
 			// Проверяем данные
 			if ($_POST && $post->check()) {
+				
+				$jsonData = Arr::get($_POST, 'arg', '');
+				$arg = json_decode($jsonData, true); // true для массива
 				if ($this->request->method() === 'POST') {
 						
 						// Важно: полностью отключаем все шаблоны
 						$this->auto_render = FALSE;
-						
+					
 						// Не должно быть никакого вывода ДО заголовков!
 						$method=Arr::get($post, 'todo');
 												
 						$model = Model::factory('identifier');
+						$model->arg=$arg;
 						if (method_exists($model, $method)) {
 							$big_array = $model->$method();
 						} else {
@@ -256,6 +261,9 @@ class Controller_identifier extends Controller_Template {
 						// 5. Завершаем скрипт
 						
 				}
+			} else {
+				
+				echo Debug::vars('272', $post);exit;
 			}
 			exit;
 	}
