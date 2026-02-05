@@ -29,10 +29,11 @@
             ?>
             <div class="input-group-append">
                 <?php
-                echo Form::button('filterByDate', 'Идентификаторы без событий до даты', [
+                echo Form::button('todo', 'Идентификаторы без событий до указанной даты', [
                     'type' => 'submit',
                     'class' => 'btn btn-info',
                     'name' => 'cardNoEvent',
+                    'value' => 'cardNoEventDate',
                     'id' => 'dateSubmitBtn'
                 ]);
                 ?>
@@ -40,44 +41,12 @@
         </div>
         <small class="text-muted">Максимальная доступная дата: <?php echo date('d.m.Y'); ?></small>
         
-        <!-- JavaScript для дополнительной проверки -->
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var datePicker = document.getElementById('event_date_picker');
-            var submitBtn = document.getElementById('dateSubmitBtn');
-            
-            // Устанавливаем максимальную дату как текущую
-            var today = new Date().toISOString().split('T')[0];
-            datePicker.max = today;
-            
-            // Проверка при выборе даты
-            datePicker.addEventListener('change', function() {
-                var selectedDate = new Date(this.value);
-                var currentDate = new Date();
-                currentDate.setHours(0,0,0,0);
-                
-                if (selectedDate > currentDate) {
-                    alert('Нельзя выбирать будущие даты!');
-                    this.value = today;
-                }
-            });
-            
-            // Проверка при отправке
-            submitBtn.addEventListener('click', function(e) {
-                var selectedDate = new Date(datePicker.value);
-                var currentDate = new Date();
-                currentDate.setHours(0,0,0,0);
-                
-                if (selectedDate > currentDate) {
-                    e.preventDefault();
-                    alert('Ошибка: выбрана будущая дата. Пожалуйста, выберите текущую или прошедшую дату.');
-                    datePicker.focus();
-                    return false;
-                }
-            });
-        });
-        </script>
+       
     </fieldset>
+	<?php
+	echo Form::close();
+	echo Form::open('identifier/action');
+	?>
 
     <!-- Второй fieldset: выбор действия -->
     <fieldset class="well mt-4">
@@ -109,3 +78,43 @@
 
   </div>
 </div>
+ <!-- JavaScript для дополнительной проверки -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var datePicker = document.getElementById('event_date_picker');
+            var submitBtn = document.getElementById('dateSubmitBtn');
+            
+            // Устанавливаем максимальную дату как текущую
+            var today = new Date().toISOString().split('T')[0];
+            datePicker.max = today;
+            
+            // Проверка при выборе даты
+            datePicker.addEventListener('change', function() {
+                var selectedDate = new Date(this.value);
+                var currentDate = new Date();
+                currentDate.setHours(0,0,0,0);
+                
+                if (selectedDate > currentDate) {
+                    alert('Нельзя выбирать будущие даты!');
+                    this.value = today;
+                }
+            });
+            
+            // Проверка при отправке
+           submitBtn.addEventListener('click', function(e) {
+    var selectedDate = new Date(datePicker.value);
+    var currentDate = new Date();
+    
+    // Убираем время у обеих дат для корректного сравнения
+    selectedDate.setHours(0, 0, 0, 0);
+    currentDate.setHours(0, 0, 0, 0);
+    
+    if (selectedDate > currentDate) {
+        e.preventDefault();
+        alert('Ошибка: выбрана будущая дата. Пожалуйста, выберите текущую или прошедшую дату.');
+        datePicker.focus();
+        return false;
+    }
+});
+        });
+        </script>

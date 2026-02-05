@@ -17,7 +17,6 @@ class Model_identifier extends Model
 		$sql='select e.id_card, max(e.datetime) from events e
 		where e.id_eventtype in (46, 50, 65, 70, 71, 145)
 		group by e.id_card';
-		
 		return array_column(DB::query(Database::SELECT, iconv('UTF-8', 'CP1251',$sql))
 					->execute(Database::instance('fb'))
 					->as_array(), null, 'ID_CARD');
@@ -52,25 +51,63 @@ class Model_identifier extends Model
 		
 	}
 	
+	/**5.02.2026 вывод списка карт, у которых нет отметок о проходах до указанной даты
+	*/
+	public function cardNoEventDate($dateBefor)
+	{
+			if (is_null($dateBefor)) {
+			$dateBefor = date('Y-m-d');
+		}
+		
+		$cutoffDate = DateTime::createFromFormat('Y-m-d', $dateBefor);
+		
+		//получаю весь список карт с метками прохода
+		$cardsArray =$this->allCards();
+		//и выбираю те записи, у которых метка времени lastevent меньше указанной или null
+		//echo Debug::vars('67', $cutoffDate);//exit;
+		//echo Debug::vars('68', $cardsArray);exit;
+		$filteredArray = array_filter($cardsArray, function($card) use ($cutoffDate) {
+			// Если lastevent пустое или null
+			if (empty($card['lastevent'])) {
+				return true;
+			}
+			
+			// Преобразуем lastevent в объект DateTime
+			$lasteventDate = DateTime::createFromFormat('Y-m-d H:i:s', $card['lastevent']);
+			
+			// Если преобразование не удалось, пропускаем запись
+			if (!$lasteventDate) {
+				return false;
+			}
+			
+			
+			
+			// Сравниваем даты
+			return $lasteventDate < $cutoffDate;
+			});
+		
+		//echo Debug::vars('88', $filteredArray);exit;
+		return $filteredArray;
+		
+	}
 	
 	/** 1.02.2026 г модель возвращает список карт, у которых нет отметок о проходах
 	*/
 	public function cardNoEvent()
 	{
 	
-	
-		$listWhoGo = $this->cardsWithEvents();			
-		$listIdentifier = $this->cardsFullList();			
+		$listWhoGo = $this->cardsWithEvents();	//массив карт с отметками о проходах		
+		$listIdentifier = $this->cardsFullList();//массив всех карт			
 	
 	//теперь выбираю элементы из массива $listIdentifier, которых нет в массиве $listWhoGo. Это и будут карты без проходов
 	$result = array_diff_key($listIdentifier, $listWhoGo);
-	//echo Debug::vars('51', count($result));exit;
+	
 	//теперь для каждого элемента добавляю время прохода
 	foreach ($result as &$key)
 	{
-		//echo Debug::vars('45', $key);//exit;
+		
 		$key['lastevent']=Arr::get(Arr::get($listWhoGo,Arr::get($key,'ID_CARD')), 'MAX');
-		//echo Debug::vars('50', $key);exit;
+		
 		
 	}
 		unset($key);

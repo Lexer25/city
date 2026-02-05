@@ -73,7 +73,23 @@
                         'title' => __('сводная'),
                         'url' => 'skud',
                         'condition' => true
+                    ),
+					
+					'eximdata' => array(
+                        'title' => __('Экспорт/импорт'),
+                        'url' => 'eximdata',
+                        'condition' => true
+                    ),
+					
+					'apb' => array(
+                        'title' => __('АПБ'),
+                        'url' => 'apb',
+                        'condition' => true
                     )
+					
+					
+					
+					
                 );
                 
                 // Вывод основных пунктов меню с безопасным экранированием
@@ -100,27 +116,8 @@
                     }
                 }
                 
-                // Пункт экспорт/импорт с безопасным URL
-                echo '<li>' . HTML::anchor(
-                    URL::site('eximdata', Request::current()->protocol()), 
-                    HTML::chars(__('Экспорт/импорт'))
-                ) . '</li>';
-                
-                // Включение дополнительного меню БЕЗОПАСНО
-                $apb_menu = '';
-                // Проверяем, существует ли файл через безопасный механизм Kohana
-                try {
-                    // Используем View вместо прямого include
-                    ;
-                    if ($apb_view = View::factory('apb/menu')) {
-                        $apb_menu = $apb_view->render();
-                    }
-                } catch (Exception $e) {
-                    // Логируем ошибку, но не прерываем выполнение
-                    Kohana::$log->add(Log::ERROR, 'Error loading APB menu: ' . $e->getMessage());
-                }
-                
-                echo $apb_menu;
+               
+       
                 ?>
             </ul>
             
@@ -135,7 +132,7 @@
 							</span>
 							<span style="display: inline-block; vertical-align: middle;">
 								<?php echo HTML::anchor(
-									URL::site('logout', Request::current()->protocol()), 
+									'logout', 
 									HTML::chars(__('logout')), 
 									array(
 										'class' => 'btn btn-xs btn-default',
@@ -148,7 +145,7 @@
                         <?php echo Form::open('dashboard', array('method' => 'post', 'class' => 'navbar-form form-inline')) ?>
                             <?php 
                             // Добавляем CSRF защиту если она включена в Kohana
-                            if (class_exists('Security') && method_exists('Security', 'token')) {
+							if (class_exists('Security') && method_exists('Security', 'token')) {
                                 echo Form::hidden('csrf', Security::token());
                             }
                             ?>
@@ -197,20 +194,18 @@
                 </li>
             </ul>
         </div>
-        
-
-
-<!-- Версия и время - с отступом сверху -->
-<div style="margin-top: 10px; padding-left: 15px; font-size: 12px; line-height: 1.2;">
-    <?php
-    // Отображение версии
-    if (class_exists('Version')) {
-        echo Version::render_full() . '<br>';
-    }
-    
-    // Время обновления
-    echo HTML::chars(__('timerefresh', array('tr' => date("d.m.Y H:i", time()))));
-    ?>
-</div>
+ 
+			<!-- Версия и время - с отступом сверху -->
+			<div style="margin-top: 10px; padding-left: 15px; font-size: 12px; line-height: 1.2;">
+				<?php
+				// Отображение версии
+				if (class_exists('Version')) {
+					echo Version::render_full() . '<br>';
+				}
+				
+				// Время обновления
+				echo HTML::chars(__('timerefresh', array('tr' => date("d.m.Y H:i", time()))));
+				?>
+			</div>
     </div>
 </nav>

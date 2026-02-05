@@ -184,6 +184,7 @@
 			class="btn btn-danger pull-right" 
 			name="todo"  
 			value="delete" 
+			disabled
 			<?php if(!Auth::instance()->logged_in()) echo 'disabled'?> onclick="return confirm('<?echo __('people_delete_alert')?>') ? true : false;"><?echo __('card_delete')?>
 	</button>
 	

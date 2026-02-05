@@ -25,6 +25,7 @@ class Controller_identifier extends Controller_Template {
   public $options = array(
 				'cardNoEvent' => 'Список идентификаторов, не имеющих отметки о событиях.',
 				'allCards' => 'Список всех идентификаторов.',
+				//'cardNoEventDate' => 'Список идентификаторов, не имеющих отметки о событиях до указанной даты.',
 				
 			);
    
@@ -66,16 +67,16 @@ class Controller_identifier extends Controller_Template {
 	
 	public function action_action()
 	{
-		//echo Debug::vars('39', $_POST);exit;
+		//echo Debug::vars('39', $_POST);//exit;
 				
 
 			// Создаем валидацию
 			$post = Validation::factory($_POST)
 				->rule('todo', 'not_empty', array(':value'))
-				->rule('todo', 'in_array', array(':value', array_keys($this->options)));
+				->rule('todo', 'in_array', array(':value', array_keys($this->options1)));
 
 			// Если форма отправлена и нажата кнопка карт без событий до даты
-			if (isset($_POST['cardNoEvent'])) {
+			if (isset($_POST['cardNoEventDate'])) {
 				// Проверяем дату
 				$post->rule('event_date', 'not_empty')
 					 ->rule('event_date', 'date');
@@ -85,7 +86,7 @@ class Controller_identifier extends Controller_Template {
 			if ($_POST && $post->check()) {
 				// Данные валидны
 				$todo = $post['todo'];
-				
+			
 				switch ($todo) {
 					case 'cardNoEvent':
 						// Обработка для cardNoEvent
@@ -95,7 +96,10 @@ class Controller_identifier extends Controller_Template {
 						break;
 					case 'cardNoEventDate':
 						// Обработка для cardNoEventDate (нужна дата)
+						//echo Debug::vars('98');exit;
 						$event_date = $post['event_date'];
+						$data=Model::factory('identifier')->cardNoEventDate($event_date);
+						$view='cardNoEvent';
 						break;
 					case 'allCards':
 						// Обработка для allCards
@@ -117,9 +121,10 @@ class Controller_identifier extends Controller_Template {
 						$data=Model::factory('identifier')->invalidFormat();
 						$view='invalidFormat';
 						break;
+											
 					
 				}
-			//echo Debug::vars('121', $view, count($data), __('identifier/:view', array(':view'=>$view)));exit;	
+			//echo Debug::vars('126');exit;
 				$content = View::factory(__('identifier/:view', array(':view'=>$view)), array(//начальная страница для работы с идентификаторами.
 					'list'=>$data,
 					'type'=>$todo,
@@ -135,7 +140,7 @@ class Controller_identifier extends Controller_Template {
 		
 		
 			} else {
-				// Выводим ошибки
+				// Выводим ошибкиecho Debug::vars('142');exit;
 				$errors = $post->errors('validation');
 			}
 			
@@ -145,7 +150,7 @@ class Controller_identifier extends Controller_Template {
 	
 	public function action_control()
 	{
-		echo Debug::vars('39', $_POST);exit;
+		//echo Debug::vars('148', $_POST);exit;
 		$post=Validation::factory($_POST);
 		$post->rule('identifier', 'not_empty')
 				 ->rule('todo', 'not_empty')
@@ -189,7 +194,7 @@ class Controller_identifier extends Controller_Template {
 	*@input название модели, передается в POST
 	*/
 	public function action_save_csv() {
-		//echo Debug::vars('191', $_POST);exit;
+		echo Debug::vars('191', $_POST);exit;
 		$post = Validation::factory($_POST)
 				->rule('todo', 'not_empty', array(':value'))
 				->rule('todo', 'in_array', array(':value', array_keys($this->options)));
