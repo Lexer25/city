@@ -92,9 +92,11 @@
                     
                     if ($is_visible) {
                         $active_class = ($menu_active == $key) ? ' class="active"' : '';
-                        $url = URL::site($item['url'], Request::current()->protocol());
+                        $url = $item['url'];
                         $title = HTML::chars($item['title']);
                         echo '<li' . $active_class . '>' . HTML::anchor($url, $title) . '</li>';
+						
+						
                     }
                 }
                 
