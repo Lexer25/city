@@ -1,3 +1,6 @@
+<br>
+<br>
+<br>
 <div class="panel panel-primary">
   <div class="panel-heading">
     <h3 class="panel-title"><?php echo __('Информация по идентификаторам').' '.date('Y-m-d H:i:s')?></h3>
