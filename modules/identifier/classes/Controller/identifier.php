@@ -28,7 +28,7 @@ class Controller_identifier extends Controller_Template {
 			
 			parent::before();
 			$session = Session::instance();
-			$this->template = View::factory($this->template_width);//во всю ширину экрана
+			//$this->template = View::factory($this->template_width);//во всю ширину экрана
 		
 	}
 	
@@ -36,8 +36,8 @@ class Controller_identifier extends Controller_Template {
 	{
 		
 	
-		
-		$content = View::factory('identifier/welcome', array(//начальная страница для работы с идентификаторами.
+		//$this->template = View::factory($this->template);
+		$content = View::factory('identifier/index', array(//начальная страница для работы с идентификаторами.
 		'options'=>$this->options,
 			
 		));
@@ -122,7 +122,7 @@ class Controller_identifier extends Controller_Template {
 											
 					
 				}
-			
+			$this->template = View::factory($this->template_width);//во всю ширину экрана
 				$content = View::factory(__('identifier/:view', array(':view'=>$view)), array(//начальная страница для работы с идентификаторами.
 					'list'=>$data,
 					'type'=>$todo,

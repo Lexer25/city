@@ -1,5 +1,19 @@
 <?php
 //echo Debug::vars('2', count($list), $type);exit;
+//считаю количество лет, месяцев, дней от текущей даты.
+$eventDate = Arr::get($arg, 'event_date');
+$diff = Date::span(strtotime($eventDate), time(), 'years,months,days');
+
+$diffText = '';
+if ($diff['years'] > 0) {
+    $diffText .= $diff['years'] . 'г. ';
+}
+if ($diff['months'] > 0) {
+    $diffText .= $diff['months'] . 'мес. ';
+}
+if ($diff['days'] > 0 || empty($diffText)) {
+    $diffText .= $diff['days'] . 'дн.';
+}
 ?>
 <script type="text/javascript">
       $(document).ready(function() {
@@ -17,8 +31,12 @@
 <br>
 <div class="panel panel-primary">
   <div class="panel-heading">
-    <h3 class="panel-title"><?php echo __('Список карт, не имеющих отметки о проходе до указанной даты :date', array(':date'=>Arr::get($arg, 'event_date')));?></h3>
+    <h3 class="panel-title"><?php echo __('Список карт, не имеющих отметки о проходе до указанной даты :date (:diff)', array(
+        ':date' => $eventDate,
+        ':diff' => trim($diffText)
+    )); ?></h3>
   </div>
+
   
 
  <?php
