@@ -1,199 +1,198 @@
-<?php
-//echo Debug::vars('2', count($list), $type);exit;
-?>
+<?php defined('SYSPATH') OR die('No direct access allowed.'); ?>
+
 <script type="text/javascript">
-      $(document).ready(function() {
-    	    $("#check_all").click(function () {
-				if (!$("#check_all").is(":checked"))
-    	            $(".checkbox").prop("checked",false);
-    	        else
-    	            $(".checkbox").prop("checked",true);
-    	    });
-    	});
-  	
-</script> 
+$(document).ready(function() {
+    $("#check_all").click(function () {
+        $(".checkbox").prop("checked", this.checked);
+    });
+});
+</script>
 
 <div class="panel panel-primary">
-  <div class="panel-heading">
-    <h3 class="panel-title"><?php echo __('Список карт, не имеющих отметки о проходе');?></h3>
-  </div>
-  
-
- <?php
-/* 	$title=array('ID_CARD'
-    ,'TIMESTART'
-    ,'TIMEEND'
-    ,'"ACTIVE"'
-    ,'ID_CARDTYPE'
-    ,'IDTYPE'
-    ,'CREATEDAT'
-    ,'ID_PEP'
-    ,'FIO'
-    ,'ID_ORG'
-    ,'ORGNAME'
-    ,'ID_PARENT'
-    ,'ORGPARENTNAME'); */
-	
-	$title=array('ID_CARD'
-    ,'TIMESTART'
-    ,'TIMEEND'
-	,'"ACTIVE"'
-    ,'IDTYPE'
-    ,'CREATEDAT'
-    ,'ID_PEP'
-    ,'FIO'
-    ,'ID_ORG'
-    ,'ORGNAME'
-    ,'ID_PARENT'
-    ,'ORGPARENTNAME'
-	,'lastevent');
-	
-	//$title=array_keys(reset($list));
-	
-?>	
-  <div class="panel-body">
-  
-	<?echo __('total_count').' ';
-		echo isset($list)? count($list) : '0';?>	
-	
-	<?echo Form::open('identifier/save_csv');
-			echo Form::button('todo', __('Сохранить список в файл'), array('value'=>$type,'class'=>'btn btn-primary', 'type' => 'submit'));
-			echo Form::hidden('arg', json_encode($arg));//сохраняю параметры выборки для передачи в POST
-		
-		
-		echo Form::close();
-		?>
-	
-
-
-
-	<?echo Form::open('identifier/control', array('class'=>'form-inline'));?>
-	
-			
-		
-		<table id="tablesorter" class="table table-striped table-hover table-condensed tablesorter">
-		<thead allign="center">
-			<tr>
-			<th>№ п/п</th>
-			<th>
-				Выделить<br><label><input type="checkbox" name="identifier" id="check_all"></label>
-			</th>
-			<?php
-	
-				foreach($title as $key)
-								{
-									echo '<th>';
-									
-										echo $key;
-									echo '</th>';
-								}
-			
-		
-			?>
-			
-		</tr>
-		</thead>
-		
-		<tbody>
-			<?php
-			$sn=0;
-			foreach($list as $key=>$value)
-			{
-				//echo Debug::vars('110', $value);exit;
-				echo '<tr>';
-					echo '<td>';
-						echo ++$sn;
-					echo '</td>';
-				echo '<td>
-					<label>'.Form::checkbox('identifier[]', '\''.Arr::get($value, 'ID_CARD').'\'', FALSE, array('class'=>'checkbox')).'</label>
-				</td>';
-						echo '<td>';
-							echo iconv('windows-1251','UTF-8', Arr::get($value, 'ID_CARD'));
-						echo '</td>';
-					echo '<td>';
-							echo iconv('windows-1251','UTF-8', Arr::get($value, 'TIMESTART'));
-						echo '</td>';
-					echo '<td>';
-							echo iconv('windows-1251','UTF-8', Arr::get($value, 'TIMEEND'));
-						echo '</td>';
-					echo '<td>';
-							echo Arr::get($value, 'ACTIVE');
-						echo '</td>';
-					echo '<td>';
-							echo iconv('windows-1251','UTF-8', Arr::get($value, 'IDTYPE'));
-						echo '</td>';
-					
-					echo '<td>';
-							echo iconv('windows-1251','UTF-8', Arr::get($value, 'CREATEDAT'));
-						echo '</td>';
-					
-					echo '<td>';
-							echo iconv('windows-1251','UTF-8', Arr::get($value, 'ID_PEP'));
-						echo '</td>';
-					
-					echo '<td>';
-							echo iconv('windows-1251','UTF-8', Arr::get($value, 'FIO'));
-						echo '</td>';
-					
-					echo '<td>';
-							echo iconv('windows-1251','UTF-8', Arr::get($value, 'ID_ORG'));
-						echo '</td>';
-					
-					echo '<td>';
-							echo iconv('windows-1251','UTF-8', Arr::get($value, 'ORGNAME'));
-						echo '</td>';
-					
-					echo '<td>';
-							echo iconv('windows-1251','UTF-8', Arr::get($value, 'ID_PARENT'));
-						echo '</td>';
-					
-					echo '<td>';
-							echo iconv('windows-1251','UTF-8', Arr::get($value, 'ORGPARENTNAME'));
-						echo '</td>';
-					echo '<td>';
-							echo iconv('windows-1251','UTF-8', Arr::get($value, 'lastevent'));
-						echo '</td>';
-					
-				echo '</tr>';
-				
-				
-			}
-			
-			?>
-		
-		</tbody>
-
-		
-		<tr>
-		</tr>
-		</table>
- 
-	  <nav class="navbar navbar-default navbar-fixed-bottom disable" role="navigation">
-  <div class="container">
-  <div class="row">
-
-
-
-	<button 
-		  	type="submit" 
-		  	class="btn btn-success" 
-		  	name="todo"  
-		  	value="unactive" 
-		  	<?php if(!Auth::instance()->logged_in()) echo 'disabled'?>
-		  	onclick="return confirm('<?echo __('people_unactive_alert')?>') ? true : false;"><?echo __('people_unactive')?>
-	</button>
-  	  
-  	<button type="submit" 
-			class="btn btn-danger pull-right" 
-			name="todo"  
-			value="delete" 
-			disabled
-			<?php if(!Auth::instance()->logged_in()) echo 'disabled'?> onclick="return confirm('<?echo __('people_delete_alert')?>') ? true : false;"><?echo __('card_delete')?>
-	</button>
-	
-	</div>
-	</div>
-</nav>						  
-							
-	</div>
+    <div class="panel-heading">
+        <h3 class="panel-title"><?php echo htmlspecialchars(__('Список карт, не имеющих отметки о проходе')); ?></h3>
+    </div>
+    
+    <?php
+    // Определение заголовков таблицы
+    $headers = array(
+        'ID_CARD' => 'ID карты',
+        'TIMESTART' => 'Начало действия',
+        'TIMEEND' => 'Окончание действия',
+        'ACTIVE' => 'Активна',
+        'IDTYPE' => 'Тип карты',
+        'CREATEDAT' => 'Дата создания',
+        'ID_PEP' => 'ID сотрудника',
+        'FIO' => 'ФИО',
+        'ID_ORG' => 'ID организации',
+        'ORGNAME' => 'Название организации',
+        'ID_PARENT' => 'ID родительской организации',
+        'ORGPARENTNAME' => 'Родительская организация',
+        'lastevent' => 'Последнее событие'
+    );
+    ?>
+    
+    <div class="panel-body">
+        <div class="alert alert-info">
+            <?php echo htmlspecialchars(__('total_count')) . ': ' . (isset($list) ? count($list) : '0'); ?>
+        </div>
+        
+        <div class="mb-3">
+            <?php
+            echo Form::open('identifier/save_csv', array('class' => 'form-inline'));
+            echo Form::button('export', htmlspecialchars(__('Сохранить список в файл')), array(
+                'value' => isset($type) ? $type : '',
+                'class' => 'btn btn-primary',
+                'type' => 'submit'
+            ));
+            
+            if (isset($arg)) {
+                echo Form::hidden('arg', htmlspecialchars(json_encode($arg)));
+            }
+            echo Form::close();
+            ?>
+        </div>
+        
+        <?php echo Form::open('identifier/control', array('class' => 'form-inline', 'id' => 'cards-form')); ?>
+        
+        <?php if (isset($list) && !empty($list)): ?>
+            <div class="table-responsive">
+                <table id="cards-table" class="table table-striped table-hover table-condensed">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>
+                                <div class="text-center">
+                                    <label class="d-block">
+                                        Выделить все
+                                        <input type="checkbox" id="check_all" class="form-check-input">
+                                    </label>
+                                </div>
+                            </th>
+                            <?php foreach ($headers as $header): ?>
+                                <th><?php echo htmlspecialchars($header); ?></th>
+                            <?php endforeach; ?>
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+                        <?php foreach ($list as $index => $row): ?>
+                            <?php
+                            // Безопасное получение значений с проверкой существования
+                            $cardId = isset($row['ID_CARD']) ? $row['ID_CARD'] : '';
+                            $safeCardId = htmlspecialchars($cardId, ENT_QUOTES, 'UTF-8');
+                            ?>
+                            <tr>
+                                <td><?php echo ($index + 1); ?></td>
+                                <td class="text-center">
+                                    <label>
+                                        <?php echo Form::checkbox('identifier[]', $safeCardId, false, array(
+                                            'class' => 'checkbox form-check-input',
+                                            'data-card-id' => $safeCardId
+                                        )); ?>
+                                    </label>
+                                </td>
+                                <?php foreach (array_keys($headers) as $field): ?>
+                                    <td>
+                                        <?php
+                                        $value = isset($row[$field]) ? $row[$field] : '';
+                                        // Преобразование кодировки только если нужно
+                                        if (!mb_check_encoding($value, 'UTF-8')) {
+                                            $value = iconv('windows-1251', 'UTF-8', $value);
+                                        }
+                                        echo htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+                                        ?>
+                                    </td>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="alert alert-warning">
+                <?php echo htmlspecialchars(__('Нет данных для отображения')); ?>
+            </div>
+        <?php endif; ?>
+        
+        <!-- Панель действий -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <?php if (Auth::instance()->logged_in()): ?>
+                        <div>
+                            <button type="submit" 
+                                    class="btn btn-success" 
+                                    name="action" 
+                                    value="deactivate"
+                                    onclick="return confirm('<?php echo htmlspecialchars(addslashes(__('people_unactive_alert'))); ?>')">
+                                <?php echo htmlspecialchars(__('people_unactive')); ?>
+                            </button>
+                            
+                            <button type="submit" 
+                                    class="btn btn-danger ml-2" 
+                                    name="action" 
+                                    value="delete"
+                                    disabled
+                                    onclick="return confirm('<?php echo htmlspecialchars(addslashes(__('people_delete_alert'))); ?>')">
+                                <?php echo htmlspecialchars(__('card_delete')); ?>
+                            </button>
+                        </div>
+                        
+                        <div class="text-muted">
+                            <small>Выбрано карт: <span id="selected-count">0</span></small>
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-danger w-100">
+                            <?php echo htmlspecialchars(__('Для выполнения действий необходимо авторизоваться')); ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        
+        <?php echo Form::close(); ?>
+    </div>
 </div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    // Выделение всех чекбоксов
+    $("#check_all").click(function() {
+        var isChecked = $(this).prop('checked');
+        $(".checkbox").prop("checked", isChecked).trigger('change');
+    });
+    
+    // Подсчет выбранных элементов
+    $(document).on('change', '.checkbox', function() {
+        updateSelectedCount();
+    });
+    
+    function updateSelectedCount() {
+        var selectedCount = $('.checkbox:checked').length;
+        $('#selected-count').text(selectedCount);
+        
+        // Активировать/деактивировать кнопки в зависимости от выбора
+        var hasSelection = selectedCount > 0;
+        $('button[name="action"]').prop('disabled', !hasSelection);
+    }
+    
+    // Инициализация счетчика
+    updateSelectedCount();
+    
+    // Валидация формы
+    $('#cards-form').submit(function(e) {
+        if ($('.checkbox:checked').length === 0) {
+            alert('<?php echo htmlspecialchars(addslashes(__('Пожалуйста, выберите хотя бы одну карту'))); ?>');
+            e.preventDefault();
+            return false;
+        }
+        
+        // Дополнительная проверка для удаления
+        if ($('button[name="action"]:focus').val() === 'delete') {
+            var selectedCount = $('.checkbox:checked').length;
+            return confirm('<?php echo htmlspecialchars(addslashes(__('Вы уверены, что хотите удалить выбранные карты? Это действие необратимо.'))); ?>');
+        }
+    });
+});
+</script>

@@ -3,121 +3,104 @@
 <br>
 <div class="panel panel-primary">
   <div class="panel-heading">
-    <h3 class="panel-title"><?php echo __('Информация по идентификаторам').' '.date('Y-m-d H:i:s')?></h3>
+    <h3 class="panel-title"><?php echo htmlspecialchars(__('Информация по идентификаторам') . ' ' . date('Y-m-d H:i:s')) ?></h3>
   </div>
   
   <div class="panel-body">
-
     <?php
-    $t1 = microtime(true);
     echo Form::open('identifier/action');
     ?>
-
-    <!-- Первый fieldset: фильтр по дате -->
-    <fieldset class="well">
-        <legend>Фильтр по дате событий</legend>
         
-        <div class="input-group mb-3">
-            <?php
-            $current_date = date('Y-m-d');
-            
-            echo Form::input('event_date', $current_date, [
-                'type' => 'date',
-                'class' => 'form-control date-picker',
-                'placeholder' => 'Выберите дату',
-                'max' => $current_date,
-                'id' => 'event_date_picker',
-                'onfocus' => 'this.max=new Date().toISOString().split("T")[0]'
-            ]);
-            ?>
-            <div class="input-group-append">
-                <?php
-               /*  echo Form::button('todo', 'Дата последнего прохода', [
-                    'type' => 'submit',
-                    'class' => 'btn btn-info',
-                    'name' => 'cardNoEvent',
-                    'value' => 'cardNoEventDate',
-                    'id' => 'dateSubmitBtn'
-                ]); */
-                ?>
-            </div>
-        </div>
-        <small class="text-muted">Максимальная доступная дата: <?php echo date('d.m.Y'); ?></small>
-        
-       
-    </fieldset>
-	<?php
-	/* echo Form::close();
-	echo Form::open('identifier/action'); */
-	?>
-
-    <!-- Второй fieldset: выбор действия -->
-    <fieldset class="well mt-4">
-        <legend>Действия с идентификаторами</legend>
-        
+    <div class="input-group mb-3">
+        <label for="event_date_picker" class="w-100 mb-1">Дата события:</label>
         <?php
-       
-        foreach ($options as $value => $label) {
-            echo '<div class="radio">';
-            echo '<label>';
-            echo Form::radio('todo', $value, false, ['id' => $value]);
-            echo ' ' . $label;
-            echo '</label>';
-            echo '</div>';
-        }
-        ?>
+        $current_date = date('Y-m-d');
         
-        <div class="text-center mt-3">
-            <?php
-            echo Form::button('execute', 'Выполнить', [
-                'type' => 'submit',
-                'class' => 'btn btn-primary btn-lg'
-            ]);
-            ?>
-        </div>
-    </fieldset>
+        echo Form::input('event_date', $current_date, [
+            'type' => 'date',
+            'class' => 'form-control date-picker',
+            'placeholder' => 'Выберите дату',
+            'max' => $current_date,
+            'id' => 'event_date_picker',
+            'title' => 'Выберите дату не позднее сегодняшнего дня',
+            'required' => 'required'
+        ]);
+        ?>
+    </div>
+    <small class="text-muted">Максимальная доступная дата: <?php echo htmlspecialchars(date('d.m.Y')); ?></small>
+    
+    <?php
+    foreach ($options as $value => $label) {
+        echo '<div class="radio mt-2">';
+        echo '<label>';
+        echo Form::radio('todo', $value, false, [
+            'id' => 'todo_' . $value,
+            'required' => 'required'
+        ]);
+        echo ' ' . htmlspecialchars($label);
+        echo '</label>';
+        echo '</div>';
+    }
+    ?>
+    
+    <div class="text-center mt-3">
+        <?php
+        echo Form::button('execute', 'Выполнить', [
+            'type' => 'submit',
+            'class' => 'btn btn-primary btn-lg'
+        ]);
+        ?>
+    </div>
 
     <?php echo Form::close(); ?>
-
   </div>
 </div>
- <!-- JavaScript для дополнительной проверки -->
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var datePicker = document.getElementById('event_date_picker');
-            var submitBtn = document.getElementById('dateSubmitBtn');
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var datePicker = document.getElementById('event_date_picker');
+    var today = new Date().toISOString().split('T')[0];
+    
+    // Устанавливаем максимальную дату
+    datePicker.max = today;
+    
+    // Валидация при изменении
+    datePicker.addEventListener('change', function() {
+        if (this.value > today) {
+            alert('Нельзя выбирать будущие даты!');
+            this.value = today;
+        }
+    });
+    
+    // Находим форму и добавляем валидацию при отправке
+    var form = datePicker.closest('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (datePicker.value > today) {
+                e.preventDefault();
+                alert('Ошибка: выбрана будущая дата. Пожалуйста, выберите текущую или прошедшую дату.');
+                datePicker.value = today;
+                datePicker.focus();
+                return false;
+            }
             
-            // Устанавливаем максимальную дату как текущую
-            var today = new Date().toISOString().split('T')[0];
-            datePicker.max = today;
+            // Проверяем, выбран ли radio button
+            var radioButtons = form.querySelectorAll('input[name="todo"]');
+            var radioSelected = false;
             
-            // Проверка при выборе даты
-            datePicker.addEventListener('change', function() {
-                var selectedDate = new Date(this.value);
-                var currentDate = new Date();
-                currentDate.setHours(0,0,0,0);
-                
-                if (selectedDate > currentDate) {
-                    alert('Нельзя выбирать будущие даты!');
-                    this.value = today;
+            for (var i = 0; i < radioButtons.length; i++) {
+                if (radioButtons[i].checked) {
+                    radioSelected = true;
+                    break;
                 }
-            });
+            }
             
-            // Проверка при отправке
-           submitBtn.addEventListener('click', function(e) {
-    var selectedDate = new Date(datePicker.value);
-    var currentDate = new Date();
-    
-    // Убираем время у обеих дат для корректного сравнения
-    selectedDate.setHours(0, 0, 0, 0);
-    currentDate.setHours(0, 0, 0, 0);
-    
-    if (selectedDate > currentDate) {
-        e.preventDefault();
-        alert('Ошибка: выбрана будущая дата. Пожалуйста, выберите текущую или прошедшую дату.');
-        datePicker.focus();
-        return false;
+            if (!radioSelected) {
+                e.preventDefault();
+                alert('Пожалуйста, выберите один из вариантов действия.');
+                return false;
+            }
+        });
     }
 });
-        });
-        </script>
+</script>
