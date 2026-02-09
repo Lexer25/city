@@ -21,7 +21,7 @@ class Model_identifier extends Model
 		return array_column(DB::query(Database::SELECT, iconv('UTF-8', 'CP1251',$sql))
 					->execute(Database::instance('fb'))
 					->as_array(), null, 'ID_CARD');
-		
+		set_time_limit(600); // 600 секунд
 		
 	}
 	

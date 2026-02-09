@@ -42,6 +42,7 @@ class Controller_identifier extends Controller_Template {
 			
 		));
         $this->template->content = $content;
+		//echo View::factory('profiler/stats');
 		
 	}
 	
@@ -124,12 +125,13 @@ class Controller_identifier extends Controller_Template {
 				}
 			$this->template = View::factory($this->template_width);//во всю ширину экрана
 				$content = View::factory(__('identifier/:view', array(':view'=>$view)), array(//начальная страница для работы с идентификаторами.
-					'list'=>$data,
+					'list'=>array_slice($data,0, 25),
 					'type'=>$todo,
 					'arg'=>$arg,
 				));
 			
 				$this->template->content = $content;
+				echo View::factory('profiler/stats');
 		
 		
 		
