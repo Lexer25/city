@@ -78,8 +78,11 @@ if ($diff['days'] > 0 || empty($diffText)) {
 	
 	echo '<br>';
 		
+	$show_row=0;
+	$show_row=isset($rows_per_page)? $rows_per_page : '0';
+	if($total_row_count<$show_row) $show_row=$total_row_count;
 	echo __('Из них показаны ').' ';
-		echo isset($rows_per_page)? $rows_per_page : '0';
+		echo $show_row;
 		
 		
 	echo '<br>';

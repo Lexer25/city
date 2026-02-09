@@ -17,7 +17,11 @@
         <?php
         // Определяем значение для поля event_date
         // Если в сессии есть event_date, используем его, иначе текущую дату
-		$session_event_date = Session::instance()->get('session_event_date');
+		
+		
+		$session_event_date = Cookie::get('session_event_date');
+		
+		
         if (isset($session_event_date) && !empty($session_event_date)) {
             $event_date_value = $session_event_date;
         } else {
@@ -25,13 +29,13 @@
         }
         
         // Обеспечиваем, что дата не больше текущей
-
-      /*   if ($event_date_value > $current_date) {
+		$current_date = date('Y-m-d');
+        if ($event_date_value > $current_date) {
             $event_date_value = $current_date;
-        } */
+        }
         
 		
-		$current_date = date('Y-m-d');
+		
 		
 		
         echo Form::input('event_date', $event_date_value, [
@@ -52,7 +56,17 @@
         <label for="rows_per_page" class="w-100 mb-1">Количество строк на странице:</label>
         <?php
         // Определяем значение для поля rows_per_page
-        $rows_value = 50; // Значение по умолчанию
+        //$rows_value = 50; // Значение по умолчанию
+		
+		$session_rows_per_page = Cookie::get('session_rows_per_page');
+		
+		 if (isset($session_rows_per_page) && !empty($session_rows_per_page)) {
+            $rows_value = $session_rows_per_page;
+        } else {
+            $rows_value = 50;
+        }
+		
+		
         
         if (isset($rows_per_page) && $rows_per_page !== '' && is_numeric($rows_per_page)) {
             $rows_value = (int)$rows_per_page;

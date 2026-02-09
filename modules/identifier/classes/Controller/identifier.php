@@ -83,8 +83,10 @@ class Controller_identifier extends Controller_Template {
 			
 			//сохраняю дату в сессию
 			$event_date = $this->request->post('event_date');
-            Session::instance()->set('session_event_date', $event_date);
-			
+			$rows_per_page = $this->request->post('rows_per_page');
+            //Session::instance()->set('session_event_date', $event_date);
+			Cookie::set('session_event_date', $event_date, 30 * 86400); // 30 дней в секундах
+			Cookie::set('session_rows_per_page', $rows_per_page, 30 * 86400); // 30 дней в секундах
 			
 			
 				$rows_per_page=Arr::get($post, 'rows_per_page', 50);
