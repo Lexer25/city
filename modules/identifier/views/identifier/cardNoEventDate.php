@@ -73,8 +73,17 @@ if ($diff['days'] > 0 || empty($diffText)) {
 ?>	
   <div class="panel-body">
   
-	<?echo __('total_count').' ';
-		echo isset($list)? count($list) : '0';?>	
+	<?	echo __('Всего найдено записей').' ';
+		echo isset($total_row_count)? $total_row_count : '0';
+	
+	echo '<br>';
+		
+	echo __('Из них показаны ').' ';
+		echo isset($rows_per_page)? $rows_per_page : '0';
+		
+		
+	echo '<br>';
+		echo __('Для получения всего списка сохраните список в файл. В файле будет полный набор данных.');?>	
 	
 	<?echo Form::open('identifier/save_csv');
 			echo Form::button('todo', __('Сохранить список в файл'), array('value'=>$type,'class'=>'btn btn-primary', 'type' => 'submit'));

@@ -1,5 +1,6 @@
 <?php
-//echo Debug::vars('2', count($list), $type);exit;
+//echo Debug::vars('2', count($list), $type);//exit;
+
 ?>
 <script type="text/javascript">
       $(document).ready(function() {
@@ -23,20 +24,7 @@
  
  //получаю список колонок из первой строки данных
  
- //echo Debug::vars('26', array_keys(reset($list)));exit;
-/* 	$title=array('ID_CARD'
-    ,'TIMESTART'
-    ,'TIMEEND'
-    ,'"ACTIVE"'
-    ,'ID_CARDTYPE'
-    ,'IDTYPE'
-    ,'CREATEDAT'
-    ,'ID_PEP'
-    ,'FIO'
-    ,'ID_ORG'
-    ,'ORGNAME'
-    ,'ID_PARENT'
-    ,'ORGPARENTNAME'); */
+
 	
 	$title=array('ID_CARD'
     ,'TIMESTART'
@@ -57,10 +45,19 @@
 ?>	
   <div class="panel-body">
   
-	<?echo __('total_count').' ';
-		echo isset($list)? count($list) : '0';?>	
+	<?
+	echo __('Всего найдено записей').' ';
+		echo isset($total_row_count)? $total_row_count : '0';
 	
-	<?echo Form::open('identifier/save_csv');
+	echo '<br>';
+		
+	echo __('Из них показаны ').' ';
+		echo isset($rows_per_page)? $rows_per_page : '0';
+		
+		
+	echo '<br>';
+		echo __('Для получения всего списка сохраните список в файл. В файле будет полный набор данных.');
+		echo Form::open('identifier/save_csv');
 			echo Form::button('todo', __('Сохранить список в файл'), array('value'=>$type,'class'=>'btn btn-primary', 'type' => 'submit'));
 		
 		

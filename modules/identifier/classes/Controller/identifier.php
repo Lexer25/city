@@ -7,6 +7,7 @@
 
 class Controller_identifier extends Controller_Template {
    public $template = 'template';
+  
    //Широки шаблон
    //для использьвания необходимо указать 
    //$this->template = View::factory($this->template_width);
@@ -29,14 +30,13 @@ class Controller_identifier extends Controller_Template {
 			parent::before();
 			$session = Session::instance();
 			//$this->template = View::factory($this->template_width);//во всю ширину экрана
-		
+		//echo Debug::vars('32', $session);exit;
 	}
 	
 	public function action_index()
 	{
 		
 	
-		//$this->template = View::factory($this->template);
 		$content = View::factory('identifier/index', array(//начальная страница для работы с идентификаторами.
 		'options'=>$this->options,
 			
@@ -80,6 +80,14 @@ class Controller_identifier extends Controller_Template {
 			$arg=array();
 			// Проверяем данные
 			if ($_POST && $post->check()) {
+			
+			//сохраняю дату в сессию
+			$event_date = $this->request->post('event_date');
+            Session::instance()->set('session_event_date', $event_date);
+			
+			
+			
+				$rows_per_page=Arr::get($post, 'rows_per_page', 50);
 				// Данные валидны
 				$todo = $post['todo'];
 			
@@ -123,15 +131,22 @@ class Controller_identifier extends Controller_Template {
 											
 					
 				}
+				 $session_event_date = Session::instance()->get('event_date', null);
+				 
 			$this->template = View::factory($this->template_width);//во всю ширину экрана
 				$content = View::factory(__('identifier/:view', array(':view'=>$view)), array(//начальная страница для работы с идентификаторами.
-					'list'=>array_slice($data,0, 25),
+					'list'=>array_slice($data,0, $rows_per_page),
+					'total_row_count'=>count($data),
+					'rows_per_page'=>$rows_per_page,
 					'type'=>$todo,
 					'arg'=>$arg,
+					'todo'=>$todo,
+					'session_event_date'=>$session_event_date,
+					
 				));
 			
 				$this->template->content = $content;
-				echo View::factory('profiler/stats');
+				//echo View::factory('profiler/stats');
 		
 		
 		
