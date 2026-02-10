@@ -61,6 +61,20 @@ class Model_Parkdb extends Model {
 		  AND (C.RDB$CONSTRAINT_TYPE = \'PRIMARY KEY\')
 		  AND (I.RDB$STATISTICS > cast(0 as double precision))';
 		  
+		  
+		$sql='SELECT 
+				I.RDB$RELATION_NAME AS RELATION,
+				CAST(1 / I.RDB$STATISTICS AS INTEGER) AS RECORD_COUNT
+			FROM 
+				RDB$INDICES I
+				JOIN RDB$RELATION_CONSTRAINTS C 
+					ON C.RDB$INDEX_NAME = I.RDB$INDEX_NAME
+			WHERE 
+				C.RDB$CONSTRAINT_TYPE = \'PRIMARY KEY\'
+				AND I.RDB$STATISTICS > CAST(0 AS DOUBLE PRECISION)';
+		  
+		  
+		  
 		  $query = DB::query(Database::SELECT, $sql)
             ->execute(Database::instance('fb'))
             ->as_array();

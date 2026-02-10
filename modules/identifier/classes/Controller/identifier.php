@@ -63,7 +63,7 @@ class Controller_identifier extends Controller_Template {
 	*/
 	public function action_action()
 	{
-		//echo Debug::vars('39', $_POST);exit;
+		echo Debug::vars('39', $_POST);exit;
 				
 
 			// Создаем валидацию

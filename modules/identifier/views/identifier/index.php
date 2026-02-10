@@ -89,31 +89,42 @@
         ?>
     </div>
     <small class="text-muted">Допустимый диапазон: от 1 до 500</small>
-    
-    <?php
-    foreach ($options as $value => $label) {
-        echo '<div class="radio mt-2">';
-        echo '<label>';
-        echo Form::radio('todo', $value, false, [
-            'id' => 'todo_' . $value,
-            'required' => 'required'
-        ]);
-        echo ' ' . htmlspecialchars($label);
-        echo '</label>';
-        echo '</div>';
-    }
-    ?>
-    
-    <div class="text-center mt-3">
-        <?php
-        echo Form::button('execute', 'Выполнить', [
+	<?php
+		echo '<br>';
+		 echo Form::button('todo', 'Получить', [
             'type' => 'submit',
             'class' => 'btn btn-primary btn-lg'
         ]);
-        ?>
-    </div>
+	?>
+ <hr>
 
-    <?php echo Form::close(); ?>
+<?php
+	echo Form::open('identifier/action');
+	echo __('Список идентификаторов, не имеющих отметки о событиях');
+		echo '<br>';
+		 echo Form::button('todo', 'Получить', [
+            'type' => 'submit',
+            'class' => 'btn btn-primary btn-lg'
+        ]);
+	echo Form::close();
+	
+?> 
+ <hr>   
+ 
+<?php
+	echo Form::open('identifier/action');
+	echo __('Список всех идентификаторов с датой последнего события.');
+	echo __('Список всех идентификаторов с датой последнего события.');
+		echo '<br>';
+		 echo Form::button('execute', 'Получить', [
+            'type' => 'submit',
+            'class' => 'btn btn-primary btn-lg'
+        ]);
+	echo Form::close();
+	
+?> 
+ <hr>   
+ 
   </div>
 </div>
 
