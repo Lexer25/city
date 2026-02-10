@@ -6,9 +6,21 @@
   <div class="panel-heading">
     <h3 class="panel-title"><?php echo htmlspecialchars(__('Информация по идентификаторам') . ' ' . date('Y-m-d H:i:s')) ?></h3>
   </div>
+  <p><b>Внимание!</p></b>
+  Подготовка по отчетам может занимать длительное время!<br>
+  Для сокращения времени вывод информации на экран рекомендую ограничить "Количество строк на экране" (допустимое значение до 500).<br>
+  В файл экспортируются все данные, независимо от значения "Количество строк на экране".<br>
+	<p><b>Удаление идентификаторов.</p></b>
+  Для удаления неактивных идентификаторов используйте инструмет Артонит Сити Центр - Количество неактивных карт, просмотр списка, выбор вариантов действия.<br>
   
   <div class="panel-body">
+  <hr>
+  <p><b>Отчет 1: список идентификаторов, которые не ходили после указанной даты.</b></p>
+  Будут выбраны идентификаторы, которые не имеют отметки о проходе после указанной даты.
+  После получения списка будет возможность выбрать идентификаторы и сделать их неактивными.<br>
+  Возможен экспорт списка в файл csv для последующего анализа.
     <?php
+	
     echo Form::open('identifier/action');
     ?>
         
@@ -17,10 +29,8 @@
         <?php
         // Определяем значение для поля event_date
         // Если в сессии есть event_date, используем его, иначе текущую дату
-		
-		
+		//Вспоминаю дату из предыдущего запроса.
 		$session_event_date = Cookie::get('session_event_date');
-		
 		
         if (isset($session_event_date) && !empty($session_event_date)) {
             $event_date_value = $session_event_date;
@@ -33,11 +43,7 @@
         if ($event_date_value > $current_date) {
             $event_date_value = $current_date;
         }
-        
-		
-		
-		
-		
+  		//вывод календаря
         echo Form::input('event_date', $event_date_value, [
             'type' => 'date',
             'class' => 'form-control date-picker',
@@ -91,34 +97,43 @@
     <small class="text-muted">Допустимый диапазон: от 1 до 500</small>
 	<?php
 		echo '<br>';
-		 echo Form::button('todo', 'Получить', [
+		 echo Form::button('todo', 'Получить Отчет 1', [
             'type' => 'submit',
-            'class' => 'btn btn-primary btn-lg'
+            'class' => 'btn btn-primary btn-lg',
+			'value'=>'cardNoEventDate',
         ]);
 	?>
  <hr>
-
+<p><b>Отчет 2: список идентификаторов, не имеющих отметки о событиях.</p></b>
+Будут выбраны идентификаторы, у которых нет отметки о проходе.
+Будет подготовлен список идентификаторов, у которых нет ни одной отметки о проходе.<br>
+После получения списка будет возможность выбрать идентификаторы и сделать их неактивными.<br>
+Возможен экспорт списка в файл csv для последующего анализа.
 <?php
+
 	echo Form::open('identifier/action');
-	echo __('Список идентификаторов, не имеющих отметки о событиях');
+
 		echo '<br>';
-		 echo Form::button('todo', 'Получить', [
+		 echo Form::button('todo', 'Получить Отчет 2', [
             'type' => 'submit',
-            'class' => 'btn btn-primary btn-lg'
+            'class' => 'btn btn-primary btn-lg',
+			'value'=>'cardNoEvent',
         ]);
-	echo Form::close();
+
 	
 ?> 
- <hr>   
- 
+ <hr>
+<p><b>Отчет 3: список всех идентификаторов с датой последнего события.</p></b> 
+Будут выбраные все идентификаторы, зарегистрированные в базе данных СКУД. При наличии событий о проходе будет указана дата последнего прохода.<br>
+ Возможен экспорт списка в файл csv для последующего анализа.
 <?php
-	echo Form::open('identifier/action');
-	echo __('Список всех идентификаторов с датой последнего события.');
-	echo __('Список всех идентификаторов с датой последнего события.');
+
+		
 		echo '<br>';
-		 echo Form::button('execute', 'Получить', [
+		 echo Form::button('todo', 'Получить отчет 3', [
             'type' => 'submit',
-            'class' => 'btn btn-primary btn-lg'
+            'class' => 'btn btn-primary btn-lg',
+			'value'=>'allCards'
         ]);
 	echo Form::close();
 	
@@ -187,22 +202,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
             
-            // Проверяем, выбран ли radio button
-            var radioButtons = form.querySelectorAll('input[name="todo"]');
-            var radioSelected = false;
+       
             
-            for (var i = 0; i < radioButtons.length; i++) {
-                if (radioButtons[i].checked) {
-                    radioSelected = true;
-                    break;
-                }
-            }
-            
-            if (!radioSelected) {
-                e.preventDefault();
-                alert('Пожалуйста, выберите один из вариантов действия.');
-                return false;
-            }
+           
         });
     }
 });
