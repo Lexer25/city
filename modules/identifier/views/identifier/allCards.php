@@ -13,7 +13,7 @@
     	});
   	
 </script> 
-
+<br>
 <div class="panel panel-primary">
   <div class="panel-heading">
     <h3 class="panel-title"><?php echo __('Список всех карт с меткой последнего прохода.');?></h3>

@@ -34,11 +34,23 @@ $(document).ready(function() {
     
     <div class="panel-body">
         <div class="alert alert-info">
-            <?php echo htmlspecialchars(__('total_count')) . ': ' . (isset($list) ? count($list) : '0'); ?>
+           
         </div>
         
         <div class="mb-3">
             <?php
+			echo __('Всего найдено записей').' ';
+		echo isset($total_row_count)? $total_row_count : '0';
+	
+	echo '<br>';
+		
+	$show_row=0;
+	$show_row=isset($rows_per_page)? $rows_per_page : '0';
+	if($total_row_count<$show_row) $show_row=$total_row_count;
+	echo __('Из них показаны ').' ';
+		echo $show_row;
+		
+		
             echo Form::open('identifier/save_csv', array('class' => 'form-inline'));
             echo Form::button('export', htmlspecialchars(__('Сохранить список в файл')), array(
                 'value' => isset($type) ? $type : '',
@@ -76,14 +88,16 @@ $(document).ready(function() {
                     </thead>
                     
                     <tbody>
-                        <?php foreach ($list as $index => $row): ?>
+                        <?php 
+						$sn=0;
+						foreach ($list as $index => $row): ?>
                             <?php
                             // Безопасное получение значений с проверкой существования
                             $cardId = isset($row['ID_CARD']) ? $row['ID_CARD'] : '';
                             $safeCardId = htmlspecialchars($cardId, ENT_QUOTES, 'UTF-8');
                             ?>
                             <tr>
-                                <td><?php echo ($index + 1); ?></td>
+                                <td><?php echo (++$sn); ?></td>
                                 <td class="text-center">
                                     <label>
                                         <?php echo Form::checkbox('identifier[]', $safeCardId, false, array(
@@ -130,7 +144,7 @@ $(document).ready(function() {
                             </button>
                             
                             <button type="submit" 
-                                    class="btn btn-danger ml-2" 
+                                    class="btn btn-danger pull-right" 
                                     name="action" 
                                     value="delete"
                                     disabled
