@@ -85,7 +85,13 @@
                         'title' => __('АПБ'),
                         'url' => 'apb',
                         'condition' => true
-                    )
+                    ),
+					'parsec' => array(
+                        'title' => __('parsec'),
+                        'url' => 'parsec',
+                        'condition' => true
+                    ),
+					
 					
 					
 					
