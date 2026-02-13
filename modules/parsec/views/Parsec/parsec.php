@@ -1,13 +1,7 @@
 <? //http://itchief.ru/lessons/bootstrap-3/30-bootstrap-3-tables;
 // страница отображения данных по парковочной системе
-
 echo Form::open('parsec/parsec_control', array('method' => 'post', 'id' => 'parsec-form'));
 ?>
-<span data-username="<?php echo Session::instance()->get('username', 'Администратор'); ?>" style="display: none;"></span>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.min.js"></script>
-
-
 <fieldset>
     <legend><?php echo __('parsec_about'); ?></legend>
     <?php echo __('parsec_legend'); ?>
@@ -100,6 +94,53 @@ Session::instance()->delete('e_mess');
             </div>
         </div>
 
+        <!-- Поле поиска организации с автодополнением -->
+        <div class="row" style="margin-bottom: 15px;">
+            <div class="col-md-6">
+                <div class="input-group" style="position: relative;">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-building"></span>
+                    </span>
+                    <input type="text" 
+                           id="org-search" 
+                           class="form-control" 
+                           placeholder="Введите название организации для поиска..."
+                           autocomplete="off">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" id="clear-org-search">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </button>
+                    </span>
+                </div>
+                <div id="org-autocomplete-list" class="list-group" style="position: absolute; z-index: 1000; width: 50%; max-height: 200px; overflow-y: auto; display: none;"></div>
+            </div>
+            <div class="col-md-6">
+                <small class="text-muted" id="org-search-info">
+                    Введите 2+ символа для поиска организации
+                </small>
+            </div>
+        </div>
+
+       <!-- Скрытое поле для имени пользователя -->
+<span data-username="<?php 
+    // Получаем имя пользователя из сессии или ставим 'Администратор'
+    $username = Session::instance()->get('username', 'Администратор');
+    
+    // Если в сессии пусто, пробуем Auth
+    if (empty($username) || $username === 'Администратор') {
+        if (class_exists('Auth') && method_exists(Auth::instance(), 'get_user')) {
+            $user = Auth::instance()->get_user();
+            if (is_object($user) && isset($user->username)) {
+                $username = $user->username;
+            } elseif (is_array($user) && isset($user['username'])) {
+                $username = $user['username'];
+            }
+        }
+    }
+    
+    echo htmlspecialchars($username, ENT_QUOTES, 'UTF-8'); 
+?>" style="display: none;"></span>
+
         <!-- Таблица -->
         <div class="table-responsive">
             <table class="table table-striped table-hover table-condensed" id="parsec-table">
@@ -184,7 +225,9 @@ Session::instance()->delete('e_mess');
 
 <?php echo Form::close(); ?>
 
-
+<!-- Подключение библиотек для PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.min.js"></script>
 
 <style>
 /* ===== СТИЛИ ===== */
@@ -288,6 +331,48 @@ Session::instance()->delete('e_mess');
     border-left: 3px solid #31708f;
 }
 
+/* Автодополнение для организаций */
+#org-autocomplete-list {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    margin-top: 2px;
+    padding: 5px 0;
+}
+
+#org-autocomplete-list .list-group-item {
+    border: none;
+    border-bottom: 1px solid #f5f5f5;
+    margin-bottom: 0;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+#org-autocomplete-list .list-group-item:hover {
+    background-color: #337ab7;
+    color: white;
+}
+
+#org-autocomplete-list .list-group-item:last-child {
+    border-bottom: none;
+}
+
+#org-autocomplete-list .highlight {
+    background-color: #337ab7;
+    color: white;
+}
+
+#org-search {
+    border-radius: 4px 0 0 4px;
+}
+
+#org-search:focus {
+    border-color: #337ab7;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(51, 122, 183, 0.6);
+}
+
 /* Адаптивность */
 .table-responsive {
     border: none;
@@ -379,7 +464,6 @@ Session::instance()->delete('e_mess');
 
                 let cellValue = cells[i] ? (cells[i].textContent || cells[i].innerText || '').toLowerCase() : '';
 
-                // Спецобработка для колонки операции
                 if (i == 3) {
                     const opMatch = cellValue.match(/\((\d+)\)/);
                     const opCode = opMatch ? opMatch[1] : '';
@@ -399,7 +483,6 @@ Session::instance()->delete('e_mess');
             if (show) visibleCount++;
         });
 
-        // Обновляем счётчик
         const counter = document.getElementById('filter-counter');
         const total = rows.length;
         if (counter) {
@@ -408,6 +491,7 @@ Session::instance()->delete('e_mess');
 
         saveFilters();
         applySorting();
+        updateOrgSearchInfo(); // Обновляем информацию о поиске
     }
 
     // ========== СОРТИРОВКА ==========
@@ -473,430 +557,390 @@ Session::instance()->delete('e_mess');
         }
     }
 
-   // ========== ЭКСПОРТ В CSV (точка с запятой, Excel RU) ==========
-function exportToCSV() {
-    const rows = Array.from(document.querySelectorAll('#table-body tr'));
-    const visibleRows = rows.filter(row => row.style.display !== 'none');
-    
-    if (visibleRows.length === 0) {
-        alert('Нет данных для экспорта');
-        return;
-    }
-
-    const headers = ['ID', 'GUID', 'ID_PEP', 'Операция', 'Организация', 'Попытки', 'Для кого', 'Дата'];
-    
-    const data = visibleRows.map(row => {
-        const cells = row.cells;
-        return [
-            cells[0].textContent.trim(),
-            cells[1].textContent.trim(),
-            cells[2].textContent.trim(),
-            cells[3].textContent.trim(),
-            cells[4].textContent.trim(),
-            cells[5].textContent.trim(),
-            cells[6].textContent.trim(),
-            cells[7].textContent.trim()
-        ];
-    });
-
-    // Разделитель — точка с запятой (Excel RU)
-    const separator = ';';
-    
-    const csvContent = [
-        headers.join(separator),
-        ...data.map(row => 
-            row.map(cell => 
-                `"${cell.replace(/"/g, '""')}"`  // кавычки обязательны для русских Excel
-            ).join(separator)
-        )
-    ].join('\n');
-
-    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `parsec_export_${new Date().toISOString().slice(0,10)}.csv`;
-    link.click();
-}
-
-
-// ========== ЭКСПОРТ В PDF (pdfmake, кириллица, ПОРТРЕТ, ПОЛНЫЙ ЗАГОЛОВОК) ==========
-function exportToPDF() {
-    const rows = Array.from(document.querySelectorAll('#table-body tr'));
-    const visibleRows = rows.filter(row => row.style.display !== 'none');
-
-    if (visibleRows.length === 0) {
-        alert('Нет данных для экспорта');
-        return;
-    }
-
-    // Заголовки таблицы
-    const headers = [
-        'ID',
-        'GUID',
-        'ID PEP',
-        'Операция',
-        'Организация',
-        'Попытки',
-        'Для кого',
-        'Дата'
-    ];
-
-    // Данные таблицы
-    const bodyData = visibleRows.map(row => {
-        const cells = row.cells;
-        return [
-            cells[0].textContent.trim(),
-            cells[1].textContent.trim(),
-            cells[2].textContent.trim(),
-            cells[3].textContent.trim(),
-            cells[4].textContent.trim(),
-            cells[5].textContent.trim(),
-            cells[6].textContent.trim(),
-            cells[7].textContent.trim()
-        ];
-    });
-
-    // Текущая дата и время
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('ru-RU');
-    const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    
-    // Имя пользователя (можно передать из PHP)
-    // По умолчанию берём из системы или ставим "Администратор"
-    let userName = 'Администратор';
-    
-    // Пытаемся получить имя из DOM или сессии
-    const userElement = document.querySelector('[data-username]');
-    if (userElement) {
-        userName = userElement.dataset.username;
-    }
-
-    // Формируем структуру документа
-    const docDefinition = {
-        pageOrientation: 'portrait',
-        pageSize: 'A4',
-        pageMargins: [15, 50, 15, 30], // Увеличил верхний отступ для заголовка
+    // ========== ЭКСПОРТ В CSV (ТАБУЛЯЦИЯ, БЕЗ КАВЫЧЕК) ==========
+    function exportToCSV() {
+        const rows = Array.from(document.querySelectorAll('#table-body tr'));
+        const visibleRows = rows.filter(row => row.style.display !== 'none');
         
-        // Верхний колонтитул (номер страницы справа)
-        header: function(currentPage, pageCount) {
-            return {
-                text: 'Страница ' + currentPage + ' из ' + pageCount,
-                alignment: 'right',
-                margin: [0, 10, 15, 0],
-                fontSize: 8,
-                color: '#666666'
-            };
-        },
-        
-        // Нижний колонтитул
-        footer: function(currentPage, pageCount) {
-            return {
-                columns: [
-                    {
-                        text: 'Отчёт сгенерирован: ' + dateStr + ' ' + timeStr,
-                        alignment: 'left',
-                        margin: [15, 0, 0, 0],
-                        fontSize: 8,
-                        color: '#666666'
-                    },
-                    {
-                        text: 'Парсек - система управления доступом',
-                        alignment: 'right',
-                        margin: [0, 0, 15, 0],
-                        fontSize: 8,
-                        color: '#666666'
-                    }
-                ]
-            };
-        },
+        if (visibleRows.length === 0) {
+            alert('Нет данных для экспорта');
+            return;
+        }
 
-        content: [
-            // === ПОЛНЫЙ ЗАГОЛОВОК ОТЧЁТА ===
+        const headers = ['ID', 'GUID', 'ID_PEP', 'Операция', 'Организация', 'Попытки', 'Для кого', 'Дата'];
+        
+        const data = visibleRows.map(row => {
+            const cells = row.cells;
+            return [
+                cells[0].textContent.trim(),
+                cells[1].textContent.trim(),
+                cells[2].textContent.trim(),
+                cells[3].textContent.trim(),
+                cells[4].textContent.trim(),
+                cells[5].textContent.trim(),
+                cells[6].textContent.trim(),
+                cells[7].textContent.trim()
+            ];
+        });
+
+        const tsvContent = [
+            headers.join('\t'),
+            ...data.map(row => 
+                row.map(cell => 
+                    cell
+                        .replace(/\t/g, ' ')
+                        .replace(/\n/g, ' ')
+                        .replace(/\r/g, ' ')
+                ).join('\t')
+            )
+        ].join('\n');
+
+        const blob = new Blob(["\ufeff" + tsvContent], { type: 'text/tab-separated-values;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `parsec_export_${new Date().toISOString().slice(0,10)}.txt`;
+        link.click();
+    }
+
+    // ========== ЭКСПОРТ В PDF (pdfmake, кириллица, ПОРТРЕТ, ПОЛНЫЙ ЗАГОЛОВОК) ==========
+    function exportToPDF() {
+        const rows = Array.from(document.querySelectorAll('#table-body tr'));
+        const visibleRows = rows.filter(row => row.style.display !== 'none');
+
+        if (visibleRows.length === 0) {
+            alert('Нет данных для экспорта');
+            return;
+        }
+
+        const headers = [
+            'ID',
+            'GUID',
+            'ID PEP',
+            'Операция',
+            'Организация',
+            'Попытки',
+            'Для кого',
+            'Дата'
+        ];
+
+        const bodyData = visibleRows.map(row => {
+            const cells = row.cells;
+            return [
+                cells[0].textContent.trim(),
+                cells[1].textContent.trim(),
+                cells[2].textContent.trim(),
+                cells[3].textContent.trim(),
+                cells[4].textContent.trim(),
+                cells[5].textContent.trim(),
+                cells[6].textContent.trim(),
+                cells[7].textContent.trim()
+            ];
+        });
+
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('ru-RU');
+        const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        
+        let userName = 'Администратор';
+        const userElement = document.querySelector('[data-username]');
+        if (userElement) {
+            userName = userElement.dataset.username;
+        }
+
+        function getActiveFilters() {
+            const filters = [];
+            const filterInputs = document.querySelectorAll('.column-filter');
             
-            // 1. Название отчёта (крупно, жирно, по центру)
-            {
-                text: 'ОТЧЁТ ПО ЗАДАЧАМ ИНТЕГРАТОРА ПАРСЕК',
-                style: 'reportTitle',
-                alignment: 'center',
-                margin: [0, 0, 0, 15]
-            },
-            
-            // 2. Блок с информацией об отчёте (рамка, серая заливка)
-            {
-                stack: [
-                    // Заголовок блока
-                    {
-                        text: 'ИНФОРМАЦИЯ ОБ ОТЧЁТЕ',
-                        style: 'infoBoxTitle',
-                        alignment: 'center',
-                        margin: [0, 0, 0, 8]
-                    },
+            filterInputs.forEach(input => {
+                if (input.value && input.value !== '') {
+                    let label = '';
+                    const colIndex = input.dataset.column;
                     
-                    // Таблица с параметрами отчёта
-                    {
-                        table: {
-                            widths: ['*', '*'],
-                            body: [
-                                [
-                                    { text: '📌 Название отчёта:', style: 'infoLabel' },
-                                    { text: 'Задачи интегратора Парсек', style: 'infoValue' }
-                                ],
-                                [
-                                    { text: '👤 Подготовил:', style: 'infoLabel' },
-                                    { text: userName, style: 'infoValue' }
-                                ],
-                                [
-                                    { text: '🕒 Дата подготовки:', style: 'infoLabel' },
-                                    { text: dateStr + ' в ' + timeStr, style: 'infoValue' }
-                                ],
-                                [
-                                    { text: '📊 Всего записей:', style: 'infoLabel' },
-                                    { text: visibleRows.length + ' шт.', style: 'infoValue', bold: true }
-                                ],
-                                [
-                                    { text: '🔍 Фильтры:', style: 'infoLabel' },
-                                    { text: getActiveFilters(), style: 'infoValue', italics: true }
-                                ]
-                            ]
-                        },
-                        layout: 'noBorders',
-                        margin: [5, 0, 5, 15]
+                    switch(colIndex) {
+                        case '0': label = 'ID'; break;
+                        case '1': label = 'GUID'; break;
+                        case '2': label = 'ID PEP'; break;
+                        case '3': label = 'Операция'; break;
+                        case '4': label = 'Организация'; break;
+                        case '5': label = 'Попытки'; break;
+                        case '6': label = 'Для кого'; break;
+                        case '7': label = 'Дата'; break;
                     }
-                ],
-                style: 'infoBox',
-                margin: [0, 0, 0, 20]
-            },
-            
-            // 3. Разделитель
-            {
-                canvas: [
-                    {
-                        type: 'line',
-                        x1: 0,
-                        y1: 0,
-                        x2: 515,
-                        y2: 0,
-                        lineWidth: 0.5,
-                        lineColor: '#2c3e50'
+                    
+                    let value = input.value;
+                    if (input.tagName === 'SELECT') {
+                        const selected = input.options[input.selectedIndex];
+                        value = selected ? selected.text : value;
                     }
-                ],
-                margin: [0, 0, 0, 15]
-            },
-            
-            // 4. Заголовок таблицы
-            {
-                text: 'ДЕТАЛИЗАЦИЯ ЗАДАЧ',
-                style: 'tableTitle',
-                alignment: 'left',
-                margin: [0, 0, 0, 10]
-            },
-            
-            // 5. ТАБЛИЦА С ДАННЫМИ
-            {
-                table: {
-                    headerRows: 1,
-                     widths: [36, 40, 36, 60, 120, 45, 45, 70],
-                    body: [
-                        headers.map(h => ({
-                            text: h,
-                            style: 'tableHeader',
-                            alignment: 'center'
-                        })),
-                        ...bodyData.map(row => 
-                            row.map((cell, index) => {
-                                let align = 'left';
-                                if ([0, 2, 5].includes(index)) align = 'center';
-                                if (index === 7) align = 'center';
-                                
-                                return {
-                                    text: cell,
-                                    alignment: align,
-                                    fontSize: 7,
-                                    margin: [1, 2, 1, 2]
-                                };
-                            })
-                        )
-                    ]
-                },
-                layout: {
-                    fillColor: function(rowIndex, node, columnIndex) {
-                        if (rowIndex === 0) return '#2c3e50';
-                        return (rowIndex % 2 === 0) ? '#f8f9fa' : null;
-                    },
-                    hLineWidth: function(i, node) {
-                        return (i === 0 || i === node.table.body.length) ? 0.5 : 0.3;
-                    },
-                    vLineWidth: function(i, node) {
-                        return 0.2;
-                    },
-                    hLineColor: function(i, node) {
-                        return '#aaaaaa';
-                    },
-                    vLineColor: function(i, node) {
-                        return '#aaaaaa';
-                    },
-                    paddingLeft: function(i, node) { return 3; },
-                    paddingRight: function(i, node) { return 3; },
-                    paddingTop: function(i, node) { return 2; },
-                    paddingBottom: function(i, node) { return 2; }
+                    
+                    filters.push(label + ': ' + value);
                 }
+            });
+            
+            return filters.length > 0 ? filters.join('; ') : 'нет';
+        }
+
+        const docDefinition = {
+            pageOrientation: 'portrait',
+            pageSize: 'A4',
+            pageMargins: [15, 50, 15, 30],
+            
+            header: function(currentPage, pageCount) {
+                return {
+                    text: 'Страница ' + currentPage + ' из ' + pageCount,
+                    alignment: 'right',
+                    margin: [0, 10, 15, 0],
+                    fontSize: 8,
+                    color: '#666666'
+                };
             },
             
-            // 6. Итоговая строка
-            {
-                text: 'Всего записей в отчёте: ' + visibleRows.length,
-                style: 'summary',
-                alignment: 'right',
-                margin: [0, 15, 0, 0]
+            footer: function(currentPage, pageCount) {
+                return {
+                    columns: [
+                        {
+                            text: 'Отчёт сгенерирован: ' + dateStr + ' ' + timeStr,
+                            alignment: 'left',
+                            margin: [15, 0, 0, 0],
+                            fontSize: 8,
+                            color: '#666666'
+                        },
+                        {
+                            text: 'Парсек - система управления доступом',
+                            alignment: 'right',
+                            margin: [0, 0, 15, 0],
+                            fontSize: 8,
+                            color: '#666666'
+                        }
+                    ]
+                };
             },
-            
-            // 7. Подпись и печать (имитация)
-            {
-                columns: [
-                    {
-                        width: '*',
-                        text: ''
-                    },
-                    {
-                        width: 'auto',
-                        stack: [
-                            {
-                                text: '____________________',
-                                alignment: 'center',
-                                margin: [0, 20, 0, 5]
+
+            content: [
+                {
+                    text: 'ОТЧЁТ ПО ЗАДАЧАМ ИНТЕГРАТОРА ПАРСЕК',
+                    style: 'reportTitle',
+                    alignment: 'center',
+                    margin: [0, 0, 0, 15]
+                },
+                
+                {
+                    stack: [
+                        {
+                            text: 'ИНФОРМАЦИЯ ОБ ОТЧЁТЕ',
+                            style: 'infoBoxTitle',
+                            alignment: 'center',
+                            margin: [0, 0, 0, 8]
+                        },
+                        {
+                            table: {
+                                widths: ['*', '*'],
+                                body: [
+                                    [
+                                        { text: '📌 Название отчёта:', style: 'infoLabel' },
+                                        { text: 'Задачи интегратора Парсек', style: 'infoValue' }
+                                    ],
+                                    [
+                                        { text: '👤 Подготовил:', style: 'infoLabel' },
+                                        { text: userName, style: 'infoValue' }
+                                    ],
+                                    [
+                                        { text: '🕒 Дата подготовки:', style: 'infoLabel' },
+                                        { text: dateStr + ' в ' + timeStr, style: 'infoValue' }
+                                    ],
+                                    [
+                                        { text: '📊 Всего записей:', style: 'infoLabel' },
+                                        { text: visibleRows.length + ' шт.', style: 'infoValue', bold: true }
+                                    ],
+                                    [
+                                        { text: '🔍 Фильтры:', style: 'infoLabel' },
+                                        { text: getActiveFilters(), style: 'infoValue', italics: true }
+                                    ]
+                                ]
                             },
-                            {
-                                text: 'Подпись ответственного',
-                                alignment: 'center',
-                                fontSize: 8,
-                                color: '#666666'
-                            }
+                            layout: 'noBorders',
+                            margin: [5, 0, 5, 15]
+                        }
+                    ],
+                    style: 'infoBox',
+                    margin: [0, 0, 0, 20]
+                },
+                
+                {
+                    canvas: [
+                        {
+                            type: 'line',
+                            x1: 0,
+                            y1: 0,
+                            x2: 515,
+                            y2: 0,
+                            lineWidth: 0.5,
+                            lineColor: '#2c3e50'
+                        }
+                    ],
+                    margin: [0, 0, 0, 15]
+                },
+                
+                {
+                    text: 'ДЕТАЛИЗАЦИЯ ЗАДАЧ',
+                    style: 'tableTitle',
+                    alignment: 'left',
+                    margin: [0, 0, 0, 10]
+                },
+                
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: [18, 40, 18, 35, 45, 18, 45, 35],
+                        body: [
+                            headers.map(h => ({
+                                text: h,
+                                style: 'tableHeader',
+                                alignment: 'center'
+                            })),
+                            ...bodyData.map(row => 
+                                row.map((cell, index) => {
+                                    let align = 'left';
+                                    if ([0, 2, 5].includes(index)) align = 'center';
+                                    if (index === 7) align = 'center';
+                                    
+                                    return {
+                                        text: cell,
+                                        alignment: align,
+                                        fontSize: 7,
+                                        margin: [1, 2, 1, 2]
+                                    };
+                                })
+                            )
                         ]
                     },
-                    {
-                        width: '*',
-                        text: ''
+                    layout: {
+                        fillColor: function(rowIndex, node, columnIndex) {
+                            if (rowIndex === 0) return '#2c3e50';
+                            return (rowIndex % 2 === 0) ? '#f8f9fa' : null;
+                        },
+                        hLineWidth: function(i, node) {
+                            return (i === 0 || i === node.table.body.length) ? 0.5 : 0.3;
+                        },
+                        vLineWidth: function(i, node) {
+                            return 0.2;
+                        },
+                        hLineColor: function(i, node) {
+                            return '#aaaaaa';
+                        },
+                        vLineColor: function(i, node) {
+                            return '#aaaaaa';
+                        },
+                        paddingLeft: function(i, node) { return 3; },
+                        paddingRight: function(i, node) { return 3; },
+                        paddingTop: function(i, node) { return 2; },
+                        paddingBottom: function(i, node) { return 2; }
                     }
-                ],
-                margin: [0, 30, 0, 0]
+                },
+                
+                {
+                    text: 'Всего записей в отчёте: ' + visibleRows.length,
+                    style: 'summary',
+                    alignment: 'right',
+                    margin: [0, 15, 0, 0]
+                },
+                
+                {
+                    columns: [
+                        {
+                            width: '*',
+                            text: ''
+                        },
+                        {
+                            width: 'auto',
+                            stack: [
+                                {
+                                    text: '____________________',
+                                    alignment: 'center',
+                                    margin: [0, 20, 0, 5]
+                                },
+                                {
+                                    text: 'Подпись ответственного',
+                                    alignment: 'center',
+                                    fontSize: 8,
+                                    color: '#666666'
+                                }
+                            ]
+                        },
+                        {
+                            width: '*',
+                            text: ''
+                        }
+                    ],
+                    margin: [0, 30, 0, 0]
+                }
+            ],
+            
+            styles: {
+                reportTitle: {
+                    fontSize: 16,
+                    bold: true,
+                    color: '#2c3e50',
+                    decoration: 'underline',
+                    margin: [0, 0, 0, 10]
+                },
+                infoBox: {
+                    fillColor: '#f5f7fa',
+                    color: '#333333',
+                    fontSize: 10,
+                    padding: [10, 10, 10, 10],
+                    border: true,
+                    borderColor: '#d0d7de',
+                    borderWidth: 1
+                },
+                infoBoxTitle: {
+                    fontSize: 11,
+                    bold: true,
+                    color: '#2c3e50',
+                    background: '#e9ecef',
+                    padding: [5, 5, 5, 5]
+                },
+                infoLabel: {
+                    fontSize: 9,
+                    bold: true,
+                    color: '#495057',
+                    alignment: 'right',
+                    margin: [0, 2, 5, 2]
+                },
+                infoValue: {
+                    fontSize: 9,
+                    color: '#212529',
+                    alignment: 'left',
+                    margin: [5, 2, 0, 2]
+                },
+                tableTitle: {
+                    fontSize: 12,
+                    bold: true,
+                    color: '#2c3e50'
+                },
+                tableHeader: {
+                    bold: true,
+                    fontSize: 8,
+                    color: 'white',
+                    fillColor: '#2c3e50',
+                    alignment: 'center',
+                    margin: [2, 2, 2, 2]
+                },
+                summary: {
+                    fontSize: 10,
+                    bold: true,
+                    color: '#2c3e50'
+                }
+            },
+            
+            defaultStyle: {
+                font: 'Roboto'
             }
-        ],
-        
-        styles: {
-            // Стиль заголовка отчёта
-            reportTitle: {
-                fontSize: 16,
-                bold: true,
-                color: '#2c3e50',
-                decoration: 'underline',
-                margin: [0, 0, 0, 10]
-            },
-            
-            // Стиль блока информации
-            infoBox: {
-                fillColor: '#f5f7fa',
-                color: '#333333',
-                fontSize: 10,
-                padding: [10, 10, 10, 10],
-                border: true,
-                borderColor: '#d0d7de',
-                borderWidth: 1
-            },
-            
-            // Стиль заголовка информационного блока
-            infoBoxTitle: {
-                fontSize: 11,
-                bold: true,
-                color: '#2c3e50',
-                background: '#e9ecef',
-                padding: [5, 5, 5, 5]
-            },
-            
-            // Стиль метки (левая колонка)
-            infoLabel: {
-                fontSize: 9,
-                bold: true,
-                color: '#495057',
-                alignment: 'right',
-                margin: [0, 2, 5, 2]
-            },
-            
-            // Стиль значения (правая колонка)
-            infoValue: {
-                fontSize: 9,
-                color: '#212529',
-                alignment: 'left',
-                margin: [5, 2, 0, 2]
-            },
-            
-            // Стиль заголовка таблицы
-            tableTitle: {
-                fontSize: 12,
-                bold: true,
-                color: '#2c3e50'
-            },
-            
-            // Стиль шапки таблицы
-            tableHeader: {
-                bold: true,
-                fontSize: 8,
-                color: 'white',
-                fillColor: '#2c3e50',
-                alignment: 'center',
-                margin: [2, 2, 2, 2]
-            },
-            
-            // Стиль итоговой строки
-            summary: {
-                fontSize: 10,
-                bold: true,
-                color: '#2c3e50'
-            }
-        },
-        
-        defaultStyle: {
-            font: 'Roboto'
-        }
-    };
+        };
 
-    // Функция получения активных фильтров
-    function getActiveFilters() {
-        const filters = [];
-        const filterInputs = document.querySelectorAll('.column-filter');
-        
-        filterInputs.forEach(input => {
-            if (input.value && input.value !== '') {
-                let label = '';
-                const colIndex = input.dataset.column;
-                
-                switch(colIndex) {
-                    case '0': label = 'ID'; break;
-                    case '1': label = 'GUID'; break;
-                    case '2': label = 'ID PEP'; break;
-                    case '3': label = 'Операция'; break;
-                    case '4': label = 'Организация'; break;
-                    case '5': label = 'Попытки'; break;
-                    case '6': label = 'Для кого'; break;
-                    case '7': label = 'Дата'; break;
-                }
-                
-                let value = input.value;
-                if (input.tagName === 'SELECT') {
-                    const selected = input.options[input.selectedIndex];
-                    value = selected ? selected.text : value;
-                }
-                
-                filters.push(label + ': ' + value);
-            }
-        });
-        
-        return filters.length > 0 ? filters.join('; ') : 'нет';
+        const filename = `parsec_report_${dateStr.replace(/\./g, '_')}.pdf`;
+        pdfMake.createPdf(docDefinition).download(filename);
     }
-
-    // Генерируем и скачиваем PDF
-    const filename = `parsec_report_${dateStr.replace(/\./g, '_')}.pdf`;
-    pdfMake.createPdf(docDefinition).download(filename);
-}
 
     // ========== ПОДСВЕТКА СТРОК ==========
     function enableRowHighlight() {
@@ -907,6 +951,147 @@ function exportToPDF() {
             row.addEventListener('mouseleave', function() {
                 this.classList.remove('highlight-row');
             });
+        });
+    }
+
+    // ========== ПОИСК ОРГАНИЗАЦИИ С АВТОДОПОЛНЕНИЕМ ==========
+    function getUniqueOrganizations() {
+        const orgs = new Set();
+        const rows = document.querySelectorAll('#table-body tr');
+        
+        rows.forEach(row => {
+            const cells = row.cells;
+            if (cells[4]) {
+                const orgName = cells[4].textContent.trim();
+                if (orgName && orgName !== '') {
+                    orgs.add(orgName);
+                }
+            }
+        });
+        
+        return Array.from(orgs).sort((a, b) => a.localeCompare(b, 'ru'));
+    }
+
+    function searchOrganizations(query) {
+        const orgs = getUniqueOrganizations();
+        query = query.toLowerCase().trim();
+        
+        if (query.length < 2) {
+            return [];
+        }
+        
+        return orgs.filter(org => 
+            org.toLowerCase().includes(query)
+        ).slice(0, 10);
+    }
+
+    function showAutocompleteList(matches, query) {
+        const list = document.getElementById('org-autocomplete-list');
+        const searchInput = document.getElementById('org-search');
+        
+        if (matches.length === 0 || query.length < 2) {
+            list.style.display = 'none';
+            return;
+        }
+        
+        list.innerHTML = '';
+        
+        matches.forEach(match => {
+            const item = document.createElement('a');
+            item.className = 'list-group-item';
+            item.href = '#';
+            
+            const regex = new RegExp(`(${query})`, 'gi');
+            const highlightedText = match.replace(regex, '<strong>$1</strong>');
+            item.innerHTML = highlightedText;
+            
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                searchInput.value = match;
+                list.style.display = 'none';
+                
+                const orgFilter = document.querySelector('.column-filter[data-column="4"]');
+                if (orgFilter) {
+                    orgFilter.value = match;
+                    filterTable();
+                }
+                
+                updateOrgSearchInfo(match);
+            });
+            
+            list.appendChild(item);
+        });
+        
+        list.style.display = 'block';
+    }
+
+    function updateOrgSearchInfo(orgName) {
+        const info = document.getElementById('org-search-info');
+        const rows = Array.from(document.querySelectorAll('#table-body tr'));
+        const visibleRows = rows.filter(row => row.style.display !== 'none');
+        
+        if (orgName && orgName !== '') {
+            const count = visibleRows.length;
+            info.innerHTML = `🔍 Найдено организаций: <strong>${orgName}</strong> (${count} записей)`;
+            info.className = 'text-success';
+        } else {
+            info.innerHTML = 'Введите 2+ символа для поиска организации';
+            info.className = 'text-muted';
+        }
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    function initOrgSearch() {
+        const searchInput = document.getElementById('org-search');
+        const clearBtn = document.getElementById('clear-org-search');
+        const list = document.getElementById('org-autocomplete-list');
+        
+        if (!searchInput) return;
+        
+        const debouncedSearch = debounce(function() {
+            const query = searchInput.value;
+            const matches = searchOrganizations(query);
+            showAutocompleteList(matches, query);
+        }, 300);
+        
+        searchInput.addEventListener('input', debouncedSearch);
+        
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                list.style.display = 'none';
+                
+                const orgFilter = document.querySelector('.column-filter[data-column="4"]');
+                if (orgFilter) {
+                    orgFilter.value = '';
+                    filterTable();
+                }
+                
+                updateOrgSearchInfo('');
+            });
+        }
+        
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !list.contains(e.target)) {
+                list.style.display = 'none';
+            }
+        });
+        
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                list.style.display = 'none';
+            }
         });
     }
 
@@ -963,6 +1148,10 @@ function exportToPDF() {
                 });
                 filterTable();
                 localStorage.removeItem(STORAGE_KEY);
+                
+                const orgSearch = document.getElementById('org-search');
+                if (orgSearch) orgSearch.value = '';
+                updateOrgSearchInfo('');
             });
         }
 
@@ -977,12 +1166,9 @@ function exportToPDF() {
         }
 
         enableRowHighlight();
+        initOrgSearch();
         filterTable();
     });
 
 })();
 </script>
-
-<!-- PDF экспорт (pdfmake) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.min.js"></script>

@@ -118,7 +118,7 @@ class Controller_Parsec extends Controller_Template {
 			
 			
 			default:
-				echo Debug::vars('56', $_GET, $_POST); exit;
+				//echo Debug::vars('56', $_GET, $_POST); exit;
 			break;
 		}
 		$content='';
