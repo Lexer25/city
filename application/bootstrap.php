@@ -157,7 +157,10 @@ Kohana::modules(array(
  * Set the routes. Each route must have a minimum of a name, a URI and a set of
  * defaults for the URI.
  */
-Route::set('peoplesearcch', '(people(/peopleInfo(/<id>)(/<card>)))')
+ 
+	
+	
+Route::set('peoplesearcch', 'people(/peopleInfo(/<id>)(/<card>))')
 	->defaults(array(
 		'controller' => 'people',
 		'action'     => 'peopleInfo',

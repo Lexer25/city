@@ -75,7 +75,7 @@
 				
 				<?
 				
-				
+				//	echo Debug::vars('17', mb_detect_encoding($err, ['UTF-8', 'Windows-1251', 'KOI8-R', 'ISO-8859-5']));//exit;
 				echo date('Y.m.d H:m', time()). '<br>'. $err;
 				
 				?>

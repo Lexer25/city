@@ -7,6 +7,7 @@
 					->execute(Database::instance('fb'));		
 		
 			} catch (Exception $e) {
-				//(Database_Exception $e)
-				$this->redirect('errorpage?err='.Text::limit_chars($e->getMessage()));
+				$query = http_build_query(['err' => Text::limit_chars($e->getMessage(), 200)]);
+				$this->redirect('errorpage' . '?' . iconv('windows-1251','UTF-8',$query));
+			
 			}

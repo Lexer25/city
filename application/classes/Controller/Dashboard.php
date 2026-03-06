@@ -93,6 +93,7 @@ class Controller_Dashboard extends Controller_Template {
 		//echo Debug::vars('95', Model::factory('dbskud')->checkRfidKeyFormat()); exit;
 		//
 		$res= Model::factory('dbskud')->checkRfidKeyFormat();
+		$var=array();
 		if(is_array($res)){
 			foreach($res as $key=>$value)
 			{
@@ -102,7 +103,7 @@ class Controller_Dashboard extends Controller_Template {
 			
 		}
 		
-	
+		if(count($var)){
 		$mess=__('Ошибка формата карт :cardlist. Номер карты должен содержать строку цифры и буквы ABCDEF. Удалите карту и зарегистрируйте ее еще раз.', array(':cardlist'=>implode(",", $var)));
 		
 		throw new Exception ('Неправильный формат карт '. $mess);
@@ -111,6 +112,10 @@ class Controller_Dashboard extends Controller_Template {
 			'content' => $mess,
 		));
 		$this->template->content = $content;
+		} else {
+			
+			$this->redirect('/');
+		}
 		
 	}
 
