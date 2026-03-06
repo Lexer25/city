@@ -100,17 +100,7 @@
                 
                 // Вывод основных пунктов меню с безопасным экранированием
                 foreach ($menu_items as $key => $item) {
-                    // Более читаемое условие
-                 /*    $is_visible = false;
-                    if (isset($item['condition'])) {
-                        if (is_bool($item['condition'])) {
-                            $is_visible = $item['condition'];
-                        } elseif (isset($view_without_auth[$key])) {
-                            $is_visible = (bool)$view_without_auth[$key];
-                        } else {
-                            $is_visible = $logged_in;
-                        }
-                    } */
+                    
 					
 					$is_visible = isset($item['condition']) ? (bool)$item['condition'] : false;
                     
