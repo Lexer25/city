@@ -101,7 +101,7 @@
                 // Вывод основных пунктов меню с безопасным экранированием
                 foreach ($menu_items as $key => $item) {
                     // Более читаемое условие
-                    $is_visible = false;
+                 /*    $is_visible = false;
                     if (isset($item['condition'])) {
                         if (is_bool($item['condition'])) {
                             $is_visible = $item['condition'];
@@ -110,7 +110,9 @@
                         } else {
                             $is_visible = $logged_in;
                         }
-                    }
+                    } */
+					
+					$is_visible = isset($item['condition']) ? (bool)$item['condition'] : false;
                     
                     if ($is_visible) {
                         $active_class = ($menu_active == $key) ? ' class="active"' : '';
@@ -201,17 +203,67 @@
             </ul>
         </div>
  
-			<!-- Версия и время - с отступом сверху -->
-			<div style="margin-top: 10px; padding-left: 15px; font-size: 12px; line-height: 1.2;">
-				<?php
-				// Отображение версии
-				if (class_exists('Version')) {
-					echo Version::render_full() . '<br>';
-				}
+			<!-- Версия и время -->
+			<div class="navbar-collapse collapse">
+      <?php 
+	
+	// подсветка версии в течении 3 суток после обновления.
+	//если дата обновления отсутвует, то выводится только версия, без даты обновления
+	
+		$color=null;
+		$lightVerDay=3;
+		
+		if(!empty($config->timeUpdate)){
+			
+			$lightVerDay = Arr::get($config, 'lightVerDay', 3);//если количество дней не указано, то по умолчанию 3 суток
+			
+			//вывод даты обновления
+			$current_date = new DateTime();
+			try {
+			$update_date = new DateTime($config->timeUpdate);
+		} catch (Exception $e) {
+			// Логируем ошибку
+			Kohana::$log->add(Log::ERROR, 'Invalid date format in config: :date', [
+				':date' => $config->timeUpdate
+			]);
+			// Показываем только версию
+			echo __('Версия :ver', array(':ver' => $config->ver));
+			return;
+		}
+
+			// Вычисляем разницу
+			$interval = $current_date->diff($update_date);
+
+			// Получаем разницу в днях
+			$days_diff = $interval->days;
+			// Проверяем разницу
+			if ($days_diff < $lightVerDay) {
 				
-				// Время обновления
-				echo HTML::chars(__('timerefresh', array('tr' => date("d.m.Y H:i", time()))));
-				?>
-			</div>
+				$color = 'label-success';
+				 echo __('<span class="label :color">Версия :ver обновление :timeUpdate</span>',array(
+					':ver'=> $config->ver,
+					':timeUpdate'=> $config->timeUpdate,
+					':color'=> $color,
+					));
+			} else {
+				 echo __('Версия :ver обновление :timeUpdate',array(
+					':ver'=> $config->ver,
+					':timeUpdate'=> $config->timeUpdate,
+					));
+			}
+		}	else {		
+				echo __('Версия :ver',array(
+					':ver'=> $config->ver,
+					
+					));
+			}
+		
+		echo '<br>';
+		 
+			echo __('timerefresh', array ('tr'=> date("d.m.Y H:i",time())));
+	
+      ?>
+	  </div>
+			
     </div>
 </nav>

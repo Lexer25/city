@@ -164,7 +164,5 @@
     </div>
 
     </div>
-    <p class="text-danger">
-        <?php echo __('Time execute ') . $timeExecute; ?><br>
-    </p>
+   
 </div>

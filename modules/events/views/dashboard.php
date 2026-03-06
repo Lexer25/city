@@ -170,10 +170,5 @@
 	</div>
 
 	</div>
-	<p class="text-danger">
-	<?php echo __('Time execute ').$timeExecute.'<br>';?>
-	<?php //echo phpinfo();?>
 
-	<?php //echo Debug::vars('167', win32_query_service_status('ts2'));?>
-	</p>
 </div>

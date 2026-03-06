@@ -7,16 +7,16 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="../../assets/ico/favicon.png">
 
-    <title>Artonit City <?
-		echo  isset(Kohana::$config->load('artonitcity_config')->city_name)? Kohana::$config->load('artonitcity_config')->city_name : '';
-		echo isset($title)? $title : '';
-		?></title>
+    <title>Artonit City <?php 
+		$city_name = Arr::get(Kohana::$config->load('artonitcity_config'), 'city_name', '');
+		echo HTML::chars($city_name . ($title ? ' - ' . $title : ''));
+	?></title>
 
     <!-- Bootstrap core CSS -->
-    <?= HTML::style('static/css/bootstrap.css'); ?>
-	<?= HTML::style('static/css/modal.css'); ?>
+    <?php echo HTML::style('static/css/bootstrap.css'); ?>
+	<?php echo HTML::style('static/css/modal.css'); ?>
    
-	<?= HTML::style('static/css/city.css'); ?>
+	<?php echo HTML::style('static/css/city.css'); ?>
 	
 	<link rel="stylesheet" type="text/css" media="all" href="/city/static/css/theme.blue.css">
 	<link rel="stylesheet" type="text/css" media="all" href="/city/static/css/jquery.dataTables.min.css">
