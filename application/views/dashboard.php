@@ -4,204 +4,167 @@
   </div>
   <div class="panel-body">
 
-<!--  Панель №1 с информацией по жильцами и картам. -->
-		<div class="panel panel-info col-md-3">
-			<div class="panel-heading row"><?php echo __('data_people_and_card');?></div>
-			<div class="panel-body">
-			<?
-			if(isset($list['card']) and count($list['card']))
-			{
-				echo Arr::get($list['card']['key_count'], 'name').' '. Arr::get($list['card']['key_count'], 'count').'<br>';
-				echo Arr::get($list['card']['key_people'], 'name').' '. Arr::get($list['card']['key_people'], 'count').'<br>';
-				echo Arr::get($list['card']['key_people_delete'], 'name').' '. Arr::get($list['card']['key_people_delete'], 'count').'<br>';
-				echo Arr::get($list['card']['event_count_24'], 'name').' '. Arr::get($list['card']['event_count_24'], 'count').'<br>';
-				echo Arr::get($list['card']['count_card_late_next_week'], 'name').' '. HTML::anchor('people/find_card_late_next_week',Arr::get($list['card']['count_card_late_next_week'], 'count')).'<br>';
-				echo Arr::get($list['card']['count_card_late'], 'name').' '.HTML::anchor('people/find_card_late', Arr::get($list['card']['count_card_late'], 'count')).'<br>'; 
-				echo Arr::get($list['card']['people_without_card'], 'name').' '.HTML::anchor('people/people_without_card', Arr::get($list['card']['people_without_card'], 'count')).'<br>';
-				echo Arr::get($list['card']['count_unactive_card'], 'name').' '.HTML::anchor('people/find_unActiveCard', Arr::get($list['card']['count_unactive_card'], 'count'), array('class'=>'disabled')).'<br>';
-				if($countErrKeyFormatRfid >0){
-					
-					echo ' <span class="label label-danger">'.__('Неправильный формат RFID').'</span>'.' '.HTML::anchor('dashboard/ErrKeyFormatRfid', $countErrKeyFormatRfid);
-				} else {
-					
-					echo ' <span class="label label-success">'.__('Неправильный формат RFID').'</span>'.' '.HTML::anchor('dashboard/ErrKeyFormatRfid', $countErrKeyFormatRfid)	;
-				}
-					
-					
-			} else {
-				echo __('windows_disable');
-			}
-			?>
-			</div>
+    <!-- Панель №1 - Информация по жильцам и картам -->
+    <div class="panel panel-info col-md-3">
+        <div class="panel-heading row"><?php echo __('data_people_and_card');?></div>
+        <div class="panel-body">
+        <?php if (!empty($list['card'])): ?>
+            <?php 
+            $card = $list['card'];
 			
-		</div>
+			//набор выводимых параметров и ссылок на эти параметры. Если ссылка указана, то она будет подствлеена в html
+            $items = array(
+                'key_count' => '',
+                'key_people' => '',
+                'key_people_delete' => '',
+                'event_count_24' => '',
+                'count_card_late_next_week' => 'people/find_card_late_next_week',
+                'count_card_late' => 'people/find_card_late',
+                'people_without_card' => 'people/people_without_card',
+                'count_unactive_card' => 'people/find_unActiveCard'
+            );
+            
+            foreach ($items as $key => $link):
+                if (isset($card[$key])):
+                    $value = Arr::get($card[$key], 'count');
+                    $name = Arr::get($card[$key], 'name');
+            ?>
+                <?php echo $name . ' '; ?>
+                <?php echo $link ? HTML::anchor($link, $value) : $value; ?>
+                <br>
+            <?php 
+                endif;
+            endforeach; 
+            ?>
+            
+            <?php // RFID формат ?>
+            <span class="label label-<?php echo $countErrKeyFormatRfid > 0 ? 'danger' : 'success'; ?>">
+                <?php echo __('Неправильный формат RFID'); ?>
+            </span>
+            <?php echo HTML::anchor('dashboard/ErrKeyFormatRfid', $countErrKeyFormatRfid); ?>
+            
+        <?php else: ?>
+            <?php echo __('windows_disable'); ?>
+        <?php endif; ?>
+        </div>
+    </div>
 
-<!--  Панель №2. Информация по оборудованию. -->
+    <!-- Панель №2 - Информация по оборудованию -->
+    <div class="panel panel-warning col-md-3">
+        <div class="panel-heading row"><?php echo __('data_device');?></div>
+        <div class="panel-body">
+        <?php if (!empty($list['device'])): ?>
+            <?php foreach (Arr::get($list, 'device', array()) as $device): ?>
+                <?php echo Arr::get($device, 'name') . ' ' . Arr::get($device, 'count'); ?><br>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <?php echo __('windows_disable'); ?>
+        <?php endif; ?>
+        </div>
+    </div>
 
-		<div class="panel panel-warning col-md-3">
-		  <div class="panel-heading  row"><?php echo __('data_device');?></div>
-		  <div class="panel-body">
-			<?
-			if(isset($list['device']) and count($list['device']))
-			{
-				foreach (Arr::get($list, 'device') as $key=>$value)
-				{
-				echo Arr::get($value, 'name').' '.Arr::get($value, 'count').'<br>';	
-				}
-			} else {
-				echo __('windows_disable');
-			}
-			
-			?>
-		  </div>
-		</div>
+    <!-- Панель №3 - Очередь загрузок -->
+    <div class="panel panel-success col-md-3">
+        <div class="panel-heading row">
+            <h3 class="panel-title"><?php echo __('data_cardindev');?></h3>
+        </div>
+        <div class="panel-body">
+        <?php if (!empty($list['order'])): ?>
+            <?php foreach ($list['order'] as $key => $value): ?>
+                <?php echo Arr::get($value, 'name') . ' '; ?>
+                <?php if ($key == 'card_for_not_active'): ?>
+                    <?php echo HTML::anchor('device/'.$key, Arr::get($value, 'count')); ?>
+                <?php else: ?>
+                    <?php echo Arr::get($value, 'count'); ?>
+                <?php endif; ?>
+                <br>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <?php echo __('windows_disable'); ?>
+        <?php endif; ?>
+        </div>
+    </div>
 
-<!--  Панель №3. Очередь загрузок. -->
-		
-		<div class="panel panel-success col-md-3">
-		  <div class="panel-heading  row">
-			<h3 class="panel-title"><?php echo __('data_cardindev');?></h3>
-		  </div>
-		  <div class="panel-body">
-			<?
-			//echo debug::vars('58', $list['order'] );
-			if(isset($list['order']) and count($list['order']))
-			{ 
-				foreach ($list['order'] as $key=>$value)
-				{
-					if($key == 'card_for_not_active') 
-					{
-						echo $value['name'].' '.HTML::anchor('device/'.$key,$value['count']).'<br>';	
-					} else {
-						echo $value['name'].' '.$value['count'].'<br>';
-					}
-				}
-			} else {
-				echo __('windows_disable');
-			}
-			?>
-		  </div>
-		</div>
-		
-<!--  Панель №4. сведени о системе. -->
-		<?php
-			//echo Debug::vars('114', Arr::get($about, 'countTable'));exit;
-		
-		?>
-		<div class="panel panel-info col-md-3">
-		  <div class="panel-heading  row">
-			<h3 class="panel-title"><?php echo __('system_info');?></h3>
-		  </div>
-		  <div class="panel-body">
-		<!--	<table class="table table-striped table-hover table-condensed">
-			<tr>
-				<td>Имя</td>
-				<td><?php echo iconv('CP1251','UTF-8',  Arr::get($about, 'connectName')); ?></td>
-			</tr>
-			<tr>
-				<td>Тип</td>
-				<td><?php echo iconv('CP1251','UTF-8', Arr::get($about, 'dsn')); ?></td>
-			</tr>
-			<tr>
-				<td>БД</td>
-				<td><?php echo iconv('cp866','UTF-8//IGNORE', Arr::get($about, 'pathDB'));?>
-				
-			</td>
-			<tr>
-				<td>IP</td>
-				<td><?php echo iconv('cp866','UTF-8//IGNORE', Arr::get($about, 'Server'));?>
-				
-			</tr>
-			<tr>
-				<td>Событий</td>
-				<td><?php echo number_format(Arr::get(Arr::get($about, 'countTable'), 'EVENTS'),  0, '', ' ');?>
-				
-			</tr>
-			<tr>
-				<td> <?php echo __('Min_date');?></td>
-				<td><?php echo Arr::get($about, 'minEventDate');?>
-				
-			</tr>
+    <!-- Панель №4 - Системная информация -->
+    <div class="panel panel-info col-md-3">
+        <div class="panel-heading row">
+            <h3 class="panel-title"><?php echo __('system_info');?></h3>
+        </div>
+        <div class="panel-body">
+            <?php
+            $system_info = array(
+                'connectName' => array('Имя', 'CP1251'),
+                'dsn' => array('Тип', 'CP1251'),
+                'pathDB' => array('БД', 'cp866'),
+                'Server' => array('IP', 'CP1251')
+            );
+            
+            foreach ($system_info as $key => $params):
+                $value = Arr::path($about, $key, '');
+                if ($value):
+                    $encoded = iconv($params[1], 'UTF-8//IGNORE', $value);
+            ?>
+                <?php echo $params[0] . ': ' . $encoded; ?><br>
+            <?php 
+                endif;
+            endforeach; 
+            ?>
+            
+            <?php 
+            $events = Arr::path($about, 'countTable.EVENTS', 0);
+            echo __('Событий') . ': ' . number_format($events, 0, '', ' ') . '<br>';
+            echo __('Min_date') . ': ' . Arr::get($about, 'minEventDate', '');
+            ?>
+        </div>
+    </div>
+    
+    <div class="clearfix hidden-xs hidden-sm"></div>
 
-		</table>
-		-->
-		
-			<?php
-				echo __('Имя :connectName<br>Тип :dsn<br>БД :pathDB<br>IP :Server<br>Событий :EVENTS<br>Min_date :minEventDate<br>', 
-					array(
-						':connectName'=>iconv('CP1251','UTF-8',  Arr::get($about, 'connectName')),
-						':dsn'=>iconv('CP1251','UTF-8',  Arr::get($about, 'dsn')),
-						':pathDB'=>iconv('cp866','UTF-8//IGNORE', Arr::get($about, 'pathDB')),
-						':Server'=>iconv('CP1251','UTF-8',  Arr::get($about, 'Server')),
-						':EVENTS'=>number_format(Arr::get(Arr::get($about, 'countTable'), 'EVENTS'),  0, '', ' '),
-						':minEventDate'=>Arr::get($about, 'minEventDate'),
-					));
-			?>
-			
-		  </div>
-		</div>
-		
-		
-			<div class="clearfix hidden-xs hidden-sm"></div>
+    <!-- Панель №6 - Аналитика -->
+    <div class="panel panel-danger">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                <?php 
+                echo __('analyt_result', array(
+                    'time_from' => Date::formatted_time('-1 days', "d.m.Y H:i:s"),
+                    'time_to' => Date::formatted_time('now', "d.m.Y H:i:s")
+                ));
+                ?>
+            </h3>
+        </div>
+        <div class="panel-body">
+            <?php echo HTML::anchor('event/event_analyt', __('analyt_code_list')); ?>
+            
+            <?php if (!empty($analyt_result)): ?>
+                <table class="table table-striped table-hover table-condensed">
+                    <tr>
+                        <th><?php echo __('ID_ANALIT');?></th>
+                        <th><?php echo __('NAME_ANALYT');?></th>
+                        <th><?php echo __('COUNT_EVENT_ANALYT');?></th>
+                        <th><?php echo __('DETAIL');?></th>
+                    </tr>
+                    <?php 
+                    $config_analyt_code = Kohana::$config->load('artonitcity_config')->analit_err;
+                    foreach ($analyt_result as $data): 
+                        $analit = Arr::get($data, 'ANALIT');
+                        $class_text = in_array($analit, $config_analyt_code) ? 'text-danger' : 'text-success';
+                    ?>
+                        <tr class="<?php echo $class_text; ?>">
+                            <td><?php echo $analit; ?></td>
+                            <td><?php echo __($analit . 'a'); ?></td>
+                            <td><?php echo Arr::get($data, 'COUNT'); ?></td>
+                            <td><?php echo HTML::anchor('event/event_analyt/' . $analit, __('DETAIL')); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </table>
+            <?php else: ?>
+                <?php echo __('no_data'); ?>
+            <?php endif; ?>
+        </div>
+    </div>
 
-<!--  Панель №6. Вывод результатов аналитики. 26.02.020 -->
-		
-	<div class="panel panel-danger">
-	  <div class="panel-heading">
-		<h3 class="panel-title"><?php echo __('analyt_result', array('time_from'=>Date::formatted_time('-1 days', "d.m.Y H:i:s"), 'time_to'=>Date::formatted_time('now', "d.m.Y H:i:s")));?></h3>
-	  </div>
-	  <div class="panel-body">
-		<?
-		echo HTML::anchor('event/event_analyt', __('analyt_code_list'));
-		if(isset ($analyt_result)){
-		?>
-					<table class="table table-striped table-hover table-condensed">
-
-		<tr>
-			
-			<th><?php echo __('ID_ANALIT');?></th>
-			<th><?php echo __('NAME_ANALYT');?></th>
-			<th><?php echo __('COUNT_EVENT_ANALYT');?></th>
-			<th><?php echo __('DETAIL');?></th>
-			
-		</tr>
-		<?
-			$config_analyt_code=Kohana::$config->load('artonitcity_config')->analit_err;
-			//echo Debug::vars('133', $analyt_result);
-			if(isset($analyt_result) and count($analyt_result))
-			{
-				foreach ($analyt_result as $key => $data)
-				{
-					$class_text='text-success';
-					if(in_array(Arr::get($data, 'ANALIT'), $config_analyt_code)) $class_text='text-danger "font-weight-bold"';
-					
-					echo '<tr  class="'.$class_text.'">';
-						echo '<td>'.Arr::get($data, 'ANALIT').'</td>';
-						echo '<td>'.__(Arr::get($data, 'ANALIT').'a').'</td>';
-						echo '<td>'.__(Arr::get($data, 'COUNT')).'</td>';
-						echo '<td>'.HTML::anchor('event/event_analyt/'.Arr::get($data, 'ANALIT'),__('DETAIL')).'</td>';
-					echo '</tr>';
-					
-				}
-			}	else {
-				echo __('no_data');
-			}
-			?>
-			</table>
-			<?
-		} else {
-			echo __('no data');
-		}
-			
-		?>
-	  </div>
-	</div>
-
-	</div>
-	<p class="text-danger">
-	<?php echo __('Time execute ').$timeExecute.'<br>';?>
-	<?php //echo phpinfo();?>
-
-	<?php //echo Debug::vars('167', win32_query_service_status('ts2'));?>
-	</p>
+    </div>
+    <p class="text-danger">
+        <?php echo __('Time execute ') . $timeExecute; ?><br>
+    </p>
 </div>

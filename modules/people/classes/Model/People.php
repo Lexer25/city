@@ -140,6 +140,7 @@ class Model_People extends Model
 			$isactive=1;
 		}
 		$sql='update card c set c."ACTIVE"='.$isactive.', c.timeend = \''.$date.'\' where c.id_card in ('.implode(",",$id_card).')';
+		//echo Debug::vars('143', $sql);exit;
 		$query = DB::query(Database::UPDATE, $sql)
 		->execute(Database::instance('fb'));
 		$t2=microtime(1)-$t1;

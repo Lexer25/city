@@ -361,9 +361,19 @@ echo Debug::vars('162',(microtime(true)-$t1));//exit;
 </nav>
 
 <?php echo Form::close();?>		
+<script type="text/javascript">
+$(document).ready(function() {
+    // Выделить все
+    $('#check_all3').change(function() {
+        $('input[name^="id_dev["]').prop('checked', $(this).prop('checked'));
+    });
+    
+    // Обновление состояния чекбокса "Выделить все"
+    $('input[name^="id_dev["]').change(function() {
+        var allChecked = $('input[name^="id_dev["]').length === $('input[name^="id_dev["]:checked').length;
+        $('#check_all3').prop('checked', allChecked);
+    });
+});
+</script>
   </div>
-  
- 
-							  
-							
 </div>

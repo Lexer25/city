@@ -13,40 +13,30 @@
 		);
       });
 
-      $(document).ready(function() {
-    	    $("#check_all").click(function () {
-				if (!$("#check_all").is(":checked"))
-    	            $(".checkbox").prop("checked",false);
-    	        else
-    	            $(".checkbox").prop("checked",true);
-    	    });
-    	});
-		
-	 
-	
-	
-	
-	$(document).ready(function() {
-   // $('#btn1').on('click', function() {
-		 $("#btn1").click(function () {
-			 console.log('test 2 batton');
-        alert('Button 1 clicked');
-
-        $('#btn2').data('btn1-clicked', true);
-		
-    });
-
-    
-});
-
- 
-  	$(function() {		
+		$(function() {		
   		$("#tablesorter-demo").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}, 1:{sorter: false}}});
   	});	
   	
+
+	$(document).ready(function() {
+			// Удаляем все предыдущие обработчики и добавляем новый
+			$("#check_all").off('click').on('click', function() {
+				var isChecked = $(this).prop("checked");
+				$(".checkbox").prop("checked", isChecked);
+			});
+			
+			// Обработка снятия всех при снятии одного
+			$(".checkbox").off('click').on('click', function() {
+				var allChecked = $(".checkbox:checked").length === $(".checkbox").length;
+				$("#check_all").prop("checked", allChecked);
+			});
+		});
+		
+	 
+ 
+  
 </script> 
 
-<input type="button" id="btn1" value="button1"></input>
 <div class="panel panel-primary  ">
   <div class="panel-heading">
     <h3 class="panel-title"><?echo __($title)?></h3>
@@ -72,17 +62,15 @@
 		<thead>
 		<tr>
 			<th><?echo __('pp');?></th>
-			<th>		
-				<label><input type="checkbox" name="id_pep" id="check_all"> </label>
-			</th>
-			<th><?echo __('pep_id');?></th>
-			<th><?echo __('name');?></th>
-			<th><?echo __('org_name');?></th>
-			<th><?echo __('note');?></th>
-			<th><?echo __('card');?></th>
-			<th><?echo __('card_date_end');?></th>
-			<th><?echo __('overlate');?></th>
-			<th><?echo __('isactive');?></th>
+			<th><label><input type="checkbox" name="id_pep" id="check_all"> </label></th>
+			<th><?php echo __('pep_id');?></th>
+			<th><?php echo __('name');?></th>
+			<th><?php echo __('org_name');?></th>
+			
+			<th><?php echo __('card');?></th>
+			<th><?php echo __('card_date_end');?></th>
+			<th><?php echo __('overlate');?></th>
+			<th><?php echo __('isactive');?></th>
 			
 		</tr>
 		</thead>
@@ -91,22 +79,37 @@
 		$pp=0;
 		foreach ($list as $key=>$contact)
 		{
-		echo '<tr>';
-		echo '<td>'.$pp++.'</td>';
-		echo '<td>
-					<label>'.Form::checkbox('id_pep[]', '\''.Arr::get($contact, 'ID_CARD').'\'', FALSE, array('class'=>'checkbox')).'</label>
-				</td>';
-				echo '<td>'.Arr::get($contact, 'ID_PEP').'</td>';
-				echo '<td>'.HTML::anchor('people/peopleInfo/'.Arr::get($contact, 'ID_PEP'),  Arr::get($contact,'SURNAME').' '.Arr::get($contact, 'NAME').' '.Arr::get($contact,'PATRONYMIC')).'<br>';
-				echo '<td>'.Arr::get($contact, 'ORG_PARENT', __('No_card')); // .'/'. Arr::get($contact, 'ORG_NAME', __('No_card')).'<br>';
-				echo '<td>'.Arr::get($contact, 'NOTE', __('No_card')).'<br>';
-				echo '<td>'.Arr::get($contact, 'ID_CARD', __('No_card')).'<br>';
-				echo '<td>'.date("d.m.Y", strtotime(Arr::get($contact, 'TIMEEND', __('No_card')))).'<br>';
-				$overlate = Date::span(strtotime(Arr::get($contact, 'TIMEEND')), strtotime('now'), 'months,days');
-				echo '<td>'. Arr::get($overlate, 'months').' мес. '.Arr::get($overlate, 'days').' дн.<br>';
-				echo '<td>'. Arr::get($contact, 'ISACTIVE',0).'<br>';
 			
-			echo '</tr>';
+			 // Получаем значение TIMEEND
+                    $timeend = Arr::get($contact, 'TIMEEND');
+                    
+                    // Безопасный расчет просрочки
+                    if ($timeend && $timeend != __('No_card')) {
+                        $overlate = Date::span(strtotime($timeend), time(), 'months,days');
+                        $months = Arr::get($overlate, 'months', 0);
+                        $days = Arr::get($overlate, 'days', 0);
+                        $date_end_display = date("d.m.Y", strtotime($timeend));
+                    } else {
+                        $months = 0;
+                        $days = 0;
+                        $date_end_display = __('No_card');
+                    }
+					
+					
+		echo '<tr>';
+			echo '<td>'.$pp++.'</td>';
+			echo '<td><label>'.Form::checkbox('id_pep[]', '\''.Arr::get($contact, 'ID_CARD').'\'', FALSE, array('class'=>'checkbox')).'</label></td>';
+			echo '<td>'.Arr::get($contact, 'ID_PEP').'</td>';
+			echo '<td>'.HTML::anchor('people/peopleInfo/'.Arr::get($contact, 'ID_PEP'),  Arr::get($contact,'SURNAME').' '.Arr::get($contact, 'NAME').' '.Arr::get($contact,'PATRONYMIC')).'</td>';
+			
+			echo '<td>'.Arr::get($contact, 'ORG_PARENT', __('No_card')).'</td>';
+			echo '<td>'.Arr::get($contact, 'ID_CARD', __('No_card')).'</td>';
+			//echo '<td>'.date("d.m.Y", strtotime(Arr::get($contact, 'TIMEEND', __('No_card')))).'</td>';
+			echo '<td>'.$date_end_display.'</td>';
+			echo '<td>' . $months . ' мес. ' . $days . ' дн.</td>';
+			echo '<td>'. Arr::get($contact, 'ISACTIVE',0).'</td>';
+			
+		echo '</tr>';
 					
 			}
 				?>

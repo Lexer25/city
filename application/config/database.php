@@ -6,9 +6,9 @@ return array
 				'type'			=> 'pdo',
 				'connection'	=> array(
 					//'dsn'		=> 'odbc:SDUO',
-					//'dsn'		=> 'odbc:Kalibr',
+					'dsn'		=> 'odbc:Kalibr',
 					//'dsn'		=> 'odbc:Kalibr_25',
-					'dsn'		=> 'odbc:jimini25',
+					//'dsn'		=> 'odbc:HL',
 					'charset'   => 'windows-1251',
 					)
 				),
