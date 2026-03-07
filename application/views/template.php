@@ -44,12 +44,13 @@
         <div class="row">
             <?php
             // Подготавливаем данные для меню
-            $menu_data = array(
-                'menu_active' => Arr::get($_SESSION, 'menu_active', ''),
-                'config' => $config,
-                'logged_in' => Auth::instance()->logged_in(),
-                'user' => Auth::instance()->get_user()
-            );
+			$menu_data = array(
+				'menu_active' => Arr::get($_SESSION, 'menu_active', ''), // Текущий активный пункт
+				'config' => Kohana::$config->load('artonitcity_config'), // Конфигурация
+				'logged_in' => Auth::instance()->logged_in(),            // Статус авторизации
+				'user' => Auth::instance()->get_user(),                    // Данные пользователя
+				'view_without_auth' => (array) $config->get('view_without_auth', array())// список пунктов меню без авторизации
+			);
             
             // Безопасно подключаем меню через View::factory
             echo View::factory('top_menu', $menu_data)->render();

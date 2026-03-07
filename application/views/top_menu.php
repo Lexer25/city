@@ -17,10 +17,10 @@
             <ul class="nav navbar-nav">
                 <?php
                 // ВЫНЕСЕНО ИЗ ЦИКЛА: конфигурация загружается один раз
-                $config = Kohana::$config->load('artonitcity_config');
-                $view_without_auth = (array) $config->get('view_without_auth', array());
-                $logged_in = Auth::instance()->logged_in();
-                $menu_active = Arr::get($_SESSION, 'menu_active', '');
+                //$config = Kohana::$config->load('artonitcity_config');//передается при вызове 
+                //$view_without_auth = (array) $config->get('view_without_auth', array());
+                //$logged_in = Auth::instance()->logged_in(); //передается при вызове 
+                //$menu_active = Arr::get($_SESSION, 'menu_active', ''); //передается при вызове 
                 
                 // Массив пунктов меню вынесен в отдельную переменную для ясности
                 $menu_items = array(
