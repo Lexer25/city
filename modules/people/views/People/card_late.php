@@ -1,42 +1,3 @@
- <script type="text/javascript">
-      $(function () {
-		var dateBegin = new Date();
-		dateBegin.setHours(22, 0, 0, 0);
-		dateBegin.setMonth(dateBegin.getMonth()+2);
-	    //Инициализация datetimepicker1
-        $("#datetimepicker1").datetimepicker(
-		{language: 'ru', 
-		showToday: true,
-		sideBySide: true,
-		defaultDate: dateBegin
-		}
-		);
-      });
-
-		$(function() {		
-  		$("#tablesorter-demo").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}, 1:{sorter: false}}});
-  	});	
-  	
-
-	$(document).ready(function() {
-			// Удаляем все предыдущие обработчики и добавляем новый
-			$("#check_all").off('click').on('click', function() {
-				var isChecked = $(this).prop("checked");
-				$(".checkbox").prop("checked", isChecked);
-			});
-			
-			// Обработка снятия всех при снятии одного
-			$(".checkbox").off('click').on('click', function() {
-				var allChecked = $(".checkbox:checked").length === $(".checkbox").length;
-				$("#check_all").prop("checked", allChecked);
-			});
-		});
-		
-	 
- 
-  
-</script> 
-
 <div class="panel panel-primary  ">
   <div class="panel-heading">
     <h3 class="panel-title"><?echo __($title)?></h3>
@@ -165,5 +126,43 @@
 <?echo Form::close();?>	
 </div>	
 </div>
+ <script type="text/javascript">
+      $(function () {
+		var dateBegin = new Date();
+		dateBegin.setHours(22, 0, 0, 0);
+		dateBegin.setMonth(dateBegin.getMonth()+2);
+	    //Инициализация datetimepicker1
+        $("#datetimepicker1").datetimepicker(
+		{language: 'ru', 
+		showToday: true,
+		sideBySide: true,
+		defaultDate: dateBegin
+		}
+		);
+      });
+
+		$(function() {		
+  		$("#tablesorter-demo").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}, 1:{sorter: false}}});
+  	});	
+  	
+
+	$(document).ready(function() {
+			// Удаляем все предыдущие обработчики и добавляем новый
+			$("#check_all").off('click').on('click', function() {
+				var isChecked = $(this).prop("checked");
+				$(".checkbox").prop("checked", isChecked);
+			});
+			
+			// Обработка снятия всех при снятии одного
+			$(".checkbox").off('click').on('click', function() {
+				var allChecked = $(".checkbox:checked").length === $(".checkbox").length;
+				$("#check_all").prop("checked", allChecked);
+			});
+		});
+		
+	 
+ 
+  
+</script>
  
     

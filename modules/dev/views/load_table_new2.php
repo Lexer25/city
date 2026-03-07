@@ -1,4 +1,17 @@
-<div class="panel panel-primary">
+<script type="text/javascript">
+$(document).ready(function() {
+    // Выделить все
+    $('#check_all3').change(function() {
+        $('input[name^="id_dev["]').prop('checked', $(this).prop('checked'));
+    });
+    
+    // Обновление состояния чекбокса "Выделить все"
+    $('input[name^="id_dev["]').change(function() {
+        var allChecked = $('input[name^="id_dev["]').length === $('input[name^="id_dev["]:checked').length;
+        $('#check_all3').prop('checked', allChecked);
+    });
+});
+</script><div class="panel panel-primary">
   <div class="panel-heading">
     <h3 class="panel-title"><?php echo __('device_panel_title').' '.date('Y-m-d H:i:s')?></h3>
   </div>
@@ -361,19 +374,6 @@ echo Debug::vars('162',(microtime(true)-$t1));//exit;
 </nav>
 
 <?php echo Form::close();?>		
-<script type="text/javascript">
-$(document).ready(function() {
-    // Выделить все
-    $('#check_all3').change(function() {
-        $('input[name^="id_dev["]').prop('checked', $(this).prop('checked'));
-    });
-    
-    // Обновление состояния чекбокса "Выделить все"
-    $('input[name^="id_dev["]').change(function() {
-        var allChecked = $('input[name^="id_dev["]').length === $('input[name^="id_dev["]:checked').length;
-        $('#check_all3').prop('checked', allChecked);
-    });
-});
-</script>
+
   </div>
 </div>
