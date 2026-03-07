@@ -40,12 +40,13 @@
 </head>
 
 <body>
-  
+
         <div class="row">
+
+		<span id="time-top"></span>
             <?php
             // Подготавливаем данные для меню
-            // Подготавливаем данные для меню
-				$menu_data = array(
+			$menu_data = array(
 				'menu_active' => Arr::get($_SESSION, 'menu_active', ''), // Текущий активный пункт
 				'config' => Kohana::$config->load('artonitcity_config'), // Конфигурация
 				'logged_in' => Auth::instance()->logged_in(),            // Статус авторизации
@@ -63,8 +64,8 @@
                 <?php echo __('top'); ?>
             </button>
         </div>
-  
 
+<span id="time-bottom" style="display:none;">Страница подготовлена за <?php echo round(microtime(TRUE) - START_TIME, 3); ?> сек.</span>
     <!-- JavaScript -->
     <script type="text/javascript" src="/city/static/js/jquery-2.2.4.js"></script>
     <script type="text/javascript" src="/city/static/js/moment-with-locales.min.js"></script>
@@ -89,7 +90,16 @@
     function topFunction() {
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
-    } 
+    }
+
+
+	document.addEventListener('DOMContentLoaded', function() {
+		var bottomTime = document.getElementById('time-bottom');
+		var topTime = document.getElementById('time-top');
+		if (bottomTime && topTime) {
+			topTime.textContent = bottomTime.textContent;
+		}
+	});	
     </script>
 </body>
 </html>

@@ -42,6 +42,8 @@
 <body>
    <div class="container">
         <div class="row">
+
+		<span id="time-top"></span>
             <?php
             // Подготавливаем данные для меню
 			$menu_data = array(
@@ -63,7 +65,7 @@
             </button>
         </div>
     </div>
-
+<span id="time-bottom" style="display:none;">Страница подготовлена за <?php echo round(microtime(TRUE) - START_TIME, 3); ?> сек.</span>
     <!-- JavaScript -->
     <script type="text/javascript" src="/city/static/js/jquery-2.2.4.js"></script>
     <script type="text/javascript" src="/city/static/js/moment-with-locales.min.js"></script>
@@ -88,7 +90,16 @@
     function topFunction() {
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
-    } 
+    }
+
+
+	document.addEventListener('DOMContentLoaded', function() {
+		var bottomTime = document.getElementById('time-bottom');
+		var topTime = document.getElementById('time-top');
+		if (bottomTime && topTime) {
+			topTime.textContent = bottomTime.textContent;
+		}
+	});	
     </script>
 </body>
 </html>
