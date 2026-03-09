@@ -144,6 +144,7 @@ Kohana::modules(array(
 	 'apb' => MODPATH.'apb', //'раздел для работы с периметральным антипассбеком
 	 'identifier' => MODPATH.'identifier', //'раздел для работы с идентификаторами
 	 'parsec' => MODPATH.'parsec', //'раздел для работы с parsec
+	 'setting' => MODPATH . 'setting',
 	 
 	));
 

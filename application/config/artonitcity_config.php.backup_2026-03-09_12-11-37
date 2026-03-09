@@ -2,7 +2,7 @@
 
 /**
  * Конфигурационный файл Artonit City
- * Сгенерировано: 2026-03-09 12:32:23
+ * Сгенерировано: 2026-03-09 12:08:45
  */
 
 return array(
@@ -10,9 +10,9 @@ return array(
     'dir_compare' => 'C:\\xampp\\htdocs\\city',
     'stat_day_befor' => 2,
     'name_device_fro_test' => 'л251 к45 калитка в л254',
-    'city_name' => 'ПАО \"Калибр редактированный\\\"',
+    'city_name' => 'ПАО \\\"Калибр редактированный\\\"',
     'ver' => '2.0.4',
-    'timeUpdate' => '2026-03-09',
+    'timeUpdate' => '2026-02-03',
     'lightVerDay' => 3,
     'developer' => 'www.artonit.ru',
     'main_windows' => array(

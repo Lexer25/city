@@ -92,6 +92,14 @@
                         'condition' => true
                     ),
 					
+					'setting' => array(
+                        'title' => __('setting.menu_title'),
+                        'url' => 'setting',
+                        'condition' => true
+                    ),
+					
+					
+					
 					
 					
 					
