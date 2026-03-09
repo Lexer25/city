@@ -36,11 +36,12 @@
 </head>
 
 <body>
-    <div class="container">
-        <div class="row">
-            <span id="time-top"></span>
-            
-            <?php
+	<!-- В template.php -->
+	<?php if (isset($full_width) && $full_width): ?>
+		<!-- Широкий режим -->
+		<div class="container-fluid">
+			<div class="row">
+				 <?php
             // Подготовка данных для меню
             $menu_data = array(
                 'menu_active' => Arr::get($_SESSION, 'menu_active', ''),
@@ -57,8 +58,34 @@
             <button onclick="topFunction()" id="myBtn" title="<?php echo __('top'); ?>">
                 <?php echo __('top'); ?>
             </button>
-        </div>
-    </div>
+			
+			</div>
+		</div>
+	<?php else: ?>
+		<!-- Обычный режим -->
+		<div class="container">
+			<div class="row">
+				 <?php
+            // Подготовка данных для меню
+            $menu_data = array(
+                'menu_active' => Arr::get($_SESSION, 'menu_active', ''),
+                'config' => $config,  // Используем уже загруженный конфиг
+                'logged_in' => Auth::instance()->logged_in(),
+                'user' => Auth::instance()->get_user(),
+                'view_without_auth' => (array) $config->get('view_without_auth', array())
+            );
+            
+            echo View::factory('top_menu', $menu_data)->render();
+            echo $content;
+            ?>
+            
+            <button onclick="topFunction()" id="myBtn" title="<?php echo __('top'); ?>">
+                <?php echo __('top'); ?>
+            </button>
+			</div>
+		</div>
+	<?php endif; ?>
+   
     
     <span id="time-bottom" style="display:none;">Страница подготовлена за <?php echo round(microtime(TRUE) - START_TIME, 3); ?> сек.</span>
 

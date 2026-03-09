@@ -5,7 +5,7 @@ class Controller_Dev extends Controller_Template {
    //Широки шаблон
    //для использьвания необходимо указать 
    //$this->template = View::factory($this->template_width);
-   public $template_width = 'template_width';
+   public $template_width = 'template';
    
   	
 	public function before()
@@ -25,7 +25,8 @@ class Controller_Dev extends Controller_Template {
 	{
         $_SESSION['menu_active']='load';
 	
-		$this->template = View::factory($this->template_width);
+		//$this->template = View::factory($this->template_width);
+		$this->template->full_width = true;
 				
 		if(array_key_exists('browser',$_POST)) $_SESSION['brows']=Arr::get($_POST, 'browser');
 		
