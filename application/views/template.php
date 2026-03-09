@@ -40,6 +40,7 @@
 	<?php if (isset($full_width) && $full_width): ?>
 		<!-- Широкий режим -->
 		<div class="container-fluid">
+		<span id="time-top"></span>
 			<div class="row">
 				 <?php
             // Подготовка данных для меню
@@ -64,6 +65,7 @@
 	<?php else: ?>
 		<!-- Обычный режим -->
 		<div class="container">
+		<span id="time-top"></span>
 			<div class="row">
 				 <?php
             // Подготовка данных для меню
@@ -88,6 +90,7 @@
    
     
     <span id="time-bottom" style="display:none;">Страница подготовлена за <?php echo round(microtime(TRUE) - START_TIME, 3); ?> сек.</span>
+ 
 
     <!-- JavaScript в конце body (для скорости загрузки) -->
     <script src="/city/static/js/moment-with-locales.min.js"></script>
