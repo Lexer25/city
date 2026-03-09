@@ -29,3 +29,51 @@ body {
 #myBtn:hover {
     background-color: #555; /* Add a dark-grey background on hover */
 }
+
+
+/* 9.03.2026 Супер-компактная таблица */
+.table-super-condensed > thead > tr > th,
+.table-super-condensed > tbody > tr > td,
+.table-super-condensed > tfoot > tr > td {
+    padding: 3px 4px !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+}
+
+/* Сохраняем padding при наведении */
+.table-super-condensed > tbody > tr:hover > td {
+    padding: 3px 4px !important;
+}
+
+/* Стили для заголовков */
+.table-super-condensed > thead > tr > th {
+    font-weight: 600;
+    background-color: #f5f5f5;
+    border-bottom: 2px solid #ddd;
+}
+
+/* Стили для полей ввода внутри таблицы */
+.table-super-condensed .form-control,
+.table-super-condensed input[type="text"],
+.table-super-condensed input[type="checkbox"] {
+    height: 20px;
+    padding: 2px 4px;
+    font-size: 11px;
+    margin: 0;
+}
+
+/* Для чекбоксов - выравнивание по центру */
+.table-super-condensed input[type="checkbox"] {
+    margin: 0;
+    vertical-align: middle;
+    height: auto;  /* Сбрасываем height для чекбоксов */
+}
+
+/* Для маленьких экранов - еще меньше */
+@media (max-width: 768px) {
+    .table-super-condensed > thead > tr > th,
+    .table-super-condensed > tbody > tr > td {
+        padding: 2px 3px !important;
+        font-size: 10px !important;
+    }
+}

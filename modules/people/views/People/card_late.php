@@ -17,21 +17,22 @@
 		
 		
 		
-		 
-		<table id="tablesorter-demo">
+		 <table id="tablesorter" class="table table-striped table-hover table-super-condensed tablesorter table-bordered">
+		
 		
 		<thead>
 		<tr>
-			<th><?echo __('pp');?></th>
-			<th><label><input type="checkbox" name="id_pep" id="check_all"> </label></th>
+			<th class="filter-false" ><?echo __('pp');?></th>
+			<th class="filter-false sorter-false" ><label><input type="checkbox" name="id_pep" id="check_all"> </label></th>
 			<th><?php echo __('pep_id');?></th>
-			<th><?php echo __('name');?></th>
+			<th class="filter-true sorter-true"><?php echo __('name');?></th>
 			<th><?php echo __('org_name');?></th>
 			
 			<th><?php echo __('card');?></th>
 			<th><?php echo __('card_date_end');?></th>
 			<th><?php echo __('overlate');?></th>
 			<th><?php echo __('isactive');?></th>
+			
 			
 		</tr>
 		</thead>
@@ -142,10 +143,10 @@
       });
 
 		$(function() {		
-  		$("#tablesorter-demo").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}, 1:{sorter: false}}});
+  		$("#tablesorter").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}, 1:{sorter: false}}});
   	});	
   	
-
+//переключатель Выделить все
 	$(document).ready(function() {
 			// Удаляем все предыдущие обработчики и добавляем новый
 			$("#check_all").off('click').on('click', function() {

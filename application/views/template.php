@@ -37,7 +37,7 @@
 	<link rel="stylesheet" href="/city/static/css/themes/blue/style.css" type="text/css" media="print, projection, screen" />
 	 
 <!-- JavaScript -->
-	<script type="text/javascript" src="/city/static/js/jquery-1.11.1.min.js"></script>
+	
     <script type="text/javascript" src="/city/static/js/jquery-2.2.4.js"></script>
     <script type="text/javascript" src="/city/static/js/moment-with-locales.min.js"></script>
     <script type="text/javascript" src="/city/static/js/bootstrap.min.js"></script>
@@ -47,7 +47,6 @@
     <script type="text/javascript" src="/city/static/js/jquery.tablesorter.pager.js"></script>
     <script type="text/javascript" src="/city/static/js/crm2_template_tablesorter.js"></script>
 	 
-  </head>
     <link rel="stylesheet" type="text/css" media="all" href="/city/static/css/theme.blue.css">
     <link rel="stylesheet" type="text/css" media="all" href="/city/static/css/jquery.dataTables.min.css">
     <link rel="stylesheet" type="text/css" media="all" href="/city/static/css/theme.default.min.css">
