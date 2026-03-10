@@ -1,7 +1,7 @@
  <script type="text/javascript">
 
  	$(function() {		
-  		$("#tablesorter-demo").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}}});
+  		$("#tablesorter").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}}});
   	});	
   	
 	
@@ -36,7 +36,7 @@
 		<!-- <table class="table table-striped table-hover table-condensed table-bordered" id="example"> -->
 		
 		 
-		<table id="tablesorter-demo" class="tablesorter">
+		<table id="tablesorter" class="table table-striped table-hover table-condensed tablesorter">
 		
 		<thead>
 		<tr>

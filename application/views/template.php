@@ -27,16 +27,13 @@
     <link rel="stylesheet" href="/city/static/css/bootstrap-datetimepicker.min.css">
     <link rel="stylesheet" href="/city/static/css/modal.css">
     <link rel="stylesheet" href="/city/static/css/city.css">
-    
-    <!-- Tablesorter theme (только один) -->
     <link rel="stylesheet" href="/city/static/css/theme.blue.css">
-    
-    <!-- JavaScript в HEAD (только критический) -->
     <script src="/city/static/js/jquery-2.2.4.js"></script>
 </head>
 
 <body>
-	<!-- В template.php -->
+	<!-- В template.php установка ширины страницы-->
+	<!-- для вывода страницы во всю ширину в контроллере необходимо указать $this->template->full_width = true; -->
 	<?php if (isset($full_width) && $full_width): ?>
 		<!-- Широкий режим -->
 		<div class="container-fluid">
@@ -98,6 +95,7 @@
     <script src="/city/static/js/bootstrap-datetimepicker.min.js"></script>
     <script src="/city/static/js/jquery.tablesorter.js"></script>
     <script src="/city/static/js/jquery.tablesorter.widgets.js"></script>
+	<!-- Добавить окна для ввода фильтра -->
     <script src="/city/static/js/crm2_template_tablesorter.js"></script>
     
     <!-- Опционально: tablesorter.pager только если нужна пагинация -->

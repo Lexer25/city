@@ -1,5 +1,8 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
+/**10.03.2026 создано вместе с deepseek контроллер для управления файлом конфигурации
+*/
+
 class Controller_Setting extends Controller_Template {
     
     public $template = 'template';
@@ -364,22 +367,37 @@ class Controller_Setting extends Controller_Template {
     }
     
     /**
-     * Форматирование примитивных типов
-     */
-    protected function _format_primitive($value)
-    {
-        if (is_bool($value)) {
-            return $value ? 'true' : 'false';
-        } elseif (is_numeric($value)) {
-            return $value;
-        } elseif (is_string($value)) {
-            return "'" . addslashes($value) . "'";
-        } elseif (is_null($value)) {
-            return 'null';
-        } else {
-            return "'" . addslashes((string)$value) . "'";
-        }
+ * Форматирование примитивных типов
+ */
+protected function _format_primitive($value)
+{
+    if (is_bool($value)) {
+        return $value ? 'true' : 'false';
+    } 
+    
+    if (is_numeric($value)) {
+        return $value;
+    } 
+    
+    if (is_string($value)) {
+        // Экранируем только необходимые символы для PHP
+        // - обратную косую черту \ => \\
+        // - одинарную кавычку ' => \'
+        $escaped = str_replace(
+            ['\\', "'"],  // Что заменяем
+            ['\\\\', "\\'"],  // На что заменяем
+            $value
+        );
+        return "'" . $escaped . "'";
+    } 
+    
+    if (is_null($value)) {
+        return 'null';
     }
+    
+    // Для остальных типов приводим к строке
+    return "'" . (string)$value . "'";
+}
     
     /**
      * Создание бэкапа
