@@ -1,9 +1,4 @@
  <script type="text/javascript">
-
- 	$(function() {		
-  		$("#tablesorter").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}}});
-  	});	
-  	
 	
 	 $(document).ready(function() {
     	    $("#check_all3").click(function () {
@@ -31,16 +26,12 @@
 
 	<?echo Form::open('people/people_without_card_delete', array('class'=>'form-inline'));?>
 		
-		
-		
-		<!-- <table class="table table-striped table-hover table-condensed table-bordered" id="example"> -->
-		
-		 
+	
 		<table id="tablesorter" class="table table-striped table-hover table-condensed tablesorter">
 		
 		<thead>
 		<tr>
-			<th>		
+			<th class="filter-false sorter-false" >		
 				<label><input type="checkbox" name="id_pep" id="check_all3"> Выделить всё</label>
 			</th>
 			<th><?echo __('pep_id');?></th>

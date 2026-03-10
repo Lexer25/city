@@ -128,6 +128,9 @@
 </div>	
 </div>
  <script type="text/javascript">
+ 
+ console.log('Мой скрипт загружен');
+ 
       $(function () {
 		var dateBegin = new Date();
 		dateBegin.setHours(22, 0, 0, 0);
@@ -142,28 +145,53 @@
 		);
       });
 
-		$(function() {		
-  		$("#tablesorter").tablesorter({sortList:[[0,0]], widgets: ['zebra'], headers: { 0:{sorter: false}, 1:{sorter: false}}});
-  	});	
-  	
-//переключатель Выделить все
-	$(document).ready(function() {
-			// Удаляем все предыдущие обработчики и добавляем новый
-			$("#check_all").off('click').on('click', function() {
-				var isChecked = $(this).prop("checked");
-				$(".checkbox").prop("checked", isChecked);
-			});
-			
-			// Обработка снятия всех при снятии одного
-			$(".checkbox").off('click').on('click', function() {
-				var allChecked = $(".checkbox:checked").length === $(".checkbox").length;
-				$("#check_all").prop("checked", allChecked);
-			});
-		});
 		
-	 
- 
-  
+  	
+
+$(function () {
+    // Инициализация datetimepicker
+    var dateBegin = new Date();
+    dateBegin.setHours(22, 0, 0, 0);
+    dateBegin.setMonth(dateBegin.getMonth()+2);
+    $("#datetimepicker1").datetimepicker({
+        language: 'ru', 
+        showToday: true,
+        sideBySide: true,
+        defaultDate: dateBegin
+    });
+});
+
+//переключатель Выделить все
+$(document).ready(function() {
+    var $masterCheck = $("#check_all");
+    var $slaveChecks = $("input[name='id_pep[]']");
+    
+    // Выделить все
+    $masterCheck.off('click').on('click', function() {
+        $slaveChecks.prop("checked", $(this).prop("checked"));
+    });
+    
+    // Обновление состояния главного чекбокса
+    $slaveChecks.off('click').on('click', function() {
+        var total = $slaveChecks.length;
+        var checked = $slaveChecks.filter(":checked").length;
+        $masterCheck.prop("checked", total === checked);
+    });
+    
+    // Инициализация начального состояния
+    var total = $slaveChecks.length;
+    var checked = $slaveChecks.filter(":checked").length;
+    $masterCheck.prop("checked", total === checked);
+});
+</script>
+		
+		
+// Проверить, что находит селектор
+console.log($(".checkbox").length);          // Сколько элементов с классом checkbox
+console.log($("input[name='id_pep[]']").length); // Сколько реальных чекбоксов
+
+// Проверить, что именно попадает под .checkbox
+console.log($(".checkbox").get(0).tagName);  // Может быть INPUT или LABEL
 </script>
  
     
