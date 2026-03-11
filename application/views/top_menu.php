@@ -16,13 +16,7 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <?php
-                // ВЫНЕСЕНО ИЗ ЦИКЛА: конфигурация загружается один раз
-                //$config = Kohana::$config->load('artonitcity_config');//передается при вызове 
-                //$view_without_auth = (array) $config->get('view_without_auth', array());
-                //$logged_in = Auth::instance()->logged_in(); //передается при вызове 
-                //$menu_active = Arr::get($_SESSION, 'menu_active', ''); //передается при вызове 
-                
-                // Массив пунктов меню вынесен в отдельную переменную для ясности
+                // Массив основных пунктов меню (без сервисных)
                 $menu_items = array(
                     'load' => array(
                         'title' => __('Load'),
@@ -63,68 +57,82 @@
                         'title' => __('identifier'),
                         'url' => 'identifier',
                         'condition' => $logged_in
-                    ),
-                    'services' => array(
-                        'title' => __('services'),
-                        'url' => 'dashboard/services',
-                        'condition' => true
-                    ),
-                    'skud' => array(
-                        'title' => __('сводная'),
-                        'url' => 'skud',
-                        'condition' => true
-                    ),
-					
-					'eximdata' => array(
-                        'title' => __('Экспорт/импорт'),
-                        'url' => 'eximdata',
-                        'condition' => true
-                    ),
-					
-					'apb' => array(
-                        'title' => __('АПБ'),
-                        'url' => 'apb',
-                        'condition' => true
-                    ),
-					'parsec' => array(
-                        'title' => __('parsec'),
-                        'url' => 'parsec',
-                        'condition' => true
-                    ),
-					
-					'setting' => array(
-                        'title' => __('setting.menu_title'),
-                        'url' => 'setting',
-                        'condition' => true
-                    ),
-					
-					
-					
-					
-					
-					
-					
+                    )
                 );
                 
-                // Вывод основных пунктов меню с безопасным экранированием
+                // Вывод основных пунктов меню
                 foreach ($menu_items as $key => $item) {
-                    
-					
-					$is_visible = isset($item['condition']) ? (bool)$item['condition'] : false;
+                    $is_visible = isset($item['condition']) ? (bool)$item['condition'] : false;
                     
                     if ($is_visible) {
                         $active_class = ($menu_active == $key) ? ' class="active"' : '';
                         $url = $item['url'];
                         $title = HTML::chars($item['title']);
                         echo '<li' . $active_class . '>' . HTML::anchor($url, $title) . '</li>';
-						
-						
                     }
                 }
                 
-               
-       
+                // Пункт "Сервисы" с выпадающим списком
+                $services_items = array(
+                    'skud' => array(
+                        'title' => __('сводная'),
+                        'url' => 'skud',
+                        'condition' => true
+                    ),
+                    'eximdata' => array(
+                        'title' => __('Экспорт/импорт'),
+                        'url' => 'eximdata',
+                        'condition' => true
+                    ),
+                    'apb' => array(
+                        'title' => __('АПБ'),
+                        'url' => 'apb',
+                        'condition' => true
+                    ),
+                    'parsec' => array(
+                        'title' => __('parsec'),
+                        'url' => 'parsec',
+                        'condition' => true
+                    ),
+                    'setting' => array(
+                        'title' => __('setting.menu_title'),
+                        'url' => 'setting',
+                        'condition' => true
+                    )
+                );
+                
+                // Проверяем, есть ли видимые пункты в сервисах
+                $has_visible_services = false;
+                foreach ($services_items as $item) {
+                    if (isset($item['condition']) && (bool)$item['condition']) {
+                        $has_visible_services = true;
+                        break;
+                    }
+                }
+                
+                // Выводим пункт "Сервисы" только если есть видимые подпункты
+                if ($has_visible_services):
                 ?>
+                <li class="dropdown <?php echo (in_array($menu_active, array_keys($services_items))) ? 'active' : ''; ?>">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <?php echo HTML::chars(__('services')) ?> <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <?php
+                        foreach ($services_items as $key => $item) {
+                            $is_visible = isset($item['condition']) ? (bool)$item['condition'] : false;
+                            
+                            if ($is_visible) {
+                                $active_class = ($menu_active == $key) ? ' class="active"' : '';
+                                $url = $item['url'];
+                                $title = HTML::chars($item['title']);
+                                echo '<li' . $active_class . '>' . HTML::anchor($url, $title) . '</li>';
+                            }
+                        }
+                        ?>
+                    </ul>
+                </li>
+                <?php endif; ?>
             </ul>
             
             <!-- Правая часть меню (авторизация) -->
@@ -132,26 +140,25 @@
                 <li>
                     <?php if (Auth::instance()->logged_in()): ?>
                        <div class="navbar-text" style="padding-right: 15px;">
-							<span class="glyphicon glyphicon-user" style="margin-right: 5px;"></span>
-							<span style="display: inline-block; margin-right: 10px; vertical-align: middle;">
-								<?php echo HTML::chars(Auth::instance()->get_user()) ?>
-							</span>
-							<span style="display: inline-block; vertical-align: middle;">
-								<?php echo HTML::anchor(
-									'logout', 
-									HTML::chars(__('logout')), 
-									array(
-										'class' => 'btn btn-xs btn-default',
-										'onclick' => 'return confirm(\'' . HTML::chars(__('confirm.delete')) . '\')'
-									)
-								) ?>
-							</span>
-						</div>
+                            <span class="glyphicon glyphicon-user" style="margin-right: 5px;"></span>
+                            <span style="display: inline-block; margin-right: 10px; vertical-align: middle;">
+                                <?php echo HTML::chars(Auth::instance()->get_user()) ?>
+                            </span>
+                            <span style="display: inline-block; vertical-align: middle;">
+                                <?php echo HTML::anchor(
+                                    'logout', 
+                                    HTML::chars(__('logout')), 
+                                    array(
+                                        'class' => 'btn btn-xs btn-default',
+                                        'onclick' => 'return confirm(\'' . HTML::chars(__('confirm.delete')) . '\')'
+                                    )
+                                ) ?>
+                            </span>
+                        </div>
                     <?php else: ?>
                         <?php echo Form::open('dashboard', array('method' => 'post', 'class' => 'navbar-form form-inline')) ?>
                             <?php 
-                            // Добавляем CSRF защиту если она включена в Kohana
-							if (class_exists('Security') && method_exists('Security', 'token')) {
+                            if (class_exists('Security') && method_exists('Security', 'token')) {
                                 echo Form::hidden('csrf', Security::token());
                             }
                             ?>
@@ -183,7 +190,6 @@
                             </button>
                         <?php echo Form::close() ?>
                         <?php
-                        // Отображение ошибок входа (если есть)
                         $errors = Session::instance()->get_once('login_errors', array());
                         if (!empty($errors)) {
                             echo '<div class="alert alert-danger alert-dismissible" style="margin-top: 5px;">';
@@ -201,67 +207,54 @@
             </ul>
         </div>
  
-			<!-- Версия и время -->
-			<div class="navbar-collapse collapse">
-      <?php 
-	
-	// подсветка версии в течении 3 суток после обновления.
-	//если дата обновления отсутвует, то выводится только версия, без даты обновления
-	
-		$color=null;
-		$lightVerDay=3;
-		
-		if(!empty($config->timeUpdate)){
-			
-			$lightVerDay = Arr::get($config, 'lightVerDay', 3);//если количество дней не указано, то по умолчанию 3 суток
-			
-			//вывод даты обновления
-			$current_date = new DateTime();
-			try {
-			$update_date = new DateTime($config->timeUpdate);
-		} catch (Exception $e) {
-			// Логируем ошибку
-			Kohana::$log->add(Log::ERROR, 'Invalid date format in config: :date', [
-				':date' => $config->timeUpdate
-			]);
-			// Показываем только версию
-			echo __('Версия :ver', array(':ver' => $config->ver));
-			return;
-		}
+        <!-- Версия и время -->
+        <div class="navbar-collapse collapse">
+            <?php 
+            // подсветка версии в течении 3 суток после обновления.
+            // если дата обновления отсутствует, то выводится только версия, без даты обновления
+            
+            $color = null;
+            $lightVerDay = 3;
+            
+            if (!empty($config->timeUpdate)) {
+                $lightVerDay = Arr::get($config, 'lightVerDay', 3);
+                
+                $current_date = new DateTime();
+                try {
+                    $update_date = new DateTime($config->timeUpdate);
+                } catch (Exception $e) {
+                    Kohana::$log->add(Log::ERROR, 'Invalid date format in config: :date', [
+                        ':date' => $config->timeUpdate
+                    ]);
+                    echo __('Версия :ver', array(':ver' => $config->ver));
+                    return;
+                }
 
-			// Вычисляем разницу
-			$interval = $current_date->diff($update_date);
-
-			// Получаем разницу в днях
-			$days_diff = $interval->days;
-			// Проверяем разницу
-			if ($days_diff < $lightVerDay) {
-				
-				$color = 'label-success';
-				 echo __('<span class="label :color">Версия :ver обновление :timeUpdate</span>',array(
-					':ver'=> $config->ver,
-					':timeUpdate'=> $config->timeUpdate,
-					':color'=> $color,
-					));
-			} else {
-				 echo __('Версия :ver обновление :timeUpdate',array(
-					':ver'=> $config->ver,
-					':timeUpdate'=> $config->timeUpdate,
-					));
-			}
-		}	else {		
-				echo __('Версия :ver',array(
-					':ver'=> $config->ver,
-					
-					));
-			}
-		
-		echo '<br>';
-		 
-			echo __('timerefresh', array ('tr'=> date("d.m.Y H:i",time())));
-	
-      ?>
-	  </div>
-			
+                $interval = $current_date->diff($update_date);
+                $days_diff = $interval->days;
+                
+                if ($days_diff < $lightVerDay) {
+                    $color = 'label-success';
+                    echo __('<span class="label :color">Версия :ver обновление :timeUpdate</span>', array(
+                        ':ver' => $config->ver,
+                        ':timeUpdate' => $config->timeUpdate,
+                        ':color' => $color,
+                    ));
+                } else {
+                    echo __('Версия :ver обновление :timeUpdate', array(
+                        ':ver' => $config->ver,
+                        ':timeUpdate' => $config->timeUpdate,
+                    ));
+                }
+            } else {        
+                echo __('Версия :ver', array(
+                    ':ver' => $config->ver,
+                ));
+            }
+            
+            echo '<br>';
+            echo __('timerefresh', array ('tr' => date("d.m.Y H:i", time())));
+            ?>
+        </div>
     </div>
 </nav>
