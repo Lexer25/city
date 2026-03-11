@@ -208,7 +208,7 @@
                 <div class="row">
                     <?php 
                     $main_windows = Arr::get($config_data, 'main_windows', []);
-                    for ($i = 1; $i <= 6; $i++): 
+                    for ($i = 1; $i <= 5; $i++): 
                         $window_key = 'windows' . $i;
                     ?>
                     <div class="col-md-2">
