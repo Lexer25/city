@@ -95,12 +95,6 @@
             </div>
             <div class="panel-body">
                 <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Тестовое устройство:</label>
-                            <?php echo Form::input('name_device_fro_test', Arr::get($config_data, 'name_device_fro_test'), array('class' => 'form-control')); ?>
-                        </div>
-                    </div>
                     <div class="col-md-3">
                         <div class="form-group">
                             <label>Дней до окончания:</label>
@@ -117,7 +111,7 @@
                 
                 <!-- Формат RFID - радио-кнопки -->
                 <div class="form-group">
-                    <label class="control-label">Формат RFID:</label>
+                    <label class="control-label">Формат хранение RFID в базе данных</label>
                     <?php $rfid_value = Arr::get($config_data, 'baseFormatRfid', '0'); ?>
                     
                     <div class="well well-sm" style="background-color: #f9f9f9; margin-top: 10px;">
@@ -189,14 +183,14 @@
                 <div class="row">
                     <?php 
                     $view_without_auth = Arr::get($config_data, 'view_without_auth', []);
-                    $items = ['load', 'load_order', 'device_control', 'events', 'people', 'door', 'log', 'check'];
+                    $items = ['load', 'load_order', 'device_control', 'events', 'people', 'door', 'log'];
                     foreach ($items as $item): 
                     ?>
                     <div class="col-md-3">
                         <div class="checkbox">
                             <label>
                                 <?php echo Form::checkbox('view_without_auth[' . $item . ']', 'true', (bool) Arr::get($view_without_auth, $item, false)); ?>
-                                <?php echo ucfirst($item); ?>
+                                <?php echo ucfirst(__('setting.'.$item)); ?>
                             </label>
                         </div>
                     </div>
@@ -221,7 +215,7 @@
                         <div class="checkbox">
                             <label>
                                 <?php echo Form::checkbox('main_windows[' . $window_key . ']', 'true', (bool) Arr::get($main_windows, $window_key, false)); ?>
-                                Окно <?php echo $i; ?>
+                                Окно <?php echo __('settint.windows'.$i); ?>
                             </label>
                         </div>
                     </div>

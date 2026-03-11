@@ -62,6 +62,8 @@ class Controller_Dashboard extends Controller_Template {
 		if(Arr::get($config_windows, 'windows1', FALSE)) $list=Model::Factory('Stat')->stat();
 		if(Arr::get($config_windows, 'windows5', FALSE)) $system_events=Model::Factory('Stat')->detect_change_device_count();
 		if(Arr::get($config_windows, 'windows4', FALSE)) $event_stat=Model::Factory('Event')->stat();// подготовка статистических данных для раздела События. Готовится массив данных $list['card'], $list['device'], $list['order']
+		
+		
 		$analyt_result = Model::Factory('Stat')->analyt_result();// 26.02.2020 подсчет аналитики
 		$timeExecute=microtime(1)-$t1;
 		$countErrKeyFormatRfid=count(Model::factory('dbskud')->checkRfidKeyFormat());

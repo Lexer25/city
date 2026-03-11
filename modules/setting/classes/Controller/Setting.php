@@ -1,7 +1,9 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
-/**10.03.2026 создано вместе с deepseek контроллер для управления файлом конфигурации
-*/
+/**
+ * 10.03.2026 создано вместе с deepseek контроллер для управления файлом конфигурации
+ * 11.03.2026 добавлена поддержка папки backup
+ */
 
 class Controller_Setting extends Controller_Template {
     
@@ -16,6 +18,11 @@ class Controller_Setting extends Controller_Template {
      * @var string Путь к конфигурационному файлу
      */
     protected $_config_file;
+    
+    /**
+     * @var string Путь к папке с бэкапами
+     */
+    protected $_backup_dir;
     
     public function before()
     {
@@ -37,6 +44,14 @@ class Controller_Setting extends Controller_Template {
         
         // Определяем путь к конфигурационному файлу
         $this->_config_file = APPPATH . 'config/artonitcity_config.php';
+        
+        // Определяем путь к папке с бэкапами
+        $this->_backup_dir = APPPATH . 'config\backup';
+        
+        // Создаем папку для бэкапов, если её нет
+        if (!is_dir($this->_backup_dir)) {
+            mkdir($this->_backup_dir, 0755, true);
+        }
         
         // Подключаем i18n
         I18n::lang('ru');
@@ -102,8 +117,12 @@ class Controller_Setting extends Controller_Template {
     {
         $backup_file = $this->request->query('file');
         
-        if (file_exists($backup_file)) {
-            $this->response->send_file($backup_file, basename($backup_file));
+        // Проверяем, что файл находится в папке backup (безопасность)
+        $real_path = realpath($backup_file);
+        $backup_dir_real = realpath($this->_backup_dir);
+        
+        if ($real_path && strpos($real_path, $backup_dir_real) === 0 && file_exists($real_path)) {
+            $this->response->send_file($real_path, basename($real_path));
         } else {
             HTTP::redirect('setting/backups');
         }
@@ -367,68 +386,61 @@ class Controller_Setting extends Controller_Template {
     }
     
     /**
- * Форматирование примитивных типов
- */
-protected function _format_primitive($value)
-{
-    if (is_bool($value)) {
-        return $value ? 'true' : 'false';
-    } 
-    
-    if (is_numeric($value)) {
-        return $value;
-    } 
-    
-    if (is_string($value)) {
-        // Экранируем только необходимые символы для PHP
-        // - обратную косую черту \ => \\
-        // - одинарную кавычку ' => \'
-        $escaped = str_replace(
-            ['\\', "'"],  // Что заменяем
-            ['\\\\', "\\'"],  // На что заменяем
-            $value
-        );
-        return "'" . $escaped . "'";
-    } 
-    
-    if (is_null($value)) {
-        return 'null';
+     * Форматирование примитивных типов
+     */
+    protected function _format_primitive($value)
+    {
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        } 
+        
+        if (is_numeric($value)) {
+            return $value;
+        } 
+        
+        if (is_string($value)) {
+            // Экранируем только необходимые символы для PHP
+            // - обратную косую черту \ => \\
+            // - одинарную кавычку ' => \'
+            $escaped = str_replace(
+                ['\\', "'"],  // Что заменяем
+                ['\\\\', "\\'"],  // На что заменяем
+                $value
+            );
+            return "'" . $escaped . "'";
+        } 
+        
+        if (is_null($value)) {
+            return 'null';
+        }
+        
+        // Для остальных типов приводим к строке
+        return "'" . (string)$value . "'";
     }
     
-    // Для остальных типов приводим к строке
-    return "'" . (string)$value . "'";
-}
-    
     /**
-     * Создание бэкапа
+     * Создание бэкапа в папке backup
      */
     protected function _create_backup()
     {
-        $backup_dir = $this->_module_config->get('backup_dir');
-        if (!$backup_dir) {
-            $backup_dir = dirname($this->_config_file);
-        }
-        
-        if (!is_dir($backup_dir)) {
-            mkdir($backup_dir, 0755, true);
-        }
-        
         $date_format = $this->_module_config->get('backup_date_format', 'Y-m-d_H-i-s');
-        $backup_file = $backup_dir . '/artonitcity_config.php.backup_' . date($date_format);
+        $backup_file = $this->_backup_dir . '/artonitcity_config.php.backup_' . date($date_format);
         
         copy($this->_config_file, $backup_file);
         
         // Ограничиваем количество бэкапов
-        $this->_cleanup_old_backups($backup_dir);
+        $this->_cleanup_old_backups();
+        
+        return $backup_file;
     }
     
     /**
-     * Очистка старых бэкапов
+     * Очистка старых бэкапов в папке backup
      */
-    protected function _cleanup_old_backups($dir)
+    protected function _cleanup_old_backups()
     {
         $max_backups = $this->_module_config->get('max_backups', 50);
-        $pattern = $dir . '/artonitcity_config.php.backup_*';
+        $pattern = $this->_backup_dir . '/artonitcity_config.php.backup_*';
         $backups = glob($pattern);
         
         if (count($backups) > $max_backups) {
@@ -446,22 +458,18 @@ protected function _format_primitive($value)
     }
     
     /**
-     * Получение списка бэкапов
+     * Получение списка бэкапов из папки backup
      */
     protected function _get_backups()
     {
-        $backup_dir = $this->_module_config->get('backup_dir');
-        if (!$backup_dir) {
-            $backup_dir = dirname($this->_config_file);
-        }
-        
-        $pattern = $backup_dir . '/artonitcity_config.php.backup_*';
+        $pattern = $this->_backup_dir . '/artonitcity_config.php.backup_*';
         $backups = glob($pattern);
         
         $result = [];
         foreach ($backups as $backup) {
             $result[] = [
                 'file' => $backup,
+                'filename' => basename($backup),
                 'date' => date('Y-m-d H:i:s', filemtime($backup)),
                 'size' => filesize($backup),
                 'readable_size' => $this->_format_size(filesize($backup))
@@ -482,7 +490,13 @@ protected function _format_primitive($value)
     protected function _restore_backup($backup_file)
     {
         if ($backup_file && file_exists($backup_file)) {
-            return copy($backup_file, $this->_config_file);
+            // Проверяем, что файл находится в папке backup (безопасность)
+            $real_path = realpath($backup_file);
+            $backup_dir_real = realpath($this->_backup_dir);
+            
+            if ($real_path && strpos($real_path, $backup_dir_real) === 0) {
+                return copy($real_path, $this->_config_file);
+            }
         }
         return false;
     }

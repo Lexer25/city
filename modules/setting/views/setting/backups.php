@@ -12,6 +12,7 @@
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
+                        <th>Имя файла</th>
                         <th><?php echo __('setting.backup_date'); ?></th>
                         <th><?php echo __('setting.backup_size'); ?></th>
                         <th><?php echo __('setting.backup_actions'); ?></th>
@@ -20,6 +21,7 @@
                 <tbody>
                     <?php foreach ($backups as $backup): ?>
                     <tr>
+                        <td><code><?php echo HTML::chars($backup['filename']); ?></code></td>
                         <td><?php echo $backup['date']; ?></td>
                         <td><?php echo $backup['readable_size']; ?></td>
                         <td>
@@ -37,6 +39,11 @@
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            
+            <p class="text-muted">
+                <small>Бэкапы хранятся в папке: <code><?php echo realpath(dirname($backups[0]['file'])); ?></code></small>
+            </p>
+            
         <?php endif; ?>
         
     </div>
