@@ -655,16 +655,11 @@ class Model_Stat extends Model
 	}
 	
 	
-	
-	public function stat()// вывод статистических данных на основную страницу (раздел Информация по жильцам)
+	/**11.03.2026 выборка данных для окна 1 Инфомрация по сотрудникам и картам
+	*/
+	public function getStatPeopleAndCard()
 	{
 		$res=array();
-
-		$res['card']['key_count']['name']=__('key_count');
-		$res['card']['key_count']['count']=DB::query(Database::SELECT, 'select count(*) from card')
-		->execute(Database::instance('fb'))
-		->get('COUNT');
-		
 		$res['card']['key_people']['name']=__('key_people');
 		$res['card']['key_people']['count']=DB::query(Database::SELECT, 'select count(*) from people p where p."ACTIVE"=1')
 		->execute(Database::instance('fb'))
@@ -675,17 +670,22 @@ class Model_Stat extends Model
 		->execute(Database::instance('fb'))
 		->get('COUNT');
 		
-		// Информация о картах, срок действия которых истек
-		$res['card']['count_card_late']['name']=__('count_card_late');
-		$res['card']['count_card_late']['count']=DB::query(Database::SELECT, 'select count(*) from card c where c.timeend<\'now\' and c."ACTIVE">0.')
+		//подсчет количества событий за последние 24 часа
+		$res['card']['event_count_24']['name']=__('event_count_24');
+		$res['card']['event_count_24']['count']=DB::query(Database::SELECT, 'select count(*) from events e where e.datetime>\''.date("d.m.Y H:i:s",strtotime("-1 days")).'\'')
 		->execute(Database::instance('fb'))
 		->get('COUNT');
 		
-	
 		// Информация о картах, срок действия которых истекает в течении ближайшей недели
 		$count_day_befor_end_time=Kohana::$config->load('artonitcity_config')->count_day_befor_end_time;
 		$res['card']['count_card_late_next_week']['name']=__('count_card_late_next_week', array('count_day_befor_end_time' => date("d.m.Y",strtotime("$count_day_befor_end_time days"))));
 		$res['card']['count_card_late_next_week']['count']=DB::query(Database::SELECT, 'select count(*) from card c where c.timeend > \'now\' and c.timeend < \''. date("d.m.Y H:i:s",strtotime("$count_day_befor_end_time days")).'\'')
+		->execute(Database::instance('fb'))
+		->get('COUNT');
+		
+		// Информация о картах, срок действия которых истек
+		$res['card']['count_card_late']['name']=__('count_card_late');
+		$res['card']['count_card_late']['count']=DB::query(Database::SELECT, 'select count(*) from card c where c.timeend<\'now\' and c."ACTIVE">0.')
 		->execute(Database::instance('fb'))
 		->get('COUNT');
 		
@@ -695,11 +695,21 @@ class Model_Stat extends Model
 		->execute(Database::instance('fb'))
 		->get('COUNT');
 		
-		// Количество пользователей без событий (17.10.2017)
+		// Информация о картах, срок действия которых истек. 2.10.2020 Которые не активны!!! 
+		$res['card']['count_unactive_card']['name']=__('count_unactive_card');
+		$res['card']['count_unactive_card']['count']=DB::query(Database::SELECT, 'select count(*) from card c where c."ACTIVE"<1.')
+		->execute(Database::instance('fb'))
+		->get('COUNT');
 		
-		$res['card']['people_without_events']['name']=__('people_without_events');
+		return $res;
 		
-				
+	}
+	
+	/** 11.03.2026 набор данных для окна 2 Оборудование
+	*/
+	public function getEquipment()
+	{
+		$res=array();
 		//подсчет количества транспортных серверов
 		$res['device'][3]['name']=__('ts_count');
 		$res['device'][3]['count']=DB::query(Database::SELECT, 'select count(*) from server')
@@ -711,26 +721,18 @@ class Model_Stat extends Model
 		$res['device'][4]['count']=DB::query(Database::SELECT, 'select count(*) from device d where d.id_reader is null')
 		->execute(Database::instance('fb'))
 		->get('COUNT');
+		return $res;
 		
-		
-		//подсчет количества событий за последние 24 часа
-		$res['card']['event_count_24']['name']=__('event_count_24');
-		$res['card']['event_count_24']['count']=DB::query(Database::SELECT, 'select count(*) from events e where e.datetime>\''.date("d.m.Y H:i:s",strtotime("-1 days")).'\'')
-		->execute(Database::instance('fb'))
-		->get('COUNT');
-		
-		//посдчет количество карт для загрузки в контроллеры. 16.02.2020 вместо индекса 6 указан card_for_load
+	}
+	
+	
+	/** 11.03.2026 набор данных для окна 3 Очередь загрузок
+	*/
+	public function getLoadOrder()
+	{
+		$res=array();
 		$res['order']['card_for_load']['name']=__('loading_card_rfid');
-		/* $sql='select count(*) from cardindev cd
-			join devtype_cardtype dc on dc.id_cardtype=cd.id_cardtype
-			join device d on d.id_dev=cd.id_dev and d.id_devtype=dc.id_devtype
-			join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null and d2.id_devtype=dc.id_devtype
-			join DEVTYPE dt on dt.id_devtype=dc.id_devtype
-			where d."ACTIVE">0
-			and d2."ACTIVE">0
-			and dt.standalone in (0, 1)
-			and cd.id_cardtype=1
-			and cd.attempts<'.$this->getmaxAttempts(); */
+		
 			
 		$sql='select count(*) from cardindev cd
 			join devtype_cardtype dc on dc.id_cardtype=cd.id_cardtype
@@ -748,45 +750,99 @@ class Model_Stat extends Model
 		$res['order']['card_for_load']['count']=DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
 		->get('COUNT');
+		
+		return $res;
+		
+	}
+	
+	
+	
+	
+	public function stat()// вывод статистических данных на основную страницу (раздел Информация по жильцам)
+	{
+		
+		/* $res['card']['key_people']['name']=__('key_people');
+		$res['card']['key_people']['count']=DB::query(Database::SELECT, 'select count(*) from people p where p."ACTIVE"=1')
+		->execute(Database::instance('fb'))
+		->get('COUNT'); */
+		
+		/* $res['card']['key_people_delete']['name']=__('key_people_delete');
+		$res['card']['key_people_delete']['count']=DB::query(Database::SELECT, 'select count(*) from people p where p."ACTIVE"=0')
+		->execute(Database::instance('fb'))
+		->get('COUNT'); */
+		
+		/* // Информация о картах, срок действия которых истек
+		$res['card']['count_card_late']['name']=__('count_card_late');
+		$res['card']['count_card_late']['count']=DB::query(Database::SELECT, 'select count(*) from card c where c.timeend<\'now\' and c."ACTIVE">0.')
+		->execute(Database::instance('fb'))
+		->get('COUNT'); */
+		
+	
+		/* // Информация о картах, срок действия которых истекает в течении ближайшей недели
+		$count_day_befor_end_time=Kohana::$config->load('artonitcity_config')->count_day_befor_end_time;
+		$res['card']['count_card_late_next_week']['name']=__('count_card_late_next_week', array('count_day_befor_end_time' => date("d.m.Y",strtotime("$count_day_befor_end_time days"))));
+		$res['card']['count_card_late_next_week']['count']=DB::query(Database::SELECT, 'select count(*) from card c where c.timeend > \'now\' and c.timeend < \''. date("d.m.Y H:i:s",strtotime("$count_day_befor_end_time days")).'\'')
+		->execute(Database::instance('fb'))
+		->get('COUNT'); */
+		
+		/* // Количество пользователей без карт (17.10.2017)
+		$res['card']['people_without_card']['name']=__('people_without_card');
+		$res['card']['people_without_card']['count']=DB::query(Database::SELECT, 'select count(p.id_pep) from people p left join card c on c.id_pep=p.id_pep where c.id_card is null')
+		->execute(Database::instance('fb'))
+		->get('COUNT'); */
+		
+		// Количество пользователей без событий (17.10.2017)
+		
+		//$res['card']['people_without_events']['name']=__('people_without_events');
+		
+				
+		/* //подсчет количества транспортных серверов
+		$res['device'][3]['name']=__('ts_count');
+		$res['device'][3]['count']=DB::query(Database::SELECT, 'select count(*) from server')
+		->execute(Database::instance('fb'))
+		->get('COUNT'); */
+		
+		/* //подсчет количества контроллеров
+		$res['device'][4]['name']=__('device_count');
+		$res['device'][4]['count']=DB::query(Database::SELECT, 'select count(*) from device d where d.id_reader is null')
+		->execute(Database::instance('fb'))
+		->get('COUNT'); */
+		
+		
+		/* //подсчет количества событий за последние 24 часа
+		$res['card']['event_count_24']['name']=__('event_count_24');
+		$res['card']['event_count_24']['count']=DB::query(Database::SELECT, 'select count(*) from events e where e.datetime>\''.date("d.m.Y H:i:s",strtotime("-1 days")).'\'')
+		->execute(Database::instance('fb'))
+		->get('COUNT'); */
+		
+		//посдчет количество карт для загрузки в контроллеры. 16.02.2020 вместо индекса 6 указан card_for_load
+		/* $res['order']['card_for_load']['name']=__('loading_card_rfid');
+		
+			
+		$sql='select count(*) from cardindev cd
+			join devtype_cardtype dc on dc.id_cardtype=cd.id_cardtype
+			join device d on d.id_dev=cd.id_dev and d.id_devtype=dc.id_devtype
+			join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null and d2.id_devtype=dc.id_devtype
+			join DEVTYPE dt on dt.id_devtype=dc.id_devtype
+			where d."ACTIVE">0
+			and d2."ACTIVE">0
+			and dt.standalone in (0, 1)
+			and cd.id_cardtype=1
+			';
+			
+			
 
-		
-		
-		//количество карт с ошибкой загрузки. 16.02.2020 вместо индекса 7 указан card_overload
-		//23.12.2025 disabled
-		/* $res['order']['card_overload']['name']=__('overcount_card');
-		$res['order']['card_overload']['count']=DB::query(Database::SELECT, 'select count(*) from cardindev cd where cd.attempts>='.$this->getmaxAttempts())
-		->execute(Database::instance('fb'))
-		->get('COUNT');
-		$res['order']['card_overload']['count']='---'; */
-		
-		
-		//подсчет количества карт для неактивных устройств. 16.02.2020 вместо индекса 8 указан card_for_not_active
-		//23.12.2025 disabled
-	/* 	$res['order']['card_for_not_active']['name']=__('load_order_for_notactive');
-		$res['order']['card_for_not_active']['count']=$this->count_order_for_notactive(); */
-		
-		//подсчет количества карт, загруженных в контроллеры за последние 24 часа
-		//23.12.2025 disabled
-		/* $res['device'][9]['name']=__('load_card_in_device');
-		$res['device'][9]['count']=DB::query(Database::SELECT, 'select count(*) from cardidx cd where cd.load_time>\''.date("d.m.Y H:i:s",strtotime("-1 days")).'\'')
+		$res['order']['card_for_load']['count']=DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
 		->get('COUNT'); */
+
+				
 		
-		//подсчет количества карт, которые не удалось загрузить в контроллеры.
-		//23.12.2025 disabled
-		/* $res['device'][10]['name']=__('load_card_in_device_with_error');
-		$res['device'][10]['count']=DB::query(Database::SELECT, 'select count(*) from cardidx cd where cd.load_time>\''.date("d.m.Y H:i:s",strtotime("-1 days")).'\' and cd.load_result containing \'ERR\'')
-		->execute(Database::instance('fb'))
-		->get('COUNT'); */
-		
-		
-		
-		// Информация о картах, срок действия которых истек. 2.10.2020 Которые не активны!!! 
+		/* // Информация о картах, срок действия которых истек. 2.10.2020 Которые не активны!!! 
 		$res['card']['count_unactive_card']['name']=__('count_unactive_card');
-		//$res['card']['count_unactive_card']['count']=DB::query(Database::SELECT, 'select count(*) from card c where c.timeend<\'now\' and c."ACTIVE"<1.') //Редакция 2.10.2020 
 		$res['card']['count_unactive_card']['count']=DB::query(Database::SELECT, 'select count(*) from card c where c."ACTIVE"<1.')
 		->execute(Database::instance('fb'))
-		->get('COUNT');
+		->get('COUNT'); */
 		
 		
 		return $res;

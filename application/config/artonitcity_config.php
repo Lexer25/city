@@ -2,7 +2,7 @@
 
 /**
  * Конфигурационный файл Artonit City
- * Сгенерировано: 2026-03-11 08:18:31
+ * Сгенерировано: 2026-03-11 09:45:04
  */
 
 return array(
@@ -16,11 +16,10 @@ return array(
     'developer' => 'www.artonit.ru',
     'main_windows' => array(
         'windows1' => true,
-        'windows2' => false,
-        'windows3' => false,
-        'windows4' => false,
-        'windows5' => false,
-        'windows6' => false,
+        'windows2' => true,
+        'windows3' => true,
+        'windows4' => true,
+        'windows5' => true,
     ),
     'count_day_befor_end_time' => 30,
     'analit_ok' => array(
@@ -59,8 +58,8 @@ return array(
         5061,
     ),
     'view_without_auth' => array(
-        'load' => true,
-        'load_order' => false,
+        'load' => false,
+        'load_order' => true,
         'device_control' => false,
         'events' => true,
         'people' => false,

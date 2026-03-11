@@ -1,16 +1,30 @@
+<?php
+//echo Debug::vars('2', $config_windows);//exit;
+//echo Debug::vars('3', $list_windows1);//exit;
+?>
 <div class="panel panel-primary">
   <div class="panel-heading">
     <h3 class="panel-title"><?php echo __('Панель управления')?></h3>
   </div>
   <div class="panel-body">
 
+	<?php
+		if(!(Arr::get($config_windows, 'windows1') 
+			or Arr::get($config_windows, 'windows2')
+			or Arr::get($config_windows, 'windows3')
+			or Arr::get($config_windows, 'windows4')
+			or Arr::get($config_windows, 'windows5')
+		)) echo  'Вывод информации запрещен в настройках.'.HTML::anchor('setting', 'Настройки');
+	?>
+
     <!-- Панель №1 - Информация по жильцам и картам -->
+	<?php if(Arr::get($config_windows, 'windows1')) :?>
     <div class="panel panel-info col-md-3">
         <div class="panel-heading row"><?php echo __('data_people_and_card');?></div>
         <div class="panel-body">
-        <?php if (!empty($list['card'])): ?>
+        <?php if (!empty($list_windows1['card'])): ?>
             <?php 
-            $card = $list['card'];
+            $card = $list_windows1['card'];
 			
 			//набор выводимых параметров и ссылок на эти параметры. Если ссылка указана, то она будет подствлеена в html
             $items = array(
@@ -48,13 +62,16 @@
         <?php endif; ?>
         </div>
     </div>
-
+	<?php endif;?>
+	
+	
     <!-- Панель №2 - Информация по оборудованию -->
+	<?php if(Arr::get($config_windows, 'windows2')) :?>
     <div class="panel panel-warning col-md-3">
         <div class="panel-heading row"><?php echo __('data_device');?></div>
         <div class="panel-body">
-        <?php if (!empty($list['device'])): ?>
-            <?php foreach (Arr::get($list, 'device', array()) as $device): ?>
+        <?php if (!empty($list_windows2['device'])): ?>
+            <?php foreach (Arr::get($list_windows2, 'device', array()) as $device): ?>
                 <?php echo Arr::get($device, 'name') . ' ' . Arr::get($device, 'count'); ?><br>
             <?php endforeach; ?>
         <?php else: ?>
@@ -62,15 +79,17 @@
         <?php endif; ?>
         </div>
     </div>
-
-    <!-- Панель №3 - Очередь загрузок -->
+	<?php endif;?>
+    
+	<!-- Панель №3 - Очередь загрузок -->
+	<?php if(Arr::get($config_windows, 'windows3')) :?>
     <div class="panel panel-success col-md-3">
         <div class="panel-heading row">
             <h3 class="panel-title"><?php echo __('data_cardindev');?></h3>
         </div>
         <div class="panel-body">
-        <?php if (!empty($list['order'])): ?>
-            <?php foreach ($list['order'] as $key => $value): ?>
+        <?php if (!empty($list_windows3['order'])): ?>
+            <?php foreach ($list_windows3['order'] as $key => $value): ?>
                 <?php echo Arr::get($value, 'name') . ' '; ?>
                 <?php if ($key == 'card_for_not_active'): ?>
                     <?php echo HTML::anchor('device/'.$key, Arr::get($value, 'count')); ?>
@@ -84,8 +103,11 @@
         <?php endif; ?>
         </div>
     </div>
-
+	<?php endif;?>
+	
+	
     <!-- Панель №4 - Системная информация -->
+	<?php if(Arr::get($config_windows, 'windows4')) :?>
     <div class="panel panel-info col-md-3">
         <div class="panel-heading row">
             <h3 class="panel-title"><?php echo __('system_info');?></h3>
@@ -119,8 +141,11 @@
     </div>
     
     <div class="clearfix hidden-xs hidden-sm"></div>
+	
+	<?php endif;?>
 
-    <!-- Панель №6 - Аналитика -->
+    <!-- Панель №5 - Аналитика -->
+	<?php if(Arr::get($config_windows, 'windows5')) :?>
     <div class="panel panel-danger">
         <div class="panel-heading">
             <h3 class="panel-title">
@@ -162,7 +187,7 @@
             <?php endif; ?>
         </div>
     </div>
-
+	<?php endif;?>
     </div>
    
 </div>

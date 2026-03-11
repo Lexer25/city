@@ -59,9 +59,18 @@ class Controller_Dashboard extends Controller_Template {
 		$list=array();
 		$event_stat=array();
 		$system_events=array();
-		if(Arr::get($config_windows, 'windows1', FALSE)) $list=Model::Factory('Stat')->stat();
-		if(Arr::get($config_windows, 'windows5', FALSE)) $system_events=Model::Factory('Stat')->detect_change_device_count();
-		if(Arr::get($config_windows, 'windows4', FALSE)) $event_stat=Model::Factory('Event')->stat();// подготовка статистических данных для раздела События. Готовится массив данных $list['card'], $list['device'], $list['order']
+		$list_windows1=array();
+		$list_windows2=array();
+		$list_windows3=array();
+		$t1=microtime(true);
+		//if(Arr::get($config_windows, 'windows1', FALSE)) $list=Model::Factory('Stat')->stat();
+		
+		if(Arr::get($config_windows, 'windows1', FALSE)) $list_windows1=Model::Factory('Stat')->getStatPeopleAndCard();//статистика для окна 1
+		
+		if(Arr::get($config_windows, 'windows2', FALSE)) $list_windows2=Model::Factory('Stat')->getEquipment();//оборудование
+		
+		if(Arr::get($config_windows, 'windows3', FALSE)) $list_windows3=Model::Factory('Stat')->getLoadOrder();//очередь загрузок
+		
 		
 		
 		$analyt_result = Model::Factory('Stat')->analyt_result();// 26.02.2020 подсчет аналитики
@@ -71,15 +80,17 @@ class Controller_Dashboard extends Controller_Template {
 		$_connectName='fb';
 		$about=Model::factory('Parkdb')->aboutDB($_connectName);
 		$content = View::factory('dashboard', array(
-			'list' => $list,
-			'event_stat' => $event_stat,
-			'event_stat_enable' => Arr::get($config_windows, 'windows4'),
-			'system_events' => $system_events,
-			'system_events_enable' => Arr::get($config_windows, 'windows5'),
+			'list_windows1' => $list_windows1,
+			'list_windows2' => $list_windows2,
+			'list_windows3' => $list_windows3,
+			//'list' => $list,
+			//'event_stat' => $event_stat,
+			//'event_stat_enable' => Arr::get($config_windows, 'windows4'),
 			'analyt_result' => $analyt_result,
-			'timeExecute' => $timeExecute,	
+			//'timeExecute' => $timeExecute,	
 			'countErrKeyFormatRfid' => $countErrKeyFormatRfid,	
 			'about' => $about,	
+			'config_windows' => $config_windows,	
 			));
 		
 		$this->template->content = $content;
