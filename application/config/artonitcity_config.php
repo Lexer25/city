@@ -2,15 +2,14 @@
 
 /**
  * Конфигурационный файл Artonit City
- * Сгенерировано: 2026-03-09 12:32:23
+ * Сгенерировано: 2026-03-11 08:18:31
  */
 
 return array(
     'dir_log' => 'C:\\Program Files (x86)\\Cardsoft\\DuoSE\\Access\\Log',
     'dir_compare' => 'C:\\xampp\\htdocs\\city',
     'stat_day_befor' => 2,
-    'name_device_fro_test' => 'л251 к45 калитка в л254',
-    'city_name' => 'ПАО \"Калибр редактированный\\\"',
+    'city_name' => 'ПАО "Калибр"',
     'ver' => '2.0.4',
     'timeUpdate' => '2026-03-09',
     'lightVerDay' => 3,
@@ -60,14 +59,13 @@ return array(
         5061,
     ),
     'view_without_auth' => array(
-        'load' => false,
+        'load' => true,
         'load_order' => false,
         'device_control' => false,
         'events' => true,
         'people' => false,
         'door' => false,
         'log' => true,
-        'check' => false,
     ),
     'curl_place' => 'C:\\xampp\\curl.exe -L',
     'baseFormatRfid' => 0,
