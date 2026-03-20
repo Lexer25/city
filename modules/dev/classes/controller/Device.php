@@ -66,7 +66,7 @@ class Controller_Device extends Controller_Template {
 	 
 	 
 	 
-	 public function action*_card_for_not_active()// 16.03.2020 вывод списка неактивных устройств
+	 public function action_card_for_not_active()// 16.03.2020 вывод списка неактивных устройств
 	{
 		$list_not_active_device=Model::Factory('Device')->getListNotActiveDevices();
 		$content=View::Factory('device/ListNotActiveDevices', array(

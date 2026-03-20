@@ -7,3 +7,4 @@ application/config/backup
 *.xls
 *.xlsx
 
+/nbproject/private/

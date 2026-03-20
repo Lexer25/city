@@ -14,7 +14,7 @@
 			<td>
 			<?if (Arr::get($contact, 'PHOTO') != null) { ?>
 				<img src="data:image/jpeg;base64,<?php echo base64_encode($contact['PHOTO']); ?>" height="200" alt="photo" />
-				<?php } else { 
+				 } else { 
 					echo HTML::image("images/nophoto.png", array('height' => 200, 'alt' => 'photo'));
 			}
 			

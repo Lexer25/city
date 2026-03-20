@@ -107,7 +107,7 @@
 									echo '<td>';
 									if ($value['PHOTO'] != null) { ?>
 										<img src="data:image/jpeg;base64,<?php echo base64_encode($value['PHOTO']); ?>" height="100" alt="photo" />
-										<?php } else { 
+										} else { 
 										echo HTML::image("images/nophoto.png", array('height' => 100, 'alt' => 'photo'));
 									};
 									echo HTML::anchor('people/peopleInfo/'.$value['ESS1'],$mess, array('class'=>'text-danger bold') ).'</p><br></td>';
@@ -119,7 +119,7 @@
 									echo '<td>';
 									if ($value['PHOTO'] != null) { ?>
 										<img src="data:image/jpeg;base64,<?php echo base64_encode($value['PHOTO']); ?>" height="100" alt="photo" />
-										<?php } else { 
+										 } else { 
 										echo HTML::image("images/nophoto.png", array('height' => 100, 'alt' => 'photo'));
 									};
 									echo HTML::anchor('people/peopleInfo/'.$value['ESS1'], $mess, array('class'=>'text-success')).'</p><br></td>';

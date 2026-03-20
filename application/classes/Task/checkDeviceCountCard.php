@@ -68,7 +68,16 @@
 									
 					}
 				
-				Log::instance()->add(Log::NOTICE, 'Проверка в контроллере '.$dev->name.' '.$dev->id' завершена. Проверено '. count($door->getKeyList().' карт за время '.microtime(true)-$t1));
+				Log::instance()->add(
+                                           Log::NOTICE, 
+                                                'Проверка в контроллере '
+                                                .$dev->name
+                                                .' '
+                                                .$dev->id
+                                                .' завершена. Проверено '
+                                                . count($door->getKeyList()
+                                                .' карт за время '
+                                                .microtime(true)-$t1));
 				}	
 		
 		
