@@ -93,6 +93,7 @@
     <script src="/city/static/js/moment-with-locales.min.js"></script>
      <script src="/city/static/js/jquery.tablesorter.js"></script>
     <script src="/city/static/js/jquery.tablesorter.widgets.js"></script>
+    <script src="/city/static/js/bootstrap.min.js"></script>
 	<!-- Добавить окна для ввода фильтра -->
     <script src="/city/static/js/crm2_template_tablesorter.js"></script>
     
