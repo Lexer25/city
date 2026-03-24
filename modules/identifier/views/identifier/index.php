@@ -140,7 +140,7 @@
 ?> 
  <hr>   
  <?php
-
+//вывод номера сборки
     echo 'mod version ' . (defined('IDENTIFIER_MODULE_VERSION') ? IDENTIFIER_MODULE_VERSION : 'unknown');
 ?>
   </div>

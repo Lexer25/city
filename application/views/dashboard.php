@@ -189,5 +189,8 @@
     </div>
 	<?php endif;?>
     </div>
-   
+<?php
+//вывод номера сборки
+    echo 'app version ' . (defined('CITY_MODULE_VERSION') ? CITY_MODULE_VERSION : 'unknown');
+?> 
 </div>
