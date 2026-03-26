@@ -86,7 +86,7 @@
 	<!-- Инициализация виджета "Bootstrap datetimepicker" --> 
 		
 		<div class="form-group">
-		  <div class="input-group date" id="datetimepicker1">
+		  <div class="input-group date" id="datetimepicker">
 			<input type="text" class="form-control" name="timeTo" >
 			<span class="input-group-addon">
 			  <span class="glyphicon glyphicon-calendar"></span>
@@ -131,19 +131,6 @@
  
  console.log('Мой скрипт загружен');
  
-      $(function () {
-		var dateBegin = new Date();
-		dateBegin.setHours(22, 0, 0, 0);
-		dateBegin.setMonth(dateBegin.getMonth()+2);
-	    //Инициализация datetimepicker1
-        $("#datetimepicker1").datetimepicker(
-		{language: 'ru', 
-		showToday: true,
-		sideBySide: true,
-		defaultDate: dateBegin
-		}
-		);
-      });
 
 		
   	
@@ -153,7 +140,7 @@ $(function () {
     var dateBegin = new Date();
     dateBegin.setHours(22, 0, 0, 0);
     dateBegin.setMonth(dateBegin.getMonth()+2);
-    $("#datetimepicker1").datetimepicker({
+    $("#datetimepicker").datetimepicker({
         language: 'ru', 
         showToday: true,
         sideBySide: true,
@@ -185,13 +172,6 @@ $(document).ready(function() {
 });
 </script>
 		
-		
-// Проверить, что находит селектор
-console.log($(".checkbox").length);          // Сколько элементов с классом checkbox
-console.log($("input[name='id_pep[]']").length); // Сколько реальных чекбоксов
 
-// Проверить, что именно попадает под .checkbox
-console.log($(".checkbox").get(0).tagName);  // Может быть INPUT или LABEL
-</script>
  
     

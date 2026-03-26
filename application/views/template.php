@@ -29,6 +29,23 @@
     <link rel="stylesheet" href="/city/static/css/city.css">
     <link rel="stylesheet" href="/city/static/css/theme.blue.css">
     <script src="/city/static/js/jquery-2.2.4.js"></script>
+	
+	<!-- JavaScript в конце body (для скорости загрузки) -->
+    <script src="/city/static/js/moment-with-locales.min.js"></script>
+     <script src="/city/static/js/jquery.tablesorter.js"></script>
+    <script src="/city/static/js/jquery.tablesorter.widgets.js"></script>
+    <script src="/city/static/js/bootstrap.min.js"></script>
+    <script src="/city/static/js/bootstrap-datetimepicker.min.js"></script>
+	<!-- Добавить окна для ввода фильтра -->
+    <script src="/city/static/js/crm2_template_tablesorter.js"></script>
+    
+    <!-- Опционально: tablesorter.pager только если нужна пагинация -->
+    <?php if (isset($use_pager) && $use_pager): ?>
+        <script src="/city/static/js/jquery.tablesorter.pager.js"></script>
+    <?php endif; ?>
+
+
+
 </head>
 
 <body>
@@ -89,19 +106,7 @@
     <span id="time-bottom" style="display:none;">Страница подготовлена за <?php echo round(microtime(TRUE) - START_TIME, 3); ?> сек.</span>
  
 
-    <!-- JavaScript в конце body (для скорости загрузки) -->
-    <script src="/city/static/js/moment-with-locales.min.js"></script>
-     <script src="/city/static/js/jquery.tablesorter.js"></script>
-    <script src="/city/static/js/jquery.tablesorter.widgets.js"></script>
-    <script src="/city/static/js/bootstrap.min.js"></script>
-	<!-- Добавить окна для ввода фильтра -->
-    <script src="/city/static/js/crm2_template_tablesorter.js"></script>
     
-    <!-- Опционально: tablesorter.pager только если нужна пагинация -->
-    <?php if (isset($use_pager) && $use_pager): ?>
-        <script src="/city/static/js/jquery.tablesorter.pager.js"></script>
-    <?php endif; ?>
-
     <script>
     window.onscroll = function() {scrollFunction()};
 
