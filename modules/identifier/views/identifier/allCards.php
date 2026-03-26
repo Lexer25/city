@@ -172,3 +172,32 @@
 							
 	</div>
 </div>
+<script>
+ $(document).ready(function() {
+        // Проверяем, загрузился ли tablesorter
+        console.log('Tablesorter доступен:', typeof $.fn.tablesorter);
+        
+        // Инициализация tablesorter с фильтрами
+        if ($.fn.tablesorter) {
+            $("#tablesorter").tablesorter({
+                theme: 'blue',
+                widthFixed: true,
+                widgets: ['filter']
+            });
+            console.log('Tablesorter инициализирован');
+        } else {
+            console.log('Tablesorter не загружен');
+        }
+        
+        // Инициализация datetimepicker
+        var dateBegin = new Date();
+        dateBegin.setHours(22, 0, 0, 0);
+        dateBegin.setMonth(dateBegin.getMonth() + 2);
+        $("#datetimepicker").datetimepicker({
+            language: 'ru', 
+            showToday: true,
+            sideBySide: true,
+            defaultDate: dateBegin
+        });
+    });
+</script>

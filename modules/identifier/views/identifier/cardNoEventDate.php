@@ -103,7 +103,7 @@ if ($diff['days'] > 0 || empty($diffText)) {
 	
 			
 		
-		<table id="tablesorter" class="table table-striped table-hover table-condensed tablesorter">
+		 <table id="tablesorter" class="table table-striped table-hover table-condensed tablesorter table-bordered">
 		<thead allign="center">
 			<tr>
 			<th>№ п/п</th>
@@ -229,3 +229,56 @@ if ($diff['days'] > 0 || empty($diffText)) {
 							
 	</div>
 </div>
+<script>
+ $(document).ready(function() {
+        // Проверяем, загрузился ли tablesorter
+        console.log('Tablesorter доступен:', typeof $.fn.tablesorter);
+        
+        // Инициализация tablesorter с фильтрами
+        if ($.fn.tablesorter) {
+            $("#tablesorter").tablesorter({
+                theme: 'blue',
+                widthFixed: true,
+                widgets: ['filter']
+            });
+            console.log('Tablesorter инициализирован');
+        } else {
+            console.log('Tablesorter не загружен');
+        }
+        
+        // Инициализация datetimepicker
+        var dateBegin = new Date();
+        dateBegin.setHours(22, 0, 0, 0);
+        dateBegin.setMonth(dateBegin.getMonth() + 2);
+        $("#datetimepicker").datetimepicker({
+            language: 'ru', 
+            showToday: true,
+            sideBySide: true,
+            defaultDate: dateBegin
+        });
+		
+		 // Инициализация чекбоксов
+    setTimeout(function() {
+        var $masterCheck = $("#check_all");
+        var $slaveChecks = $("input[name='id_pep[]']");
+        
+        if ($masterCheck.length && $slaveChecks.length) {
+            $masterCheck.off('click').on('click', function() {
+                $slaveChecks.prop("checked", $(this).prop("checked"));
+            });
+            
+            $slaveChecks.off('click').on('click', function() {
+                var total = $slaveChecks.length;
+                var checked = $slaveChecks.filter(":checked").length;
+                $masterCheck.prop("checked", total === checked);
+            });
+            
+            var total = $slaveChecks.length;
+            var checked = $slaveChecks.filter(":checked").length;
+            $masterCheck.prop("checked", total === checked);
+            
+            console.log('Чекбоксы инициализированы');
+        }
+    }, 200);
+    });
+</script>

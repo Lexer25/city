@@ -1,13 +1,3 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.'); ?>
-
-<script type="text/javascript">
-$(document).ready(function() {
-    $("#check_all").click(function () {
-        $(".checkbox").prop("checked", this.checked);
-    });
-});
-</script>
-
 <div class="panel panel-primary">
     <div class="panel-heading">
         <h3 class="panel-title"><?php echo htmlspecialchars(__('Список карт, не имеющих отметки о проходе')); ?></h3>
@@ -69,7 +59,7 @@ $(document).ready(function() {
         
         <?php if (isset($list) && !empty($list)): ?>
             <div class="table-responsive">
-                <table id="cards-table" class="table table-striped table-hover table-condensed">
+                <table id="tablesorter" class="table table-striped table-hover table-condensed tablesorter table-bordered">
                     <thead>
                         <tr>
                             <th>№</th>
@@ -170,7 +160,33 @@ $(document).ready(function() {
 </div>
 
 <script type="text/javascript">
-$(document).ready(function() {
+  $(document).ready(function() {
+        // Проверяем, загрузился ли tablesorter
+        console.log('Tablesorter доступен:', typeof $.fn.tablesorter);
+        
+        // Инициализация tablesorter с фильтрами
+        if ($.fn.tablesorter) {
+            $("#tablesorter").tablesorter({
+                theme: 'blue',
+                widthFixed: true,
+                widgets: ['filter']
+            });
+            console.log('Tablesorter инициализирован');
+        } else {
+            console.log('Tablesorter не загружен');
+        }
+        
+        // Инициализация datetimepicker
+        var dateBegin = new Date();
+        dateBegin.setHours(22, 0, 0, 0);
+        dateBegin.setMonth(dateBegin.getMonth() + 2);
+        $("#datetimepicker").datetimepicker({
+            language: 'ru', 
+            showToday: true,
+            sideBySide: true,
+            defaultDate: dateBegin
+        });
+
     // Выделение всех чекбоксов
     $("#check_all").click(function() {
         var isChecked = $(this).prop('checked');
@@ -209,4 +225,6 @@ $(document).ready(function() {
         }
     });
 });
+
+
 </script>

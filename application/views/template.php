@@ -44,61 +44,36 @@
 <body>
 	<!-- В template.php установка ширины страницы-->
 	<!-- для вывода страницы во всю ширину в контроллере необходимо указать $this->template->full_width = true; -->
-	<?php if (isset($full_width) && $full_width): ?>
-		<!-- Широкий режим -->
-		<div class="container-fluid">
-		<span id="time-top"></span>
-			<div class="row">
-				 <?php
-            // Подготовка данных для меню
-            $menu_data = array(
-                'menu_active' => Arr::get($_SESSION, 'menu_active', ''),
-                'config' => $config,  // Используем уже загруженный конфиг
-                'logged_in' => Auth::instance()->logged_in(),
-                'user' => Auth::instance()->get_user(),
-                'view_without_auth' => (array) $config->get('view_without_auth', array())
-            );
-            
-            echo View::factory('top_menu', $menu_data)->render();
-            echo $content;
-            ?>
-            
-            <button onclick="topFunction()" id="myBtn" title="<?php echo __('top'); ?>">
-                <?php echo __('top'); ?>
-            </button>
-			
-			</div>
-		</div>
-	<?php else: ?>
-		<!-- Обычный режим -->
-		<div class="container">
-		<span id="time-top"></span>
-			<div class="row">
-				 <?php
-            // Подготовка данных для меню
-            $menu_data = array(
-                'menu_active' => Arr::get($_SESSION, 'menu_active', ''),
-                'config' => $config,  // Используем уже загруженный конфиг
-                'logged_in' => Auth::instance()->logged_in(),
-                'user' => Auth::instance()->get_user(),
-                'view_without_auth' => (array) $config->get('view_without_auth', array())
-            );
-            
-            echo View::factory('top_menu', $menu_data)->render();
-            echo $content;
-            ?>
-            
-            <button onclick="topFunction()" id="myBtn" title="<?php echo __('top'); ?>">
-                <?php echo __('top'); ?>
-            </button>
-			</div>
-		</div>
-	<?php endif; ?>
-   
-    
-    <span id="time-bottom" style="display:none;">Страница подготовлена за <?php echo round(microtime(TRUE) - START_TIME, 3); ?> сек.</span>
- 
+	<?php
+// Определяем класс контейнера в зависимости от режима
+$container_class = (isset($full_width) && $full_width) ? 'container-fluid' : 'container';
+?>
 
+<div class="<?php echo $container_class; ?>">
+    <span id="time-top"></span>
+    <div class="row">
+        <?php
+        // Подготовка данных для меню (код не меняется)
+        $menu_data = array(
+            'menu_active' => Arr::get($_SESSION, 'menu_active', ''),
+            'config' => $config,
+            'logged_in' => Auth::instance()->logged_in(),
+            'user' => Auth::instance()->get_user(),
+            'view_without_auth' => (array) $config->get('view_without_auth', array())
+        );
+        
+        echo View::factory('top_menu', $menu_data)->render();
+        echo $content;
+        ?>
+        
+        <button onclick="topFunction()" id="myBtn" title="<?php echo __('top'); ?>">
+            <?php echo __('top'); ?>
+        </button>
+    </div>
+</div>
+
+<!-- Остальная часть шаблона (таймеры и скрипты) остаётся без изменений -->
+<span id="time-bottom" style="display:none;">Страница подготовлена за <?php echo round(microtime(TRUE) - START_TIME, 3); ?> сек.</span>
     
     <script>
     window.onscroll = function() {scrollFunction()};
