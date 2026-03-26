@@ -10,8 +10,7 @@ class Controller_identifier extends Controller_Template {
   
    //Широки шаблон
    //для использьвания необходимо указать 
-   //$this->template = View::factory($this->template_width);
-   public $template_width = 'template_width';
+  
    
    
 
@@ -29,8 +28,7 @@ class Controller_identifier extends Controller_Template {
 			
 			parent::before();
 			$session = Session::instance();
-			//$this->template = View::factory($this->template_width);//во всю ширину экрана
-		//echo Debug::vars('32', $session);exit;
+			
 	}
 	
 	public function action_index()
@@ -135,7 +133,8 @@ class Controller_identifier extends Controller_Template {
 				}
 				 $session_event_date = Session::instance()->get('event_date', null);
 				 
-			$this->template = View::factory($this->template_width);//во всю ширину экрана
+			
+			$this->template->full_width = true;
 				$content = View::factory(__('identifier/:view', array(':view'=>$view)), array(//начальная страница для работы с идентификаторами.
 					'list'=>array_slice($data,0, $rows_per_page),
 					'total_row_count'=>count($data),
