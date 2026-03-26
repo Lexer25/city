@@ -22,27 +22,20 @@
     ?>
     </title>
 
-    <!-- CSS - ТОЛЬКО НЕОБХОДИМОЕ -->
+ <!-- CSS -->
     <link rel="stylesheet" href="/city/static/css/bootstrap.min.css">
     <link rel="stylesheet" href="/city/static/css/bootstrap-datetimepicker.min.css">
     <link rel="stylesheet" href="/city/static/css/modal.css">
     <link rel="stylesheet" href="/city/static/css/city.css">
-    <link rel="stylesheet" href="/city/static/css/theme.blue.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/theme.blue.min.css">
+    
+    <!-- JavaScript библиотеки -->
     <script src="/city/static/js/jquery-2.2.4.js"></script>
-	
-	<!-- JavaScript в конце body (для скорости загрузки) -->
     <script src="/city/static/js/moment-with-locales.min.js"></script>
-     <script src="/city/static/js/jquery.tablesorter.js"></script>
-    <script src="/city/static/js/jquery.tablesorter.widgets.js"></script>
     <script src="/city/static/js/bootstrap.min.js"></script>
     <script src="/city/static/js/bootstrap-datetimepicker.min.js"></script>
-	<!-- Добавить окна для ввода фильтра -->
-    <script src="/city/static/js/crm2_template_tablesorter.js"></script>
-    
-    <!-- Опционально: tablesorter.pager только если нужна пагинация -->
-    <?php if (isset($use_pager) && $use_pager): ?>
-        <script src="/city/static/js/jquery.tablesorter.pager.js"></script>
-    <?php endif; ?>
+    <script src="/city/static/js/jquery.tablesorter.min.js"></script>
+    <script src="/city/static/js/jquery.tablesorter.widgets.min.js"></script>
 
 
 

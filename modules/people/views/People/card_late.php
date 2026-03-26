@@ -127,50 +127,59 @@
 <?echo Form::close();?>	
 </div>	
 </div>
- <script type="text/javascript">
- 
- console.log('Мой скрипт загружен');
- 
-
-		
-  	
-
-$(function () {
-    // Инициализация datetimepicker
-    var dateBegin = new Date();
-    dateBegin.setHours(22, 0, 0, 0);
-    dateBegin.setMonth(dateBegin.getMonth()+2);
-    $("#datetimepicker").datetimepicker({
-        language: 'ru', 
-        showToday: true,
-        sideBySide: true,
-        defaultDate: dateBegin
-    });
-});
-
-//переключатель Выделить все
-$(document).ready(function() {
-    var $masterCheck = $("#check_all");
-    var $slaveChecks = $("input[name='id_pep[]']");
-    
-    // Выделить все
-    $masterCheck.off('click').on('click', function() {
-        $slaveChecks.prop("checked", $(this).prop("checked"));
+    <script>
+    $(document).ready(function() {
+        // Проверяем, загрузился ли tablesorter
+        console.log('Tablesorter доступен:', typeof $.fn.tablesorter);
+        
+        // Инициализация tablesorter с фильтрами
+        if ($.fn.tablesorter) {
+            $("#tablesorter").tablesorter({
+                theme: 'blue',
+                widthFixed: true,
+                widgets: ['filter']
+            });
+            console.log('Tablesorter инициализирован');
+        } else {
+            console.log('Tablesorter не загружен');
+        }
+        
+        // Инициализация datetimepicker
+        var dateBegin = new Date();
+        dateBegin.setHours(22, 0, 0, 0);
+        dateBegin.setMonth(dateBegin.getMonth() + 2);
+        $("#datetimepicker").datetimepicker({
+            language: 'ru', 
+            showToday: true,
+            sideBySide: true,
+            defaultDate: dateBegin
+        });
     });
     
-    // Обновление состояния главного чекбокса
-    $slaveChecks.off('click').on('click', function() {
-        var total = $slaveChecks.length;
-        var checked = $slaveChecks.filter(":checked").length;
-        $masterCheck.prop("checked", total === checked);
-    });
-    
-    // Инициализация начального состояния
-    var total = $slaveChecks.length;
-    var checked = $slaveChecks.filter(":checked").length;
-    $masterCheck.prop("checked", total === checked);
-});
-</script>
+    // Инициализация чекбоксов
+    setTimeout(function() {
+        var $masterCheck = $("#check_all");
+        var $slaveChecks = $("input[name='id_pep[]']");
+        
+        if ($masterCheck.length && $slaveChecks.length) {
+            $masterCheck.off('click').on('click', function() {
+                $slaveChecks.prop("checked", $(this).prop("checked"));
+            });
+            
+            $slaveChecks.off('click').on('click', function() {
+                var total = $slaveChecks.length;
+                var checked = $slaveChecks.filter(":checked").length;
+                $masterCheck.prop("checked", total === checked);
+            });
+            
+            var total = $slaveChecks.length;
+            var checked = $slaveChecks.filter(":checked").length;
+            $masterCheck.prop("checked", total === checked);
+            
+            console.log('Чекбоксы инициализированы');
+        }
+    }, 200);
+    </script>
 		
 
  
