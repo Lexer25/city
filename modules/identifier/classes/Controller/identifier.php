@@ -191,8 +191,25 @@ class Controller_identifier extends Controller_Template {
 					}
 				
 				break;
-				case 'delete'://вызов метода удаления карт
-				
+				case 'delete'://вызов метода удаления карт delCardArray
+					//вызываю метод unactive
+						$chunks = array_chunk(Arr::get($post, 'identifier'), 1024);
+
+					foreach ($chunks as $chunk) {
+						//вызываю метод unactive
+						$model=Model::factory('identifier');
+						if($model->delCardArray($chunk))
+						{
+							$result[]='OK';
+							
+						} else {
+							
+							$result[]='err '. $model->mess;
+						};
+						
+						
+					}
+						
 				
 				break;
 				

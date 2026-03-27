@@ -174,6 +174,34 @@ class Model_identifier extends Model
 			
 		
 	}
+	
+	/**27.03.2026 удаляет карты из указанного массива карт.
+		*/	
+	public function delCardArray($cards)
+	{
+		$sql=__('delete from card c 
+			where c.id_card in (:card_array)
+			', array(
+			':card_array'=>implode(",", $cards)));
+			
+		
+		try
+			{
+			$query = DB::query(Database::DELETE, $sql)
+			->execute(Database::instance('fb'));
+			return true;
+			} catch (Exception $e) {
+				Log::instance()->add(Log::DEBUG, $e->getMessage());
+				$this->mess=$e->getMessage();
+				return 	false;
+			}
+			
+		
+	}
+	
+	
+	
+	
 }
 	
 
