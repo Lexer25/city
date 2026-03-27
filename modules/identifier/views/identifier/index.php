@@ -22,6 +22,7 @@
     <?php
 	
     echo Form::open('identifier/action');
+	echo Form::hidden('page', 1); // Скрытое поле для номера страницы
     ?>
         
     <div class="input-group mb-3">
@@ -135,6 +136,8 @@
             'class' => 'btn btn-primary btn-lg',
 			'value'=>'allCards'
         ]);
+		
+		
 	echo Form::close();
 	
 ?> 

@@ -11,9 +11,16 @@
  * - $arg: аргументы запроса (для передачи в форму экспорта)
  * - $show_actions: показывать ли панель действий (по умолчанию true)
  * - $custom_info: дополнительная информация над таблицей (опционально)
+ * - $title: заголовок таблицы (опционально)
  */
-?>
+ 
 
+?>
+<script type="text/javascript">
+    $(function() {        
+        $("#tablesorter").tablesorter({ headers: { 3:{sorter: false}}, widgets: ['zebra']});
+    });    
+</script>
 <div class="panel panel-primary">
     <div class="panel-heading">
         <h3 class="panel-title">
@@ -67,6 +74,62 @@
         <?php echo Form::open('identifier/control', array('class' => 'form-inline', 'id' => 'cards-form')); ?>
         
         <?php if (isset($list) && !empty($list)): ?>
+            
+            <!-- Пагинация НАД таблицей -->
+            <div id="pager-top" class="pager" style="margin-bottom: 15px;">
+                <div class="row">
+                    <div class="col-md-6 col-sm-12">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-sm btn-default first"><i class="glyphicon glyphicon-step-backward"></i> Первая</button>
+                            <button type="button" class="btn btn-sm btn-default prev"><i class="glyphicon glyphicon-backward"></i> Назад</button>
+                            <button type="button" class="btn btn-sm btn-default next">Вперед <i class="glyphicon glyphicon-forward"></i></button>
+                            <button type="button" class="btn btn-sm btn-default last">Последняя <i class="glyphicon glyphicon-step-forward"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-sm-12 text-right">
+                        <div class="pagination-info" style="display: inline-block; margin-right: 15px;">
+                            <span class="pagedisplay"></span>
+                        </div>
+                        
+                        <div class="pagination-size" style="display: inline-block;">
+                            <label style="margin-right: 5px; font-weight: normal;">Показывать:</label>
+                            <select class="pagesize form-control input-sm" style="width: auto; display: inline-block;">
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="30">30</option>
+                                <option value="50" selected>50</option>
+                                <option value="100">100</option>
+                                <option value="200">200</option>
+                                <option value="500">500</option>
+                            </select>
+                        </div>
+                        
+                        <div class="pagination-goto" style="display: inline-block; margin-left: 15px;">
+                            <label style="margin-right: 5px; font-weight: normal;">Страница:</label>
+                            <input type="text" class="pagenum form-control input-sm" size="4" style="width: 60px; display: inline-block;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Настройка пагинации -->
+			<!--<div class="pager">
+				<img src="images/first.png" class="first" alt="First" />
+				<img src="images/prev.png" class="prev" alt="Prev" />
+				<span class="pagedisplay" data-pager-output-filtered="{startRow:input} &ndash; {endRow} / {filteredRows} of {totalRows} total rows"></span>
+				<img src="images/next.png" class="next" alt="Next" />
+				<img src="images/last.png" class="last" alt="Last" />
+				<select class="pagesize" title="Select page size">
+				<option value="10">10</option>
+				<option value="20">20</option>
+				<option value="30">30</option>
+				<option value="all">Все</option>
+				</select>
+				<select class="gotoPage" title="Select page number"></select>
+			</div>
+			-->
+
+            <!-- Таблица -->
             <div class="table-responsive">
                 <table id="tablesorter" class="table table-striped table-hover table-condensed tablesorter table-bordered">
                     <thead>
@@ -94,7 +157,7 @@
                             $safeCardId = htmlspecialchars($cardId, ENT_QUOTES, 'UTF-8');
                         ?>
                             <tr>
-                                <td class="text-center"><?php echo ++$sn; ?></td>
+                                <td class="text-center"><?php echo ++$sn; ?>;</td>
                                 <td class="text-center">
                                     <label>
                                         <?php echo Form::checkbox('identifier[]', $safeCardId, false, array(
@@ -120,6 +183,45 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Пагинация ПОД таблицей -->
+            <div id="pager-bottom" class="pager" style="margin-top: 15px;">
+                <div class="row">
+                    <div class="col-md-6 col-sm-12">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-sm btn-default first"><i class="glyphicon glyphicon-step-backward"></i> Первая</button>
+                            <button type="button" class="btn btn-sm btn-default prev"><i class="glyphicon glyphicon-backward"></i> Назад</button>
+                            <button type="button" class="btn btn-sm btn-default next">Вперед <i class="glyphicon glyphicon-forward"></i></button>
+                            <button type="button" class="btn btn-sm btn-default last">Последняя <i class="glyphicon glyphicon-step-forward"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-sm-12 text-right">
+                        <div class="pagination-info" style="display: inline-block; margin-right: 15px;">
+                            <span class="pagedisplay"></span>
+                        </div>
+                        
+                        <div class="pagination-size" style="display: inline-block;">
+                            <label style="margin-right: 5px; font-weight: normal;">Показывать:</label>
+                            <select class="pagesize form-control input-sm" style="width: auto; display: inline-block;">
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="30">30</option>
+                                <option value="50" selected>50</option>
+                                <option value="100">100</option>
+                                <option value="200">200</option>
+                                <option value="500">500</option>
+                            </select>
+                        </div>
+                        
+                        <div class="pagination-goto" style="display: inline-block; margin-left: 15px;">
+                            <label style="margin-right: 5px; font-weight: normal;">Страница:</label>
+                            <input type="text" class="pagenum form-control input-sm" size="4" style="width: 60px; display: inline-block;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
         <?php else: ?>
             <div class="alert alert-warning">
                 <?php echo htmlspecialchars(__('Нет данных для отображения')); ?>
@@ -168,158 +270,95 @@
     </div>
 </div>
 
-<script type="text/javascript">
-$(document).ready(function() {
-    // Проверяем, загрузился ли tablesorter
-    console.log('Tablesorter доступен:', typeof $.fn.tablesorter);
-    
-    // Инициализация tablesorter с фильтрами
-    if ($.fn.tablesorter) {
-        $("#tablesorter").tablesorter({
-            theme: 'blue',
-            widthFixed: true,
-            widgets: ['filter']
-        });
-        console.log('Tablesorter инициализирован');
-    } else {
-        console.log('Tablesorter не загружен');
-    }
-    
-    // ========== РАБОТА С ЧЕКБОКСАМИ С УЧЁТОМ ФИЛЬТРАЦИИ ==========
-    
-    // Функция получения видимых чекбоксов (только в видимых строках)
-    function getVisibleCheckboxes() {
-        return $(".checkbox").filter(function() {
-            return $(this).closest("tr").is(":visible");
-        });
-    }
-    
-    // Обновление состояния главного чекбокса и текста кнопок
-    function updateMasterCheckbox() {
-        var $visible = getVisibleCheckboxes();
-        var total = $visible.length;
-        var checked = $visible.filter(":checked").length;
-        
-        // Обновляем главный чекбокс
-        var $masterCheck = $("#check_all");
-        $masterCheck.prop("checked", total > 0 && total === checked);
-        
-        // Добавляем indeterminate состояние (когда выбрана часть)
-        if (checked > 0 && checked < total) {
-            $masterCheck.prop("indeterminate", true);
-        } else {
-            $masterCheck.prop("indeterminate", false);
-        }
-        
-        // Обновляем текст кнопки "Сделать неактивными"
-        var $btnUnactive = $("button[name='todo'][value='unactive']");
-        if ($btnUnactive.length) {
-            if (checked > 0) {
-                $btnUnactive.html("<?php echo __('people_unactive'); ?> (" + checked + ")");
-            } else {
-                $btnUnactive.html("<?php echo __('people_unactive'); ?>");
-            }
-        }
-        
-        // Обновляем текст кнопки "Удалить карты"
-        var $btnDelete = $("button[name='todo'][value='delete']");
-        if ($btnDelete.length) {
-            if (checked > 0) {
-                $btnDelete.html("<?php echo __('card_delete'); ?> (" + checked + ")");
-            } else {
-                $btnDelete.html("<?php echo __('card_delete'); ?>");
-            }
-        }
-        
-        console.log('Обновлено: видимых чекбоксов ' + total + ', выбрано ' + checked);
-    }
-    
-    // Обработчик главного чекбокса
-    $("#check_all").off('click').on('click', function() {
-        var $visible = getVisibleCheckboxes();
-        $visible.prop("checked", $(this).prop("checked"));
-        updateMasterCheckbox();
-    });
-    
-    // Обработчик дочерних чекбоксов
-    $(document).on('change', '.checkbox', function() {
-        updateMasterCheckbox();
-    });
-    
-    // Следим за событиями фильтрации tablesorter
-    $("#tablesorter").on('filterEnd', function() {
-        setTimeout(function() {
-            updateMasterCheckbox();
-        }, 50);
-    });
-    
-    // Также обновляем при сортировке
-    $("#tablesorter").on('sortEnd', function() {
-        setTimeout(function() {
-            updateMasterCheckbox();
-        }, 50);
-    });
-    
-    // Перехват отправки формы
-    $("#cards-form").on('submit', function(e) {
-        var $visibleChecked = getVisibleCheckboxes().filter(":checked");
-        
-        if ($visibleChecked.length === 0) {
-            e.preventDefault();
-            alert("<?php echo __('Не выбрано ни одной видимой карты!'); ?>");
-            return false;
-        }
-        
-        // Для кнопки "Удалить карты" дополнительное подтверждение
-        var $clickedButton = $(document.activeElement);
-        if ($clickedButton.val() === 'delete') {
-            var confirmMsg = "<?php echo __('Будет удалено'); ?> " + $visibleChecked.length + " <?php echo __('карт (только видимые в текущем фильтре). Подтверждаете удаление?'); ?>";
-            if (!confirm(confirmMsg)) {
-                e.preventDefault();
-                return false;
-            }
-        } else if ($clickedButton.val() === 'unactive') {
-            var confirmMsg = "<?php echo __('Будет деактивировано'); ?> " + $visibleChecked.length + " <?php echo __('карт (только видимые в текущем фильтре). Подтверждаете операцию?'); ?>";
-            if (!confirm(confirmMsg)) {
-                e.preventDefault();
-                return false;
-            }
-        }
-        
-        // Отключаем невидимые чекбоксы, чтобы они не отправились на сервер
-        $(".checkbox").each(function() {
-            var $checkbox = $(this);
-            if (!$checkbox.closest("tr").is(":visible")) {
-                $checkbox.prop('disabled', true);
-            }
-        });
-        
-        return true;
-    });
-    
-    // Начальная инициализация
-    setTimeout(function() {
-        updateMasterCheckbox();
-        console.log('Чекбоксы инициализированы с учётом фильтрации');
-    }, 100);
-    
-    // Подсчет выбранных элементов (для обратной совместимости)
-    $(document).on('change', '.checkbox', function() {
-        updateSelectedCount();
-    });
-    
-    function updateSelectedCount() {
-        var selectedCount = $('.checkbox:checked').length;
-        $('#selected-count').text(selectedCount);
-        
-        var hasSelection = selectedCount > 0;
-        $('button[name="todo"][value="delete"]').prop('disabled', !hasSelection);
-    }
-    
-    // Инициализация счетчика
-    updateSelectedCount();
-});
-</script>
+<style type="text/css">
+/* Стили для пагинации */
+.pager {
+    margin: 10px 0;
+    padding: 8px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    border: 1px solid #e3e3e3;
+}
+
+.pager .btn-group {
+    margin-bottom: 5px;
+}
+
+.pager .btn-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.pager .btn-default {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+}
+
+.pager .btn-default:hover:not(:disabled) {
+    background-color: #e6e6e6;
+    border-color: #adadad;
+}
+
+.pager .btn-default:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.pager .pagedisplay {
+    font-weight: bold;
+    margin: 0 10px;
+}
+
+.pager select.form-control,
+.pager input.form-control {
+    margin-left: 5px;
+}
+
+.pager label {
+    margin-bottom: 0;
+    font-weight: normal;
+}
+
+/* Стили для таблицы */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table-bordered {
+    border: 1px solid #ddd;
+}
+
+.table-bordered > thead > tr > th,
+.table-bordered > tbody > tr > td {
+    border: 1px solid #ddd;
+}
+
+.table-striped > tbody > tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+.table-hover > tbody > tr:hover {
+    background-color: #f5f5f5;
+}
+
+.table-condensed > thead > tr > th,
+.table-condensed > tbody > tr > td {
+    padding: 5px;
+}
+
+/* Стили для чекбоксов */
+.form-check-input {
+    margin: 0;
+    cursor: pointer;
+}
+
+.text-center {
+    text-align: center;
+}
+</style>
+
 
 <?php if (isset($exec_time)): ?>
 <!-- Информация о времени генерации -->

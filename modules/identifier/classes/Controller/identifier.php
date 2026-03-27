@@ -136,7 +136,8 @@ class Controller_identifier extends Controller_Template {
 			
 			$this->template->full_width = true;
 				$content = View::factory(__('identifier/:view', array(':view'=>$view)), array(//начальная страница для работы с идентификаторами.
-					'list'=>array_slice($data,0, $rows_per_page),
+				//	'list'=>array_slice($data,0, $rows_per_page),
+					'list'=>$data,
 					'total_row_count'=>count($data),
 					'rows_per_page'=>$rows_per_page,
 					'type'=>$todo,

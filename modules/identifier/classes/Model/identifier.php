@@ -15,7 +15,7 @@ class Model_identifier extends Model
 	{
 		$listIdentifier=array();//начальные значения пустой массив	
 		//получаю массив: идентификатор - дата последнего прохода
-		$sql='select e.id_card, max(e.datetime) from events e
+		$sql='select first 500 e.id_card, max(e.datetime) from events e
 		where e.id_eventtype in (46, 50, 65, 70, 71, 145)
 		group by e.id_card';
 		return array_column(DB::query(Database::SELECT, iconv('UTF-8', 'CP1251',$sql))
@@ -27,7 +27,7 @@ class Model_identifier extends Model
 	
 	public function cardsFullList()
 	{
-		$sql='select 
+		$sql='select first 500
     c.id_card
     ,c.timestart
     ,c.timeend
