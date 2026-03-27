@@ -13,14 +13,8 @@
  * - $custom_info: дополнительная информация над таблицей (опционально)
  * - $title: заголовок таблицы (опционально)
  */
- 
-
 ?>
-<script type="text/javascript">
-    $(function() {        
-        $("#tablesorter").tablesorter({ headers: { 3:{sorter: false}}, widgets: ['zebra']});
-    });    
-</script>
+
 <div class="panel panel-primary">
     <div class="panel-heading">
         <h3 class="panel-title">
@@ -157,7 +151,7 @@
                             $safeCardId = htmlspecialchars($cardId, ENT_QUOTES, 'UTF-8');
                         ?>
                             <tr>
-                                <td class="text-center"><?php echo ++$sn; ?>;</td>
+                                <td class="text-center"><?php echo ++$sn; ?></td>
                                 <td class="text-center">
                                     <label>
                                         <?php echo Form::checkbox('identifier[]', $safeCardId, false, array(
@@ -359,6 +353,195 @@
 }
 </style>
 
+<script type="text/javascript">
+$(document).ready(function() {
+    // Инициализация tablesorter с пагинацией
+    var $table = $("#tablesorter");
+    
+    if ($.fn.tablesorter) {
+        // Инициализируем tablesorter
+        $table.tablesorter({
+            theme: 'blue',
+            widgets: ['zebra', 'filter'],
+            widgetOptions: {
+                filter_reset: '.reset-filter',
+                filter_searchDelay: 300,
+                filter_placeholder: { search: 'Поиск...' }
+            }
+        });
+        
+        // Инициализируем пагинатор
+        if ($.fn.tablesorterPager) {
+            $table.tablesorterPager({
+                // Контейнеры пагинации
+                container: $(".pager"),
+                // CSS классы
+                cssGoto: '.pagenum',
+                cssPageDisplay: '.pagedisplay',
+                cssPageSize: '.pagesize',
+                cssFirst: '.first',
+                cssPrev: '.prev',
+                cssNext: '.next',
+                cssLast: '.last',
+                // Настройки
+                output: 'Показано {startRow} - {endRow} из {totalRows} записей',
+                page: 0,
+                size: <?php echo isset($rows_per_page) && $rows_per_page <= 500 ? $rows_per_page : 50; ?>,
+                positionFixed: false,
+                savePages: false,
+                countChildRows: true,
+                updateArrows: true
+            });
+            
+            console.log('Tablesorter и пагинация инициализированы');
+        } else {
+            console.error('TablesorterPager не загружен');
+        }
+    } else {
+        console.error('Tablesorter не загружен');
+    }
+    
+    // ========== РАБОТА С ЧЕКБОКСАМИ ==========
+    
+    // Функция получения видимых чекбоксов (с учетом пагинации и фильтрации)
+    function getVisibleCheckboxes() {
+        return $(".checkbox").filter(function() {
+            var $row = $(this).closest("tr");
+            return $row.is(":visible");
+        });
+    }
+    
+    // Обновление состояния главного чекбокса
+    function updateMasterCheckbox() {
+        var $visible = getVisibleCheckboxes();
+        var total = $visible.length;
+        var checked = $visible.filter(":checked").length;
+        
+        var $masterCheck = $("#check_all");
+        
+        if (total === 0) {
+            $masterCheck.prop("checked", false);
+            $masterCheck.prop("disabled", true);
+        } else {
+            $masterCheck.prop("disabled", false);
+            $masterCheck.prop("checked", total === checked);
+        }
+        
+        if (checked > 0 && checked < total) {
+            $masterCheck.prop("indeterminate", true);
+        } else {
+            $masterCheck.prop("indeterminate", false);
+        }
+        
+        $('#selected-count').text(checked);
+        updateButtonText(checked);
+    }
+    
+    // Переключение всех видимых чекбоксов
+    function toggleAllVisibleCheckboxes() {
+        var $visible = getVisibleCheckboxes();
+        var shouldCheck = $("#check_all").prop("checked");
+        $visible.prop("checked", shouldCheck);
+        updateMasterCheckbox();
+    }
+    
+    function updateButtonText(checked) {
+        var $btnUnactive = $("button[name='todo'][value='unactive']");
+        var $btnDelete = $("button[name='todo'][value='delete']");
+        
+        if ($btnUnactive.length) {
+            if (checked > 0) {
+                $btnUnactive.html("<?php echo __('people_unactive'); ?> (" + checked + ")");
+                $btnUnactive.prop('disabled', false);
+            } else {
+                $btnUnactive.html("<?php echo __('people_unactive'); ?>");
+                $btnUnactive.prop('disabled', true);
+            }
+        }
+        
+        if ($btnDelete.length) {
+            if (checked > 0) {
+                $btnDelete.html("<?php echo __('card_delete'); ?> (" + checked + ")");
+                $btnDelete.prop('disabled', false);
+            } else {
+                $btnDelete.html("<?php echo __('card_delete'); ?>");
+                $btnDelete.prop('disabled', true);
+            }
+        }
+    }
+    
+    // Обработчики событий
+    $("#check_all").off('change').on('change', function() {
+        toggleAllVisibleCheckboxes();
+    });
+    
+    $(document).off('change', '.checkbox').on('change', '.checkbox', function() {
+        updateMasterCheckbox();
+    });
+    
+    // Следим за событиями пагинации и фильтрации
+    $table.on('filterEnd pagerComplete sortEnd', function() {
+        setTimeout(function() {
+            // Сбрасываем выделение при изменении фильтра/страницы
+            $("#check_all").prop("checked", false);
+            $("#check_all").prop("indeterminate", false);
+            updateMasterCheckbox();
+        }, 50);
+    });
+    
+    // Перехват отправки формы
+    $("#cards-form").off('submit').on('submit', function(e) {
+        var $visibleChecked = getVisibleCheckboxes().filter(":checked");
+        
+        if ($visibleChecked.length === 0) {
+            e.preventDefault();
+            alert("<?php echo __('Не выбрано ни одной видимой карты!'); ?>");
+            return false;
+        }
+        
+        var $clickedButton = $(document.activeElement);
+        if ($clickedButton.val() === 'delete') {
+            var confirmMsg = "<?php echo __('Будет удалено'); ?> " + $visibleChecked.length + 
+                           " <?php echo __('карт (только видимые в текущем фильтре). Подтверждаете удаление?'); ?>";
+            if (!confirm(confirmMsg)) {
+                e.preventDefault();
+                return false;
+            }
+        } else if ($clickedButton.val() === 'unactive') {
+            var confirmMsg = "<?php echo __('Будет деактивировано'); ?> " + $visibleChecked.length + 
+                           " <?php echo __('карт (только видимые в текущем фильтре). Подтверждаете операцию?'); ?>";
+            if (!confirm(confirmMsg)) {
+                e.preventDefault();
+                return false;
+            }
+        }
+        
+        // Отключаем невидимые чекбоксы
+        $(".checkbox").each(function() {
+            var $checkbox = $(this);
+            var $row = $checkbox.closest("tr");
+            if (!$row.is(":visible")) {
+                $checkbox.prop('disabled', true);
+            } else {
+                $checkbox.prop('disabled', false);
+            }
+        });
+        
+        // Снимаем выделение со скрытых чекбоксов
+        $(".checkbox").filter(function() {
+            var $row = $(this).closest("tr");
+            return !$row.is(":visible");
+        }).prop("checked", false);
+        
+        return true;
+    });
+    
+    // Начальная инициализация
+    setTimeout(function() {
+        updateMasterCheckbox();
+    }, 100);
+});
+</script>
 
 <?php if (isset($exec_time)): ?>
 <!-- Информация о времени генерации -->

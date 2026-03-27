@@ -34,9 +34,15 @@
     <script src="/city/static/js/moment-with-locales.min.js"></script>
     <script src="/city/static/js/bootstrap.min.js"></script>
     <script src="/city/static/js/bootstrap-datetimepicker.min.js"></script>
-    <script src="/city/static/js/jquery.tablesorter.min.js"></script>
-    <script src="/city/static/js/jquery.tablesorter.widgets.min.js"></script>
+   
 
+<!-- В head или перед закрывающим body -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/theme.blue.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/jquery.tablesorter.pager.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.widgets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/extras/jquery.tablesorter.pager.min.js"></script>
 
 
 </head>
