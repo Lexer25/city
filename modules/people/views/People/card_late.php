@@ -1,10 +1,11 @@
 <?php
-// people/views/Peopler/card_late.php
+// people/views/People/card_late.php
 /**
- * Отображение просроченных карт
+ * Отображение просроченных карт (people / find_card_late и др.).
  */
+$people_table_variant = 'card_late';
 
-// Определение заголовков таблицы
+// Определение заголовков таблицы (резерв под динамические колонки)
 $headers = array(
     'ID_CARD' => 'ID карты',
     'TIMESTART' => 'Начало действия',
@@ -24,6 +25,5 @@ $headers = array(
 $title = __('Список карт c истекшим сроком действия.');
 $custom_info = '<p><strong>Примечание:</strong> В данный список включены карты, по которым в базе данных отсутствуют любые отметки о проходе.</p>';
 
-// Подключаем общий шаблон таблицы
-include('_table.php');
+include '_table.php';
 ?>

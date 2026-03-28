@@ -338,4 +338,92 @@ class Controller_People extends Controller_Template {
 	}
 	
 	
+	/**
+ * Обработка действий с картами (удаление, деактивация)
+ * Принимает POST запросы от формы в _table.php
+ */
+public function action_control()
+{
+      
+    $todo = Arr::get($_POST, 'todo');
+    $id_cards = Arr::get($_POST, 'id_pep', array());
+   echo Debug::vars('350', $_POST);exit; 
+    // Обрабатываем id_cards - убираем лишние кавычки, если они есть
+    if (is_array($id_cards)) {
+        $id_cards = array_map(function($card) {
+            return trim($card, "'");
+        }, $id_cards);
+        $id_cards = array_filter($id_cards);
+    } else {
+        $id_cards = array();
+    }
+    
+    if (empty($id_cards)) {
+        Kohana::$log->add(Log::INFO, 'action_control: Не выбрано ни одной карты для операции');
+        $this->redirect('people/find_card_late');
+        return;
+    }
+    
+    Kohana::$log->add(Log::INFO, 'action_control: Выполняется операция :todo для :count карт', array(
+        ':todo' => $todo,
+        ':count' => count($id_cards)
+    ));
+    
+    switch ($todo) {
+        case 'unactive':
+            // Деактивация карт
+            $this->card_unactive($id_cards);
+            break;
+            
+        case 'delete':
+            // Удаление карт
+            $this->card_delete_action($id_cards);
+            break;
+            
+        default:
+            Kohana::$log->add(Log::WARNING, 'action_control: Неизвестная операция :todo', array(':todo' => $todo));
+            break;
+    }
+    
+    // Возвращаемся на страницу, с которой пришли
+    $redirect_url = Arr::get($_POST, 'redirect_url', 'people/find_card_late');
+    $this->redirect($redirect_url);
+}
+
+/**
+ * Деактивация карт по ID карт
+ * @param array $id_cards Массив ID карт
+ */
+private function card_unactive($id_cards)
+{
+    if (empty($id_cards)) {
+        return;
+    }
+    
+    try {
+        Model::Factory('People')->card_people_unactive($id_cards);
+        Kohana::$log->add(Log::INFO, 'card_unactive: Деактивировано :count карт', array(':count' => count($id_cards)));
+    } catch (Exception $e) {
+        Kohana::$log->add(Log::ERROR, 'card_unactive: Ошибка при деактивации карт: :error', array(':error' => $e->getMessage()));
+    }
+}
+
+/**
+ * Удаление карт по ID карт
+ * @param array $id_cards Массив ID карт
+ */
+private function card_delete_action($id_cards)
+{
+    if (empty($id_cards)) {
+        return;
+    }
+    
+    try {
+        Model::Factory('People')->card_Card_delete($id_cards);
+        Kohana::$log->add(Log::INFO, 'card_delete_action: Удалено :count карт', array(':count' => count($id_cards)));
+    } catch (Exception $e) {
+        Kohana::$log->add(Log::ERROR, 'card_delete_action: Ошибка при удалении карт: :error', array(':error' => $e->getMessage()));
+    }
+}
+	
 }

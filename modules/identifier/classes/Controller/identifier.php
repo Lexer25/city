@@ -57,7 +57,7 @@ class Controller_identifier extends Controller_Template {
 	}
 	
 	
-	/** 5.02.2026 тут ожидаю команды для выполнения каких-либо действий
+	/** 5.02.2026 тут ожидаю команды для подготовки отчетов
 	*/
 	public function action_action()
 	{
@@ -161,9 +161,10 @@ class Controller_identifier extends Controller_Template {
 		
 	}
 	
-	public function action_control()
+	//а тут жду команды на обработку массивов карт (удалить, изменить...)
+	public function action_control_del()
 	{
-		//echo Debug::vars('148', $_POST);exit;
+		echo Debug::vars('148', $_POST);exit;
 		$post=Validation::factory($_POST);
 		$post->rule('identifier', 'not_empty')
 				 ->rule('todo', 'not_empty')
@@ -296,5 +297,239 @@ class Controller_identifier extends Controller_Template {
 			}
 			exit;
 	}
+	//=======================28.03.2026 
+	/**
+		 * Обработка массовых действий с идентификаторами (картами)
+		 * Принимает POST запросы от формы в представлениях identifier
+		 */
+		public function action_control()
+		{
+			// Логируем входящие данные для отладки
+			Kohana::$log->add(Log::DEBUG, 'identifier::action_control - POST: ' . print_r($_POST, true));
+			
+			// Получаем и очищаем идентификаторы
+			$identifiers = Arr::get($_POST, 'identifier', array());
+			
+			if (is_array($identifiers)) {
+				$identifiers = array_map(function($id) {
+					return trim($id, "'\"");
+				}, $identifiers);
+				$identifiers = array_filter($identifiers);
+			} else {
+				$identifiers = array();
+			}
+			
+			// Получаем тип операции
+			$todo = Arr::get($_POST, 'todo');
+			
+			// Проверяем наличие идентификаторов
+			if (empty($identifiers)) {
+				Kohana::$log->add(Log::WARNING, 'identifier::action_control - Не выбрано ни одного идентификатора');
+				$this->set_flash_message('warning', __('Не выбрано ни одной карты для выполнения операции'));
+				$this->redirect('identifier');
+				return;
+			}
+			
+			// Выполняем операцию в зависимости от типа
+			switch ($todo) {
+				case 'unactive':
+					$this->process_unactive($identifiers);
+					break;
+					
+				case 'delete':
+					$this->process_delete($identifiers);
+					break;
+					
+				case 'extend': // пример дополнительной операции
+					$this->process_extend($identifiers);
+					break;
+					
+				default:
+					Kohana::$log->add(Log::WARNING, 'identifier::action_control - Неизвестная операция: :todo', 
+						array(':todo' => $todo));
+					$this->set_flash_message('error', __('Неизвестная операция: :operation', array(':operation' => $todo)));
+					$this->redirect('identifier');
+					return;
+			}
+			
+			// Возвращаемся на страницу, с которой пришли
+			$redirect_url = Arr::get($_POST, 'redirect_url', 'identifier');
+			$this->redirect($redirect_url);
+		}
+
+		/**
+		 * Обработка деактивации карт
+		 * @param array $identifiers Массив ID карт
+		 */
+		private function process_unactive($identifiers)
+		{
+			$result = $this->unactive_identifiers($identifiers);
+			
+			// Устанавливаем flash сообщение
+			$flash_type = $result['success'] ? 'success' : ($result['count_success'] > 0 ? 'warning' : 'error');
+			
+			$message = $result['message'];
+			if (!empty($result['errors_list'])) {
+				$message .= ' ' . __('Детали') . ': ' . implode('; ', array_slice($result['errors_list'], 0, 3));
+				if (count($result['errors_list']) > 3) {
+					$message .= '...';
+				}
+			}
+			
+			$this->set_flash_message($flash_type, $message);
+			
+			// Логируем результат
+			Kohana::$log->add(Log::INFO, 'process_unactive завершена. Успешно: :success, Ошибок: :error', 
+				array(':success' => $result['count_success'], ':error' => $result['count_error']));
+		}
+
+		/**
+		 * Обработка удаления карт
+		 * @param array $identifiers Массив ID карт
+		 */
+		private function process_delete($identifiers)
+		{
+			$result = $this->delete_identifiers($identifiers);
+			
+			// Устанавливаем flash сообщение
+			$flash_type = $result['success'] ? 'success' : ($result['count_success'] > 0 ? 'warning' : 'error');
+			
+			$message = $result['message'];
+			if (!empty($result['errors_list'])) {
+				$message .= ' ' . __('Детали') . ': ' . implode('; ', array_slice($result['errors_list'], 0, 3));
+				if (count($result['errors_list']) > 3) {
+					$message .= '...';
+				}
+			}
+			
+			$this->set_flash_message($flash_type, $message);
+			
+			// Логируем результат
+			Kohana::$log->add(Log::INFO, 'process_delete завершена. Успешно: :success, Ошибок: :error', 
+				array(':success' => $result['count_success'], ':error' => $result['count_error']));
+		}
+
+		/**
+		 * Установка flash сообщения
+		 * @param string $type Тип сообщения (success, warning, error, info)
+		 * @param string $text Текст сообщения
+		 */
+		private function set_flash_message($type, $text)
+		{
+			Session::instance()->set('flash_message', array(
+				'type' => $type,
+				'text' => $text
+			));
+		}
+		
+		/**
+		 * Деактивация выбранных идентификаторов (карт)
+		 * @param array $identifiers Массив ID карт
+		 * @return array Результат операции
+		 */
+		private function unactive_identifiers($identifiers)
+		{
+			if (empty($identifiers)) {
+				return array(
+					'success' => false,
+					'message' => __('Не выбрано ни одной карты'),
+					'count_success' => 0,
+					'count_error' => 0
+				);
+			}
+			
+			$total_success = 0;
+			$total_errors = 0;
+			$errors_list = array();
+			
+			// Разбиваем на чанки для безопасности SQL
+			$chunks = array_chunk($identifiers, 500);
+			
+			foreach ($chunks as $chunk_index => $chunk) {
+				try {
+					$model = Model::factory('identifier');
+					if ($model->setUnactive($chunk)) {
+						$total_success += count($chunk);
+						Kohana::$log->add(Log::INFO, 'Деактивировано :count карт (chunk :chunk)', 
+							array(':count' => count($chunk), ':chunk' => $chunk_index + 1));
+					} else {
+						$error_msg = $model->mess ?: 'Неизвестная ошибка';
+						$total_errors += count($chunk);
+						$errors_list[] = "Chunk " . ($chunk_index + 1) . ": " . $error_msg;
+						Kohana::$log->add(Log::ERROR, 'Ошибка деактивации: :error', 
+							array(':error' => $error_msg));
+					}
+				} catch (Exception $e) {
+					$total_errors += count($chunk);
+					$errors_list[] = "Chunk " . ($chunk_index + 1) . ": " . $e->getMessage();
+					Kohana::$log->add(Log::ERROR, 'Исключение при деактивации: :error', 
+						array(':error' => $e->getMessage()));
+				}
+			}
+			
+			return array(
+				'success' => ($total_errors == 0),
+				'message' => sprintf(__('Деактивировано карт: %d. Ошибок: %d.'), $total_success, $total_errors),
+				'count_success' => $total_success,
+				'count_error' => $total_errors,
+				'errors_list' => $errors_list,
+				'identifiers' => $identifiers
+			);
+		}
+
+		/**
+		 * Удаление выбранных идентификаторов (карт)
+		 * @param array $identifiers Массив ID карт
+		 * @return array Результат операции
+		 */
+		private function delete_identifiers($identifiers)
+		{
+			if (empty($identifiers)) {
+				return array(
+					'success' => false,
+					'message' => __('Не выбрано ни одной карты'),
+					'count_success' => 0,
+					'count_error' => 0
+				);
+			}
+			
+			$total_success = 0;
+			$total_errors = 0;
+			$errors_list = array();
+			
+			// Разбиваем на чанки для безопасности SQL
+			$chunks = array_chunk($identifiers, 500);
+			
+			foreach ($chunks as $chunk_index => $chunk) {
+				try {
+					$model = Model::factory('identifier');
+					if ($model->delCardArray($chunk)) {
+						$total_success += count($chunk);
+						Kohana::$log->add(Log::INFO, 'Удалено :count карт (chunk :chunk)', 
+							array(':count' => count($chunk), ':chunk' => $chunk_index + 1));
+					} else {
+						$error_msg = $model->mess ?: 'Неизвестная ошибка';
+						$total_errors += count($chunk);
+						$errors_list[] = "Chunk " . ($chunk_index + 1) . ": " . $error_msg;
+						Kohana::$log->add(Log::ERROR, 'Ошибка удаления: :error', 
+							array(':error' => $error_msg));
+					}
+				} catch (Exception $e) {
+					$total_errors += count($chunk);
+					$errors_list[] = "Chunk " . ($chunk_index + 1) . ": " . $e->getMessage();
+					Kohana::$log->add(Log::ERROR, 'Исключение при удалении: :error', 
+						array(':error' => $e->getMessage()));
+				}
+			}
+			
+			return array(
+				'success' => ($total_errors == 0),
+				'message' => sprintf(__('Удалено карт: %d. Ошибок: %d.'), $total_success, $total_errors),
+				'count_success' => $total_success,
+				'count_error' => $total_errors,
+				'errors_list' => $errors_list,
+				'identifiers' => $identifiers
+			);
+		}
 	
 }

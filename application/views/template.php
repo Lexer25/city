@@ -48,6 +48,45 @@
 </head>
 
 <body>
+<?php
+// В начале файла template.php (после открытия тега body)
+// Получаем flash-сообщение из сессии
+$flash_message = Session::instance()->get('flash_message');
+if ($flash_message) {
+    // Удаляем сообщение из сессии, чтобы оно не отображалось повторно
+    Session::instance()->delete('flash_message');
+    
+    $type = Arr::get($flash_message, 'type', 'info');
+    $text = Arr::get($flash_message, 'text', '');
+    
+    // Определяем класс Bootstrap alert в зависимости от типа
+    $alert_class = '';
+    switch ($type) {
+        case 'success':
+            $alert_class = 'alert-success';
+            break;
+        case 'error':
+            $alert_class = 'alert-danger';
+            break;
+        case 'warning':
+            $alert_class = 'alert-warning';
+            break;
+        case 'info':
+        default:
+            $alert_class = 'alert-info';
+            break;
+    }
+    
+    // Выводим сообщение
+    echo '<div class="alert ' . $alert_class . ' alert-dismissible fade in" role="alert">';
+    echo '<button type="button" class="close" data-dismiss="alert" aria-label="Close">';
+    echo '<span aria-hidden="true">&times;</span>';
+    echo '</button>';
+    echo htmlspecialchars($text);
+    echo '</div>';
+}
+?>
+
 	<!-- В template.php установка ширины страницы-->
 	<!-- для вывода страницы во всю ширину в контроллере необходимо указать $this->template->full_width = true; -->
 	<?php

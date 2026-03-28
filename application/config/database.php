@@ -8,7 +8,7 @@ return array
 					//'dsn'		=> 'odbc:SDUO',
 					//'dsn'		=> 'odbc:Kalibr',
 					//'dsn'		=> 'odbc:Kalibr_25',
-					'dsn'		=> 'odbc:HL2',
+					'dsn'		=> 'odbc:HL',
 					'charset'   => 'windows-1251',
 					)
 				),

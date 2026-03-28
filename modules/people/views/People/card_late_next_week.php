@@ -1,29 +1,10 @@
 <?php
-// people/views/Peopler/card_late.php
 /**
- * Отображение просроченных карт
+ * Карты, срок действия которых скоро истекает (people / find_card_late_next_week).
+ * Общая разметка — modules/people/views/People/_table.php
  */
+$people_table_variant = 'card_late_next_week';
+$title = __('card_late_next_week_info');
+$custom_info = '<p><strong>Примечание:</strong> Перечень карт, у которых окончание срока действия попадает в окно от «сейчас» до горизонта, заданного параметром <code>count_day_befor_end_time</code>.</p>';
 
-// Определение заголовков таблицы
-$headers = array(
-    'ID_CARD' => 'ID карты',
-    'TIMESTART' => 'Начало действия',
-    'TIMEEND' => 'Окончание действия',
-    'ACTIVE' => 'Активна',
-    'IDTYPE' => 'Тип карты',
-    'CREATEDAT' => 'Дата создания',
-    'ID_PEP' => 'ID сотрудника',
-    'FIO' => 'ФИО',
-    'ID_ORG' => 'ID организации',
-    'ORGNAME' => 'Название организации',
-    'ID_PARENT' => 'ID родительской организации',
-    'ORGPARENTNAME' => 'Родительская организация',
-    'lastevent' => 'Последнее событие'
-);
-
-$title = __('Список карт, срок действия которых скоро завершиться.');
-$custom_info = '<p><strong>Примечание:</strong> В данный список включены карты, по которым в базе данных отсутствуют любые отметки о проходе.</p>';
-
-// Подключаем общий шаблон таблицы
-include('_table.php');
-?>
+include '_table.php';

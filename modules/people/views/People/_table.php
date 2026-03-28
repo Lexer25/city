@@ -1,18 +1,16 @@
 <?php
-// identifier/views/identifier/_table.php
+// people/views/People/_table.php
 /**
- * Общий шаблон для отображения таблицы карт
- * Доступные переменные:
- * - $list: массив данных для отображения
- * - $headers: массив заголовков таблицы (ключ => отображаемое имя)
- * - $total_row_count: общее количество записей
- * - $rows_per_page: количество отображаемых строк
- * - $type: тип отчета (для экспорта)
- * - $arg: аргументы запроса (для передачи в форму экспорта)
- * - $show_actions: показывать ли панель действий (по умолчанию true)
- * - $custom_info: дополнительная информация над таблицей (опционально)
- * - $title: заголовок таблицы (опционально)
+ * Общий шаблон для отображения таблицы (people: просроченные / скоро истекающие карты).
+ * - $people_table_variant: 'card_late' | 'card_late_next_week' (по умолчанию card_late)
+ * - $list, $title, $custom_info — см. ниже
  */
+if (!isset($people_table_variant)) {
+	$people_table_variant = 'card_late';
+}
+if (!isset($total_row_count) && isset($list) && is_array($list)) {
+	$total_row_count = count($list);
+}
 ?>
 
 <div class="panel panel-primary">
@@ -43,7 +41,7 @@
         <!-- Кнопка экспорта -->
         <div class="mb-3" style="margin-bottom: 15px;">
             <?php 
-            echo Form::open('identifier/save_csv', array('class' => 'form-inline'));
+            echo Form::open('people/save_csv', array('class' => 'form-inline'));
             echo Form::button('todo', __('Сохранить список в файл'), array(
                 'value' => isset($type) ? $type : '',
                 'class' => 'btn btn-primary',
@@ -115,7 +113,7 @@
 		
 		<thead>
 		<tr>
-			<th class="filter-false" ><?echo __('pp');?></th>
+			<th class="filter-false" ><?php echo __('pp'); ?></th>
 			<th class="filter-false sorter-false" ><label><input type="checkbox" name="id_pep" id="check_all"> </label></th>
 			<th><?php echo __('pep_id');?></th>
 			<th class="filter-true sorter-true"><?php echo __('name');?></th>
@@ -123,48 +121,64 @@
 			
 			<th><?php echo __('card');?></th>
 			<th><?php echo __('card_date_end');?></th>
+			<?php if ($people_table_variant === 'card_late_next_week'): ?>
+			<th><?php echo __('overlong');?></th>
+			<?php else: ?>
 			<th><?php echo __('overlate');?></th>
 			<th><?php echo __('isactive');?></th>
+			<?php endif; ?>
 			
 			
 		</tr>
 		</thead>
 		<tbody>
-		<?
+		<?php
 		$pp=0;
 		foreach ($list as $key=>$contact)
 		{
-			
-			 // Получаем значение TIMEEND
-                    $timeend = Arr::get($contact, 'TIMEEND');
-                    
-                    // Безопасный расчет просрочки
-                    if ($timeend && $timeend != __('No_card')) {
-                        $overlate = Date::span(strtotime($timeend), time(), 'months,days');
-                        $months = Arr::get($overlate, 'months', 0);
-                        $days = Arr::get($overlate, 'days', 0);
-                        $date_end_display = date("d.m.Y", strtotime($timeend));
-                    } else {
-                        $months = 0;
-                        $days = 0;
-                        $date_end_display = __('No_card');
-                    }
-					
-					
-		echo '<tr>';
-			echo '<td>'.$pp++.'</td>';
-			echo '<td><label>'.Form::checkbox('id_pep[]', '\''.Arr::get($contact, 'ID_CARD').'\'', FALSE, array('class'=>'checkbox')).'</label></td>';
-			echo '<td>'.Arr::get($contact, 'ID_PEP').'</td>';
-			echo '<td>'.HTML::anchor('people/peopleInfo/'.Arr::get($contact, 'ID_PEP'),  Arr::get($contact,'SURNAME').' '.Arr::get($contact, 'NAME').' '.Arr::get($contact,'PATRONYMIC')).'</td>';
-			
-			echo '<td>'.Arr::get($contact, 'ORG_PARENT', __('No_card')).'</td>';
-			echo '<td>'.Arr::get($contact, 'ID_CARD', __('No_card')).'</td>';
-			//echo '<td>'.date("d.m.Y", strtotime(Arr::get($contact, 'TIMEEND', __('No_card')))).'</td>';
-			echo '<td>'.$date_end_display.'</td>';
-			echo '<td>' . $months . ' мес. ' . $days . ' дн.</td>';
-			echo '<td>'. Arr::get($contact, 'ISACTIVE',0).'</td>';
-			
-		echo '</tr>';
+			$timeend = Arr::get($contact, 'TIMEEND');
+
+			if ($people_table_variant === 'card_late_next_week') {
+				if ($timeend && $timeend != __('No_card')) {
+					$date_end_display = date("d.m.Y H:i", strtotime($timeend));
+					$days_left = (int) round((strtotime($timeend) - time()) / 86400);
+				} else {
+					$date_end_display = __('No_card');
+					$days_left = 0;
+				}
+				echo '<tr>';
+				echo '<td>'.$pp++.'</td>';
+				echo '<td><label>'.Form::checkbox('id_pep[]', '\''.Arr::get($contact, 'ID_CARD').'\'', FALSE, array('class'=>'checkbox')).'</label></td>';
+				echo '<td>'.Arr::get($contact, 'ID_PEP').'</td>';
+				echo '<td>'.HTML::anchor('people/peopleInfo/'.Arr::get($contact, 'ID_PEP'), Arr::get($contact,'SURNAME').' '.Arr::get($contact, 'NAME').' '.Arr::get($contact,'PATRONYMIC')).'</td>';
+				echo '<td>'.Arr::get($contact, 'ORG_PARENT', __('No_card')).'</td>';
+				echo '<td>'.Arr::get($contact, 'ID_CARD', __('No_card')).'</td>';
+				echo '<td>'.$date_end_display.'</td>';
+				echo '<td>'.$days_left.' дн.</td>';
+				echo '</tr>';
+			} else {
+				if ($timeend && $timeend != __('No_card')) {
+					$overlate = Date::span(strtotime($timeend), time(), 'months,days');
+					$months = Arr::get($overlate, 'months', 0);
+					$days = Arr::get($overlate, 'days', 0);
+					$date_end_display = date("d.m.Y", strtotime($timeend));
+				} else {
+					$months = 0;
+					$days = 0;
+					$date_end_display = __('No_card');
+				}
+				echo '<tr>';
+				echo '<td>'.$pp++.'</td>';
+				echo '<td><label>'.Form::checkbox('id_pep[]', '\''.Arr::get($contact, 'ID_CARD').'\'', FALSE, array('class'=>'checkbox')).'</label></td>';
+				echo '<td>'.Arr::get($contact, 'ID_PEP').'</td>';
+				echo '<td>'.HTML::anchor('people/peopleInfo/'.Arr::get($contact, 'ID_PEP'), Arr::get($contact,'SURNAME').' '.Arr::get($contact, 'NAME').' '.Arr::get($contact,'PATRONYMIC')).'</td>';
+				echo '<td>'.Arr::get($contact, 'ORG_PARENT', __('No_card')).'</td>';
+				echo '<td>'.Arr::get($contact, 'ID_CARD', __('No_card')).'</td>';
+				echo '<td>'.$date_end_display.'</td>';
+				echo '<td>'.$months.' мес. '.$days.' дн.</td>';
+				echo '<td>'.Arr::get($contact, 'ISACTIVE', 0).'</td>';
+				echo '</tr>';
+			}
 					
 			}
 				?>
