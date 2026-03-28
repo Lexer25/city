@@ -93,9 +93,8 @@ class Model_Apb extends Model {
 	
 	public function get_list()// получить список настроек apb
 	{
+		
 		$sql='select p.id, p.id_db, p.name, p.guest_duration as DURATION, p.enabled from PERIMETER p';
-		
-		
 		$query = DB::query(Database::SELECT, $sql)
 			->execute(Database::instance('fb'))
 			->as_array();
@@ -109,7 +108,8 @@ class Model_Apb extends Model {
 			
 			
 		}
-		return $res;	
+		//return $res;	
+		return !empty($res) ? $res : [];
 	}
 	
 	

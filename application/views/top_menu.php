@@ -77,7 +77,7 @@
                     'skud' => array(
                         'title' => __('сводная'),
                         'url' => 'skud',
-                        'condition' => true
+                        'condition' => false
                     ),
                     'eximdata' => array(
                         'title' => __('Экспорт/импорт'),

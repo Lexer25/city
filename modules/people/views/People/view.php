@@ -4,24 +4,24 @@
 <div class="panel panel-primary"> 
 
   <div class="panel-heading">
-    <h3 class="panel-title"><?echo __('people_panel_title')?></h3>
+    <h3 class="panel-title"><?php echo __('people_panel_title')?></h3>
   </div>
   <div class="panel-body">
 	
-<?// таблица общих данных о жильце?>
+<?php // таблица общих данных о жильце?>
 	<table class="table table-striped table-hover table-condensed table-bordered">
 		<tr>
 			<td>
-			<?if (Arr::get($contact, 'PHOTO') != null) { ?>
+			<?php if (Arr::get($contact, 'PHOTO') != null) { ?>
 				<img src="data:image/jpeg;base64,<?php echo base64_encode($contact['PHOTO']); ?>" height="200" alt="photo" />
-				 } else { 
+				 <?php } else { 
 					echo HTML::image("images/nophoto.png", array('height' => 200, 'alt' => 'photo'));
 			}
 			
 			?>
 			</td>
 			<td>
-				<? 
+				<?php 
 				echo Arr::get($contact,'SURNAME').' '.Arr::get($contact, 'NAME').' '.Arr::get($contact,'PATRONYMIC').'<br>';
 				echo __('tabmum'). ' '.Arr::get($contact, 'TABNUM', __('No_card')).'<br>';
 				echo __('id_pep'). ' '.Arr::get($contact, 'ID_PEP', __('No_card')).'<br>';
@@ -67,7 +67,7 @@
 			</td>	
 			<td>
 				
-				<? // информация о типе авторизации
+				<?php // информация о типе авторизации
 				
 				echo __('about_pep_authmode'). '<br><br>';
 				
@@ -88,23 +88,23 @@
 			
 		</tr>
 	</table>
-<?// таблица последний событий жильца?>
+<?php // таблица последний событий жильца?>
 	<div class="panel panel-primary">
 		<div class="panel-heading">
-			<h3 class="panel-title"><?echo __('people_event_title', array(':dateFrom'=>Arr::get($_SESSION, 'peopleEventsTimeFrom', date("d.m.Y H:i:s",strtotime("-1 days"))), ':dateTo'=>Arr::get($_SESSION, 'peopleEventsTimeTo', date("d.m.Y H:i:s"))))?></h3>
+			<h3 class="panel-title"><?php echo __('people_event_title', array(':dateFrom'=>Arr::get($_SESSION, 'peopleEventsTimeFrom', date("d.m.Y H:i:s",strtotime("-1 days"))), ':dateTo'=>Arr::get($_SESSION, 'peopleEventsTimeTo', date("d.m.Y H:i:s"))))?></h3>
 		</div>	
-	<? //echo Debug::vars('88', $events);?>
+	<?php //echo Debug::vars('88', $events);?>
 	<table class="table table-striped table-hover table-condensed table-bordered">
 					<tr>
-						<th><?echo __('timestamp');?></th>
-						<th><?echo __('door');?></th>
-						<th><?echo __('card');?></th>
-						<th><?echo __('note');?></th>
-						<th><?echo __('event_name');?></th>
-						<th><?echo __('event_analit');?></th>
+						<th><?php echo __('timestamp');?></th>
+						<th><?php echo __('door');?></th>
+						<th><?php echo __('card');?></th>
+						<th><?php echo __('note');?></th>
+						<th><?php echo __('event_name');?></th>
+						<th><?php echo __('event_analit');?></th>
 					</tr>
 						
-				<?foreach ($events as $key=>$value)
+				<?php foreach ($events as $key=>$value)
 				{
 					$tr_color='warning';
 					if(Arr::get($value, 'EVENT_ANALIT') == 0) $tr_color='success';
@@ -154,27 +154,27 @@
 	</table>
 	</div>
 	
-	<?// таблица загрузки карты жильца в контроллеры?>
+	<?php // таблица загрузки карты жильца в контроллеры?>
 	<div class="panel panel-primary">
 		<div class="panel-heading">
-			<h3 class="panel-title"><?echo __('people_load_card')?></h3>
+			<h3 class="panel-title"><?php echo __('people_load_card')?></h3>
 		</div>	
 				<table class="table table-striped table-hover table-condensed table-bordered">
 					<tr>
-						<th><?echo __('SER_NUM');?></th>
-						<th><?echo __('door');?></th>
-						<th><?echo __('load_result');?></th>
-						<th><?echo __('load_time');?></th>
-						<th><?echo __('load_del');?></th>
-						<th><?echo __('load_insert');?></th>
-				<?
+						<th><?php echo __('SER_NUM');?></th>
+						<th><?php echo __('door');?></th>
+						<th><?php echo __('load_result');?></th>
+						<th><?php echo __('load_time');?></th>
+						<th><?php echo __('load_del');?></th>
+						<th><?php echo __('load_insert');?></th>
+				<?php
 				$row_count=1;
 			//	echo Debug::vars('139', $doors);exit;
 				foreach ($doors as $key=>$value)
 				{
 					echo '<tr>';
 						echo '<td>'.$row_count++.'</td>';
-						echo '<td>'.Arr::get($value, 'NAME').'('.Arr::get($value, 'ID_DEV').')'.' '.Arr::get($value, 'STANDALONE').' </td>';
+						echo '<td>'.Arr::get($value, 'NAME').'('.Arr::get($value, 'ID_DEV').')'.' '.Arr::get($value, 'STANDALONE').'  </td>';
 						
 						if(Arr::get($value, 'STANDALONE') == 0){
 							echo '<td>'.__('standalone').'</td>';
@@ -211,6 +211,3 @@
 
 </div>	
 </div>
-	
-  
-
