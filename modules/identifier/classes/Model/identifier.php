@@ -15,7 +15,7 @@ class Model_identifier extends Model
 	{
 		$listIdentifier=array();//начальные значения пустой массив	
 		//получаю массив: идентификатор - дата последнего прохода
-		$sql='select first 500 e.id_card, max(e.datetime) from events e
+		$sql='select  e.id_card, max(e.datetime) from events e
 		where e.id_eventtype in (46, 50, 65, 70, 71, 145)
 		group by e.id_card';
 		return array_column(DB::query(Database::SELECT, iconv('UTF-8', 'CP1251',$sql))
@@ -27,7 +27,7 @@ class Model_identifier extends Model
 	
 	public function cardsFullList()
 	{
-		$sql='select first 500
+		$sql='select 
     c.id_card
     ,c.timestart
     ,c.timeend
@@ -68,16 +68,21 @@ class Model_identifier extends Model
 		//получаю весь список карт с метками прохода
 		$cardsArray =$this->allCards();
 		//и выбираю те записи, у которых метка времени lastevent меньше указанной
-		
+	//echo Debug::vars('71', $cardsArray);exit;	
 		$filteredArray = array_filter($cardsArray, function($card) use ($cutoffDate) {
 			// Если lastevent пустое или null
 			if (empty($card['lastevent'])) {
 				return false;
 			}
 			
+			// Если карта не активна, то не выводить
+			if (empty($card['ACTIVE'])) {
+				return false;
+			}
+			
 			// Преобразуем lastevent в объект DateTime
 			$lasteventDate = DateTime::createFromFormat('Y-m-d H:i:s', $card['lastevent']);
-			
+	
 			// Если преобразование не удалось, пропускаем запись
 			if (!$lasteventDate) {
 				
@@ -88,7 +93,7 @@ class Model_identifier extends Model
 			return $lasteventDate < $cutoffDate;
 			});
 		
-		
+	
 		return $filteredArray;
 		
 	}
@@ -150,6 +155,37 @@ class Model_identifier extends Model
 	
 	
 	
+	/**29.03.2026 функция продлевает time_end для указанного массива карт.
+		*/	
+	public function prolong($cards, $date)
+	{
+		//добавляю апострофы
+		$cards_quoted = array_map(function($card) {
+        return "'" . $card . "'";
+    }, $cards);
+    
+    $cards_string = implode(',', $cards_quoted);
+    
+    $sql = 'update card c 
+            set c.timeend=\''.$date.'\'
+            WHERE c.id_card IN (' . $cards_string . ')';
+    
+
+		try
+			{
+			$query = DB::query(Database::UPDATE, $sql)
+			->execute(Database::instance('fb'));
+			return true;
+			} catch (Exception $e) {
+				Log::instance()->add(Log::DEBUG, $e->getMessage());
+				$this->mess=$e->getMessage();
+				return 	false;
+			}
+			
+		
+	}
+	
+	
 	/**1.02.2026 функция устанавилвает ACTIVE=0 для указанного массива карт.
 		*/	
 	public function setUnactive($cards)
@@ -179,6 +215,8 @@ class Model_identifier extends Model
 			
 		
 	}
+	
+	
 	
 	/**27.03.2026 удаляет карты из указанного массива карт.
 		*/	

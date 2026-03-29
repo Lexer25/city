@@ -32,8 +32,6 @@ if (!isset($total_row_count) && isset($list) && is_array($list)) {
             if (isset($total_row_count) && $total_row_count < $show_row) {
                 $show_row = $total_row_count;
             }
-            echo __('Из них показаны') . ' ' . $show_row;
-            echo '<br>';
             echo __('Для получения всего списка сохраните список в файл. В файле будет полный набор данных.');
             ?>
         </div>
@@ -148,7 +146,7 @@ if (!isset($total_row_count) && isset($list) && is_array($list)) {
 				}
 				echo '<tr>';
 				echo '<td>'.$pp++.'</td>';
-				echo '<td><label>'.Form::checkbox('id_pep[]', '\''.Arr::get($contact, 'ID_CARD').'\'', FALSE, array('class'=>'checkbox')).'</label></td>';
+				echo '<td><label>'.Form::checkbox('identifier[]', Arr::get($contact, 'ID_CARD'), FALSE, array('class'=>'checkbox')).'</label></td>';
 				echo '<td>'.Arr::get($contact, 'ID_PEP').'</td>';
 				echo '<td>'.HTML::anchor('people/peopleInfo/'.Arr::get($contact, 'ID_PEP'), Arr::get($contact,'SURNAME').' '.Arr::get($contact, 'NAME').' '.Arr::get($contact,'PATRONYMIC')).'</td>';
 				echo '<td>'.Arr::get($contact, 'ORG_PARENT', __('No_card')).'</td>';
@@ -169,7 +167,7 @@ if (!isset($total_row_count) && isset($list) && is_array($list)) {
 				}
 				echo '<tr>';
 				echo '<td>'.$pp++.'</td>';
-				echo '<td><label>'.Form::checkbox('id_pep[]', '\''.Arr::get($contact, 'ID_CARD').'\'', FALSE, array('class'=>'checkbox')).'</label></td>';
+				echo '<td><label>'.Form::checkbox('identifier[]', Arr::get($contact, 'ID_CARD'), FALSE, array('class'=>'checkbox')).'</label></td>';
 				echo '<td>'.Arr::get($contact, 'ID_PEP').'</td>';
 				echo '<td>'.HTML::anchor('people/peopleInfo/'.Arr::get($contact, 'ID_PEP'), Arr::get($contact,'SURNAME').' '.Arr::get($contact, 'NAME').' '.Arr::get($contact,'PATRONYMIC')).'</td>';
 				echo '<td>'.Arr::get($contact, 'ORG_PARENT', __('No_card')).'</td>';
@@ -230,43 +228,90 @@ if (!isset($total_row_count) && isset($list) && is_array($list)) {
             </div>
         <?php endif; ?>
         
-        <!-- Панель действий -->
-        <?php if (isset($show_actions) ? $show_actions : true): ?>
-            <div class="card mt-3" style="margin-top: 20px;">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <?php if (Auth::instance()->logged_in()): ?>
-                            <div>
-                                <button type="submit" 
-                                        class="btn btn-success" 
-                                        name="todo"  
-                                        value="unactive"
-                                        onclick="return confirm('<?php echo htmlspecialchars(addslashes(__('people_unactive_alert'))); ?>')">
-                                    <?php echo htmlspecialchars(__('people_unactive')); ?>
-                                </button>
+<!-- Панель действий -->
+<?php if (isset($show_actions) ? $show_actions : true): ?>
+    <div class="card mt-3" style="margin-top: 20px;">
+        <div class="card-body">
+            <!-- Блок с датой и кнопками в одном ряду -->
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="form-inline" style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
+                        <!-- Календарь -->
+                        <div class="form-group" style="flex: 1; min-width: 200px;">
+                            <label for="prolong_date" class="control-label" style="display: block; margin-bottom: 5px;">
+                                <?php echo __('Дата'); ?>:
+                            </label>
+                            <div class="input-group" style="width: 100%;">
+                                <?php
+                                // Значение по умолчанию - текущая дата + 3 месяца
+                                $default_date = date('Y-m-d', strtotime('+3 months'));
+                                $prolong_date = isset($prolong_date) ? $prolong_date : $default_date;
                                 
-                                <button type="submit" 
-                                        class="btn btn-danger" 
-                                        name="todo"  
-                                        value="delete"
-                                        disabled
-                                        onclick="return confirm('<?php echo htmlspecialchars(addslashes(__('people_delete_alert'))); ?>')">
-                                    <?php echo htmlspecialchars(__('card_delete')); ?>
-                                </button>
+                                echo Form::input('prolong_date', $prolong_date, [
+                                    'type' => 'date',
+                                    'class' => 'form-control date-picker',
+                                    'id' => 'prolong_date',
+                                    'min' => date('Y-m-d'), // Минимум - сегодня
+                                    'max' => date('Y-m-d', strtotime('+5 years')), // Максимум - через 5 лет
+                                    'title' => __('Выберите дату')
+                                ]);
+                                ?>
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
                             </div>
-                            
-                            <div class="text-muted">
-                                <small><?php echo __('Выбрано карт'); ?>: <span id="selected-count">0</span></small>
-                            </div>
-                        <?php else: ?>
-                            <div class="alert alert-danger w-100">
-                                <?php echo htmlspecialchars(__('Для выполнения действий необходимо авторизоваться')); ?>
-                            </div>
-                        <?php endif; ?>
+                        </div>
+                        
+                       <!-- Кнопка Продлить -->
+						<div class="form-group">
+							<button type="submit" 
+									class="btn btn-warning" 
+									name="todo"  
+									value="prolong"
+									onclick="return confirmExtend();">
+								<span class="glyphicon glyphicon-calendar"></span>
+								<?php echo __('Продлить до указанной даты'); ?>
+							</button>
+						</div>
+                        
+                        <!-- Кнопка Сделать неактивными -->
+                        <div class="form-group">
+                            <button type="submit" 
+                                    class="btn btn-success" 
+                                    name="todo"  
+                                    value="unactive"
+                                    onclick="return confirmDeactivation();">
+                                <span class="glyphicon glyphicon-ok"></span>
+                                <?php echo htmlspecialchars(__('people_unactive')); ?>
+                            </button>
+                        </div>
+                        
+                        <!-- Кнопка Удалить -->
+                        <div class="form-group">
+                            <button type="submit" 
+                                    class="btn btn-danger" 
+                                    name="todo"  
+                                    value="delete"
+                                    disabled
+                                    onclick="return confirmDelete();">
+                                <span class="glyphicon glyphicon-trash"></span>
+                                <?php echo htmlspecialchars(__('card_delete')); ?>
+                            </button>
+                        </div>
+                        
+                        <!-- Счетчик выбранных карт -->
+                        <div class="form-group text-muted" style="margin-left: auto;">
+                            <small><?php echo __('Выбрано карт'); ?>: <span id="selected-count">0</span></small>
+                        </div>
                     </div>
+                    <small class="text-muted" style="display: block; margin-top: 5px;">
+                        <?php echo __('Рекомендуемая дата: текущая + 3 месяца (' . date('d.m.Y', strtotime('+3 months')) . ')'); ?>
+                    </small>
                 </div>
             </div>
-        <?php endif; ?>
+        </div>
+    </div>
+<?php endif; ?>
         
         <?php echo Form::close(); ?>
     </div>
@@ -406,53 +451,68 @@ $(document).ready(function() {
     }
     
     // Обновление состояния главного чекбокса
-    function updateMasterCheckbox() {
-        var $visible = getVisibleCheckboxes();
-        var total = $visible.length;
-        var checked = $visible.filter(":checked").length;
-        
-        var $masterCheck = $("#check_all");
-        
-        if (total === 0) {
-            $masterCheck.prop("checked", false);
-            $masterCheck.prop("disabled", true);
+   // Обновление состояния главного чекбокса
+function updateMasterCheckbox() {
+    var $visible = getVisibleCheckboxes();
+    var total = $visible.length;
+    var checked = $visible.filter(":checked").length;
+    
+    var $masterCheck = $("#check_all");
+    
+    if (total === 0) {
+        $masterCheck.prop("checked", false);
+        $masterCheck.prop("disabled", true);
+    } else {
+        $masterCheck.prop("disabled", false);
+        $masterCheck.prop("checked", total === checked);
+    }
+    
+    if (checked > 0 && checked < total) {
+        $masterCheck.prop("indeterminate", true);
+    } else {
+        $masterCheck.prop("indeterminate", false);
+    }
+    
+    $('#selected-count').text(checked);
+    
+    // Обновляем текст кнопок
+    var $btnUnactive = $("button[name='todo'][value='unactive']");
+    var $btnDelete = $("button[name='todo'][value='delete']");
+    var $btnExtend = $("button[name='todo'][value='prolong']");
+    
+    // Кнопка "Сделать неактивными"
+    if ($btnUnactive.length) {
+        if (checked > 0) {
+            $btnUnactive.html("<?php echo htmlspecialchars(__('people_unactive')); ?> (" + checked + ")");
+            $btnUnactive.prop('disabled', false);
         } else {
-            $masterCheck.prop("disabled", false);
-            $masterCheck.prop("checked", total === checked);
-        }
-        
-        if (checked > 0 && checked < total) {
-            $masterCheck.prop("indeterminate", true);
-        } else {
-            $masterCheck.prop("indeterminate", false);
-        }
-        
-        $('#selected-count').text(checked);
-        
-        // Обновляем текст кнопок
-        var $btnUnactive = $("button[name='todo'][value='unactive']");
-        var $btnDelete = $("button[name='todo'][value='delete']");
-        
-        if ($btnUnactive.length) {
-            if (checked > 0) {
-                $btnUnactive.html("Сделать неактивными (" + checked + ")");
-                $btnUnactive.prop('disabled', false);
-            } else {
-                $btnUnactive.html("Сделать неактивными");
-                $btnUnactive.prop('disabled', true);
-            }
-        }
-        
-        if ($btnDelete.length) {
-            if (checked > 0) {
-                $btnDelete.html("Удалить карты (" + checked + ")");
-                $btnDelete.prop('disabled', false);
-            } else {
-                $btnDelete.html("Удалить карты");
-                $btnDelete.prop('disabled', true);
-            }
+            $btnUnactive.html("<?php echo htmlspecialchars(__('people_unactive')); ?>");
+            $btnUnactive.prop('disabled', true);
         }
     }
+    
+    // Кнопка "Продлить до указанной даты"
+    if ($btnExtend.length) {
+        if (checked > 0) {
+            $btnExtend.html("Продлить до указанной даты (" + checked + ")");
+            $btnExtend.prop('disabled', false);
+        } else {
+            $btnExtend.html("Продлить до указанной даты");
+            $btnExtend.prop('disabled', true);
+        }
+    }
+    
+    // Кнопка "Удалить карты"
+    if ($btnDelete.length) {
+        if (checked > 0) {
+            $btnDelete.html("<?php echo htmlspecialchars(__('card_delete')); ?> (" + checked + ")");
+            $btnDelete.prop('disabled', false);
+        } else {
+            $btnDelete.html("<?php echo htmlspecialchars(__('card_delete')); ?>");
+            $btnDelete.prop('disabled', true);
+        }
+    }
+}
     
     // Переключение всех видимых чекбоксов
     function toggleAllVisibleCheckboxes() {

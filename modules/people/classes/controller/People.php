@@ -243,6 +243,7 @@ class Controller_People extends Controller_Template {
 		$t1=microtime(1);
 		$result=Model::Factory('stat')->Get_people_late();
 		$t2=microtime(1);
+		$this->template->full_width = true;
 		$content=View::Factory('people/card_late', array(
 			'list' => $result,
 			'delay'=>$t2-$t1,

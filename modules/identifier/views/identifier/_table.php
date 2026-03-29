@@ -34,8 +34,7 @@
             if (isset($total_row_count) && $total_row_count < $show_row) {
                 $show_row = $total_row_count;
             }
-            echo __('Из них показаны') . ' ' . $show_row;
-            echo '<br>';
+
             echo __('Для получения всего списка сохраните список в файл. В файле будет полный набор данных.');
             ?>
         </div>

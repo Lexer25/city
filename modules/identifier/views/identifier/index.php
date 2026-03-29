@@ -57,45 +57,8 @@
         ?>
     </div>
     <small class="text-muted">Максимальная доступная дата: <?php echo htmlspecialchars(date('d.m.Y')); ?></small>
-    
-    <!-- Добавленное поле для количества строк -->
-    <div class="input-group mt-3 mb-3">
-        <label for="rows_per_page" class="w-100 mb-1">Количество строк на странице:</label>
-        <?php
-        // Определяем значение для поля rows_per_page
-        //$rows_value = 50; // Значение по умолчанию
-		
-		$session_rows_per_page = Cookie::get('session_rows_per_page');
-		
-		 if (isset($session_rows_per_page) && !empty($session_rows_per_page)) {
-            $rows_value = $session_rows_per_page;
-        } else {
-            $rows_value = 50;
-        }
-		
-		
-        
-        if (isset($rows_per_page) && $rows_per_page !== '' && is_numeric($rows_per_page)) {
-            $rows_value = (int)$rows_per_page;
-            // Ограничиваем значение в допустимом диапазоне
-            if ($rows_value < 1) $rows_value = 1;
-            if ($rows_value > 500) $rows_value = 500;
-        }
-        
-        echo Form::input('rows_per_page', $rows_value, [
-            'type' => 'number',
-            'class' => 'form-control',
-            'id' => 'rows_per_page',
-            'min' => '1',
-            'max' => '500',
-            'step' => '1',
-            'placeholder' => 'Введите число от 1 до 500',
-            'title' => 'Введите количество строк для отображения на странице',
-            'required' => 'required'
-        ]);
-        ?>
-    </div>
-    <small class="text-muted">Допустимый диапазон: от 1 до 500</small>
+
+
 	<?php
 		echo '<br>';
 		 echo Form::button('todo', 'Получить Отчет 1', [
