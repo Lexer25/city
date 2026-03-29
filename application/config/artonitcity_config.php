@@ -10,8 +10,8 @@ return array(
     'dir_compare' => 'C:\\xampp\\htdocs\\city',
     'stat_day_befor' => 2,
     'city_name' => 'ПАО "Калибр"',
-    'ver' => '2.0.4',
-    'timeUpdate' => '2026-03-09',
+    'ver' => '2.0.5',
+    'timeUpdate' => '2026-03-30',
     'lightVerDay' => 3,
     'developer' => 'www.artonit.ru',
     'main_windows' => array(
