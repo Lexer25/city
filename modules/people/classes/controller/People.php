@@ -174,6 +174,10 @@ class Controller_People extends Controller_Template {
 							}
 
 			break;
+			case 'none':
+				$key=Arr::get($post, 'getCardInfo');
+			
+			break;
 			default:
 				$this->redirect('people/find');
 			break;

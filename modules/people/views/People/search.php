@@ -52,9 +52,10 @@
 		<td>	  
 		<form class="navbar-form navbar-left" role="search" action="findAnyCard" method="POST">
 			<div class="form-group">
-				<input type="text" class="form-control" placeholder="Номер карты HEX" name="getCardInfo">
+				<input type="text" class="form-control" placeholder="Номер карты" name="getCardInfo">
 				<p><input name="keyFormat" type="radio" value="hex" checked>HEX</p>
 				<p><input name="keyFormat" type="radio" value="dec"> DEC</p>
+				<p><input name="keyFormat" type="radio" value="none"> Не преобразовывать</p>
 				<button type="submit" class="btn btn-default">Найти по номеру карты</button>
 			</div>
 		</form> 
