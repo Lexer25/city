@@ -149,7 +149,7 @@
                         foreach ($list as $index => $row): 
                             $cardId = isset($row['ID_CARD']) ? $row['ID_CARD'] : '';
                             $safeCardId = htmlspecialchars($cardId, ENT_QUOTES, 'UTF-8');
-                        ?>
+						?>
                             <tr>
                                 <td class="text-center"><?php echo ++$sn; ?></td>
                                 <td class="text-center">

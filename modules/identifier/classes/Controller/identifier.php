@@ -305,7 +305,7 @@ class Controller_identifier extends Controller_Template {
 		public function action_control()
 		{
 			// Логируем входящие данные для отладки
-			Kohana::$log->add(Log::DEBUG, 'identifier::action_control - POST: ' . print_r($_POST, true));
+			Kohana::$log->add(Log::DEBUG, '308 identifier::action_control - POST: ' . print_r($_POST, true));
 			
 			// Получаем и очищаем идентификаторы
 			$identifiers = Arr::get($_POST, 'identifier', array());
@@ -324,7 +324,7 @@ class Controller_identifier extends Controller_Template {
 			
 			// Проверяем наличие идентификаторов
 			if (empty($identifiers)) {
-				Kohana::$log->add(Log::WARNING, 'identifier::action_control - Не выбрано ни одного идентификатора');
+				Kohana::$log->add(Log::WARNING, '327 identifier::action_control - Не выбрано ни одного идентификатора');
 				$this->set_flash_message('warning', __('Не выбрано ни одной карты для выполнения операции'));
 				$this->redirect('identifier');
 				return;
@@ -345,7 +345,7 @@ class Controller_identifier extends Controller_Template {
 					break;
 					
 				default:
-					Kohana::$log->add(Log::WARNING, 'identifier::action_control - Неизвестная операция: :todo', 
+					Kohana::$log->add(Log::WARNING, '349 identifier::action_control - Неизвестная операция: :todo', 
 						array(':todo' => $todo));
 					$this->set_flash_message('error', __('Неизвестная операция: :operation', array(':operation' => $todo)));
 					$this->redirect('identifier');
@@ -379,7 +379,7 @@ class Controller_identifier extends Controller_Template {
 			$this->set_flash_message($flash_type, $message);
 			
 			// Логируем результат
-			Kohana::$log->add(Log::INFO, 'process_unactive завершена. Успешно: :success, Ошибок: :error', 
+			Kohana::$log->add(Log::INFO, '382 process_unactive завершена. Успешно: :success, Ошибок: :error', 
 				array(':success' => $result['count_success'], ':error' => $result['count_error']));
 		}
 
@@ -405,7 +405,7 @@ class Controller_identifier extends Controller_Template {
 			$this->set_flash_message($flash_type, $message);
 			
 			// Логируем результат
-			Kohana::$log->add(Log::INFO, 'process_delete завершена. Успешно: :success, Ошибок: :error', 
+			Kohana::$log->add(Log::INFO, '408 process_delete завершена. Успешно: :success, Ошибок: :error', 
 				array(':success' => $result['count_success'], ':error' => $result['count_error']));
 		}
 
@@ -445,24 +445,26 @@ class Controller_identifier extends Controller_Template {
 			// Разбиваем на чанки для безопасности SQL
 			$chunks = array_chunk($identifiers, 500);
 			
+			$model = Model::factory('identifier');
+			
 			foreach ($chunks as $chunk_index => $chunk) {
 				try {
-					$model = Model::factory('identifier');
+					
 					if ($model->setUnactive($chunk)) {
 						$total_success += count($chunk);
-						Kohana::$log->add(Log::INFO, 'Деактивировано :count карт (chunk :chunk)', 
+						Kohana::$log->add(Log::INFO, '455 Деактивировано :count карт (chunk :chunk)', 
 							array(':count' => count($chunk), ':chunk' => $chunk_index + 1));
 					} else {
 						$error_msg = $model->mess ?: 'Неизвестная ошибка';
 						$total_errors += count($chunk);
 						$errors_list[] = "Chunk " . ($chunk_index + 1) . ": " . $error_msg;
-						Kohana::$log->add(Log::ERROR, 'Ошибка деактивации: :error', 
+						Kohana::$log->add(Log::ERROR, '461 Ошибка деактивации: :error', 
 							array(':error' => $error_msg));
 					}
 				} catch (Exception $e) {
 					$total_errors += count($chunk);
 					$errors_list[] = "Chunk " . ($chunk_index + 1) . ": " . $e->getMessage();
-					Kohana::$log->add(Log::ERROR, 'Исключение при деактивации: :error', 
+					Kohana::$log->add(Log::ERROR, '468 Исключение при деактивации: :error', 
 						array(':error' => $e->getMessage()));
 				}
 			}
@@ -505,19 +507,19 @@ class Controller_identifier extends Controller_Template {
 					$model = Model::factory('identifier');
 					if ($model->delCardArray($chunk)) {
 						$total_success += count($chunk);
-						Kohana::$log->add(Log::INFO, 'Удалено :count карт (chunk :chunk)', 
+						Kohana::$log->add(Log::INFO, '510 Удалено :count карт (chunk :chunk)', 
 							array(':count' => count($chunk), ':chunk' => $chunk_index + 1));
 					} else {
 						$error_msg = $model->mess ?: 'Неизвестная ошибка';
 						$total_errors += count($chunk);
 						$errors_list[] = "Chunk " . ($chunk_index + 1) . ": " . $error_msg;
-						Kohana::$log->add(Log::ERROR, 'Ошибка удаления: :error', 
+						Kohana::$log->add(Log::ERROR, '516 Ошибка удаления: :error', 
 							array(':error' => $error_msg));
 					}
 				} catch (Exception $e) {
 					$total_errors += count($chunk);
 					$errors_list[] = "Chunk " . ($chunk_index + 1) . ": " . $e->getMessage();
-					Kohana::$log->add(Log::ERROR, 'Исключение при удалении: :error', 
+					Kohana::$log->add(Log::ERROR, '522 Исключение при удалении: :error', 
 						array(':error' => $e->getMessage()));
 				}
 			}

@@ -154,13 +154,18 @@ class Model_identifier extends Model
 		*/	
 	public function setUnactive($cards)
 	{
-		$sql=__('update card c 
-			set c."ACTIVE"=0 
-			where c.id_card in (:card_array)
-			', array(
-			':card_array'=>implode(",", $cards)));
-			
-		
+		//добавляю апострофы
+		$cards_quoted = array_map(function($card) {
+        return "'" . $card . "'";
+    }, $cards);
+    
+    $cards_string = implode(',', $cards_quoted);
+    
+    $sql = 'UPDATE card c 
+            SET c."ACTIVE" = 0 
+            WHERE c.id_card IN (' . $cards_string . ')';
+    
+
 		try
 			{
 			$query = DB::query(Database::UPDATE, $sql)
@@ -179,12 +184,17 @@ class Model_identifier extends Model
 		*/	
 	public function delCardArray($cards)
 	{
-		$sql=__('delete from card c 
-			where c.id_card in (:card_array)
-			', array(
-			':card_array'=>implode(",", $cards)));
-			
+		//добавляю апострофы
+		$cards_quoted = array_map(function($card) {
+        return "'" . $card . "'";
+    }, $cards);
 		
+		 $cards_string = implode(',', $cards_quoted);
+		 
+		$sql='delete from card c 
+			WHERE c.id_card IN (' . $cards_string . ')';
+			
+	//echo Debug::vars('197', $sql);exit;	
 		try
 			{
 			$query = DB::query(Database::DELETE, $sql)
