@@ -145,7 +145,7 @@ Kohana::modules(array(
 	 'identifier' => MODPATH.'identifier', //'раздел для работы с идентификаторами
 	 'parsec' => MODPATH.'parsec', //'раздел для работы с parsec
 	 'setting' => MODPATH . 'setting',//настройка Сити через веб-форму
-	 
+	 'about' => MODPATH.'about', // About module
 	));
 
 /**

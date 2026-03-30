@@ -57,6 +57,11 @@
                         'title' => __('identifier'),
                         'url' => 'identifier',
                         'condition' => $logged_in
+                    ),
+					'guide' => array(
+                        'title' => __('guide'),
+                        'url' => 'guide',
+                        'condition' => true
                     )
                 );
                 
@@ -99,6 +104,7 @@
                         'url' => 'setting',
                         'condition' => true
                     )
+					
                 );
                 
                 // Проверяем, есть ли видимые пункты в сервисах
