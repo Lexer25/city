@@ -16,10 +16,11 @@ class Controller_About extends Controller_Template {
     {
         // Получаем информацию о разработчике
         $developer_info = array(
-            'name' => 'Ваше Имя',
-            'company' => 'Название компании',
-            'email' => 'email@example.com',
-            'website' => 'http://example.com'
+            'name' => 'Артонит Сити панель управления СКУД',
+            'company' => 'ООО "Артсек"',
+            'email' => 'support@artsec.ru',
+            'website_1' => 'http://artsec.ru',
+            'website_2' => 'http://artonit.ru'
         );
         
         // Получаем историю версий

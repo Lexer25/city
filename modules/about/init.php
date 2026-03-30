@@ -1,5 +1,3 @@
 <?php
-
-Kohana::modules(array(
-    'about' => MODPATH.'about', // About module
-));
+// Инициализация модуля About
+// Не требуется дополнительная инициализация

@@ -19,7 +19,7 @@
             </tr>
             <tr>
                 <th>Веб-сайт:</th>
-                <td><a href="<?php echo htmlspecialchars($developer['website']); ?>" target="_blank"><?php echo htmlspecialchars($developer['website']); ?></a></td>
+                <td><a href="<?php echo htmlspecialchars($developer['website_1']); ?>" target="_blank"><?php echo htmlspecialchars($developer['website_1']).'<br>'.htmlspecialchars($developer['website_2']); ?></a></td>
             </tr>
         </table>
 

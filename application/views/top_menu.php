@@ -62,6 +62,11 @@
                         'title' => __('guide'),
                         'url' => 'guide',
                         'condition' => true
+                    ),
+					'about' => array(
+                        'title' => __('О программе'),
+                        'url' => 'about',
+                        'condition' => true
                     )
                 );
                 
