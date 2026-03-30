@@ -1,12 +1,12 @@
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">О программе</h3>
+        <h3 class="panel-title">Информация о программе</h3>
     </div>
     <div class="panel-body">
-        <h4>Информация о разработчике</h4>
+        
         <table class="table table-striped">
             <tr>
-                <th>Имя:</th>
+                <th>Название:</th>
                 <td><?php echo htmlspecialchars($developer['name']); ?></td>
             </tr>
             <tr>
