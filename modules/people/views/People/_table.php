@@ -5,6 +5,7 @@
  * - $people_table_variant: 'card_late' | 'card_late_next_week' (по умолчанию card_late)
  * - $list, $title, $custom_info — см. ниже
  */
+  ini_set('memory_limit', '256M');
 if (!isset($people_table_variant)) {
 	$people_table_variant = 'card_late';
 }

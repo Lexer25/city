@@ -13,6 +13,8 @@
  * - $custom_info: дополнительная информация над таблицей (опционально)
  * - $title: заголовок таблицы (опционально)
  */
+ 
+ ini_set('memory_limit', '256M');
 ?>
 
 <div class="panel panel-primary">
