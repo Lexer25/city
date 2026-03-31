@@ -71,7 +71,7 @@ class Controller_Dashboard extends Controller_Template {
 		
 		if(Arr::get($config_windows, 'windows3', FALSE)) $list_windows3=Model::Factory('Stat')->getLoadOrder();//очередь загрузок
 		
-		
+		$windows1data=$this->getWin1();
 		
 		$analyt_result = Model::Factory('Stat')->analyt_result();// 26.02.2020 подсчет аналитики
 		$timeExecute=microtime(1)-$t1;
@@ -91,6 +91,7 @@ class Controller_Dashboard extends Controller_Template {
 			'countErrKeyFormatRfid' => $countErrKeyFormatRfid,	
 			'about' => $about,	
 			'config_windows' => $config_windows,	
+			'windows1data'=>$windows1data,
 			));
 		
 		$this->template->content = $content;
@@ -98,7 +99,59 @@ class Controller_Dashboard extends Controller_Template {
 		
 	}
 	
-	
+	/**31.03.2026 Сбор информации для окна №1
+	$items = array(
+					'key_count' => '',
+					'key_people' => '',
+					'key_people_delete' => '',
+					'event_count_24' => '',
+					'count_card_late_next_week' => 'people/find_card_late_next_week',
+					'count_card_late' => 'people/find_card_late',
+					'people_without_card' => 'people/people_without_card',
+					'count_unactive_card' => 'people/find_unActiveCard'
+				);
+				
+	*/
+			public function getWin1()
+			{
+				$config = Kohana::$config->load('artonitcity_config');
+				$days = (int) $config->count_day_befor_end_time;
+				$people_model = Model::factory('people');
+				
+				// Определяем структуру данных
+				$keys = array(
+					'people_count' => array($people_model, 'getPeopleCount'),
+					'key_people_delete' => array($people_model, 'getDeletedPeopleCount'),
+					'timeExpired' => function() use ($days) {
+						return date('d.m.Y', strtotime("+{$days} days"));
+					},
+					'count_card_late_next_week' => array($people_model, 'getCountCardLateNextTime'),
+					'getcardexpired' => array($people_model, 'getcardexpired'),
+					'getPeopleWithoutCard' => array($people_model, 'getPeopleWithoutCard'),
+					'getCardNotActive' => array($people_model, 'getCardNotActive'),
+				);
+				
+				$result = array();
+				foreach ($keys as $key => $callback) {
+					try {
+						if (is_array($callback)) {
+							// Для методов с параметрами
+							if ($key === 'count_card_late_next_week') {
+								$result[$key] = call_user_func($callback, $days);
+							} else {
+								$result[$key] = call_user_func($callback);
+							}
+						} else {
+							$result[$key] = $callback();
+						}
+					} catch (Exception $e) {
+						Kohana::$log->add(Log::ERROR, "Error getting {$key}: " . $e->getMessage());
+						$result[$key] = 0;
+					}
+				}
+				
+				return $result;
+			}
 	/** 14.09.2024 Просмотр списка карт с неправильным форматом
 	*/
 	public function action_ErrKeyFormatRfid()

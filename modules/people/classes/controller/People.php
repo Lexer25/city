@@ -413,22 +413,23 @@ private function card_unactive($id_cards)
     }
 }
 
-/**
- * Удаление карт по ID карт
- * @param array $id_cards Массив ID карт
- */
-private function card_delete_action($id_cards)
-{
-    if (empty($id_cards)) {
-        return;
-    }
-    
-    try {
-        Model::Factory('People')->card_Card_delete($id_cards);
-        Kohana::$log->add(Log::INFO, 'card_delete_action: Удалено :count карт', array(':count' => count($id_cards)));
-    } catch (Exception $e) {
-        Kohana::$log->add(Log::ERROR, 'card_delete_action: Ошибка при удалении карт: :error', array(':error' => $e->getMessage()));
-    }
-}
+	/**
+	 * Удаление карт по ID карт
+	 * @param array $id_cards Массив ID карт
+	 */
+	private function card_delete_action($id_cards)
+	{
+		if (empty($id_cards)) {
+			return;
+		}
+		
+		try {
+			Model::Factory('People')->card_Card_delete($id_cards);
+			Kohana::$log->add(Log::INFO, 'card_delete_action: Удалено :count карт', array(':count' => count($id_cards)));
+		} catch (Exception $e) {
+			Kohana::$log->add(Log::ERROR, 'card_delete_action: Ошибка при удалении карт: :error', array(':error' => $e->getMessage()));
+		}
+	}
+
 	
 }

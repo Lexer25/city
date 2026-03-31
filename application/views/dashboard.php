@@ -19,49 +19,53 @@
 
     <!-- Панель №1 - Информация по жильцам и картам -->
 	<?php if(Arr::get($config_windows, 'windows1')) :?>
-    <div class="panel panel-info col-md-3">
-        <div class="panel-heading row"><?php echo __('data_people_and_card');?></div>
-        <div class="panel-body">
-        <?php if (!empty($list_windows1['card'])): ?>
-            <?php 
-            $card = $list_windows1['card'];
-			
-			//набор выводимых параметров и ссылок на эти параметры. Если ссылка указана, то она будет подствлеена в html
-            $items = array(
-                'key_count' => '',
-                'key_people' => '',
-                'key_people_delete' => '',
-                'event_count_24' => '',
-                'count_card_late_next_week' => 'people/find_card_late_next_week',
-                'count_card_late' => 'people/find_card_late',
-                'people_without_card' => 'people/people_without_card',
-                'count_unactive_card' => 'people/find_unActiveCard'
-            );
-            
-            foreach ($items as $key => $link):
-                if (isset($card[$key])):
-                    $value = Arr::get($card[$key], 'count');
-                    $name = Arr::get($card[$key], 'name');
-            ?>
-                <?php echo $name . ' '; ?>
-                <?php echo $link ? HTML::anchor($link, $value) : $value; ?>
-                <br>
-            <?php 
-                endif;
-            endforeach; 
-            ?>
-            
-            <?php // RFID формат ?>
-            <span class="label label-<?php echo $countErrKeyFormatRfid > 0 ? 'danger' : 'success'; ?>">
-                <?php echo __('Неправильный формат RFID'); ?>
-            </span>
-            <?php echo HTML::anchor('dashboard/ErrKeyFormatRfid', $countErrKeyFormatRfid); ?>
-            
-        <?php else: ?>
-            <?php echo __('windows_disable'); ?>
-        <?php endif; ?>
-        </div>
-    </div>
+   <div class="panel panel-info col-md-3">
+		<div class="panel-heading row"><?php echo __('data_people_and_card'); ?></div>
+		<div class="panel-body">
+			<?php if (!empty($list_windows1['card'])): 
+				$card = $list_windows1['card'];
+				
+				// набор выводимых параметров и ссылок на эти параметры. Если ссылка указана, то она будет подствлеена в html
+				$items = array(
+					'key_count' => '',
+					'key_people' => '',
+					'key_people_delete' => '',
+					'event_count_24' => '',
+					'count_card_late_next_week' => 'people/find_card_late_next_week',
+					'count_card_late' => 'people/find_card_late',
+					'people_without_card' => 'people/people_without_card',
+					'count_unactive_card' => 'people/find_unActiveCard'
+				);
+				
+				foreach ($items as $key => $link):
+					if (isset($card[$key])):
+						$value = Arr::get($card[$key], 'count');
+						$name = Arr::get($card[$key], 'name');
+						echo HTML::chars($name) . ' ';
+						echo $link ? HTML::anchor($link, HTML::chars($value)) : HTML::chars($value);
+						echo '<br>';
+					endif;
+				endforeach; 
+				echo '-----'.'<br>';
+				echo __('Количество пользователей :data', array(':data'=>Arr::get($windows1data, 'people_count'))).'<br>';
+				echo __('Количество удалденных пользователей :data', array(':data'=>Arr::get($windows1data, 'key_people_delete'))).'<br>';
+				echo __('Срок действия завершится до :date :count', array(':date'=>Arr::get($windows1data, 'timeExpired'), ':count'=>Arr::get($windows1data, 'count_card_late_next_week'))).'<br>';
+				echo __('Срок карты закончился :data', array(':data'=>Arr::get($windows1data, 'getcardexpired'))).'<br>';
+				echo __('Сотрудники без карты :data', array(':data'=>Arr::get($windows1data, 'getPeopleWithoutCard'))).'<br>';
+				echo __('Количество неактивных карт :data', array(':data'=>Arr::get($windows1data, 'getCardNotActive'))).'<br>';
+			?>
+				
+				<!-- RFID формат -->
+				<span class="label label-<?php echo $countErrKeyFormatRfid > 0 ? 'danger' : 'success'; ?>">
+					<?php echo __('Неправильный формат RFID'); ?>
+				</span>
+				<?php echo HTML::anchor('dashboard/ErrKeyFormatRfid', $countErrKeyFormatRfid); ?>
+				
+			<?php else: ?>
+				<?php echo __('windows_disable'); ?>
+			<?php endif; ?>
+		</div>
+	</div>
 	<?php endif;?>
 	
 	

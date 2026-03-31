@@ -482,6 +482,81 @@ where e.id_card is null';
 		
 		}
 		
+			
+		public function getPeopleCount()
+		{
+				$query=DB::query(Database::SELECT, 'select count(*) from people p where p."ACTIVE"=1')
+				->execute(Database::instance('fb'));
+				
+				return $query->get('COUNT');
+			
+		}
+		
+		public function getDeletedPeopleCount()
+		{
+				$query=DB::query(Database::SELECT, 'select count(*) from people p where p."ACTIVE"=0')
+				->execute(Database::instance('fb'));
+				return $query->get('COUNT');
+			
+		}
+		
+			/**
+			 * Получает количество карт, срок действия которых истекает до указанной даты
+			 * 
+			 * @param int $data Количество дней от текущей даты
+			 * @return int Количество карт
+			 */
+			public function getCountCardLateNextTime($data)
+			{
+				// Валидация: убеждаемся, что $data - целое число
+				$data = (int) $data;
+				
+				// Расчет даты до SQL запроса
+				$date = date('Y-m-d H:i:s', strtotime("+{$data} days"));
+				
+				// Формируем SQL с прямой подстановкой даты
+				$sql = "SELECT COUNT(*) FROM card c WHERE c.timeend>'now' and c.timeend < CAST('{$date}' AS TIMESTAMP)";
+				
+				$query = DB::query(Database::SELECT, $sql);
+				$result = $query->execute(Database::instance('fb'));
+				
+				return (int) $result->get('COUNT');
+			}
+			
+			
+			// Информация о картах, срок действия которых истек
+		
+		
+		public function getcardexpired()
+		{
+			$query=DB::query(Database::SELECT, 'select count(*) from card c where c.timeend<\'now\' and c."ACTIVE">0.')
+			->execute(Database::instance('fb'));
+			return (int)$query->get('COUNT');
+			
+		}
+		
+		
+		// Количество пользователей без карт (17.10.2017)
+		public function getPeopleWithoutCard()
+		{
+			echo Debug::vars('542');//exit;
+			$query=DB::query(Database::SELECT, 'select count(p.id_pep) from people p left join card c on c.id_pep=p.id_pep where c.id_card is null')
+				->execute(Database::instance('fb'));
+			//echo Debug::vars('544', $query);exit;
+			return $query->get('COUNT');
+			
+		}
+		
+		
+		// Информация о картах, срок действия которых истек. 2.10.2020 Которые не активны!!! 
+		public function getCardNotActive()
+		{
+			$query=DB::query(Database::SELECT, 'select count(*) from card c where c."ACTIVE"<1.')
+		->execute(Database::instance('fb'));
+		return $query->get('COUNT');
+			
+		}
+	
 }
 
 
