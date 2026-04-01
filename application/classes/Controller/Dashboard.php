@@ -116,10 +116,21 @@ class Controller_Dashboard extends Controller_Template {
 			{
 				$config = Kohana::$config->load('artonitcity_config');
 				$days = (int) $config->count_day_befor_end_time;
+				$dateExpired=date('d.m.Y', strtotime("+{$days} days"));//дата для расчета
 				$people_model = Model::factory('people');
+				$card_model = Model::factory('people');
+				
+				$result=array();
+				$result['people_count']=$people_model->getPeopleCount();//количество пользователей
+				$result['key_people_delete']=$people_model->getDeletedPeopleCount();//количество удаленных пользователей
+				$result['timeExpired']=$dateExpired;//дата для расчета
+				$result['count_card_late_next_week']=$people_model->getCountCardLateNextTime($result['timeExpired']);//количество карт, срок которых истечет до указанной даты
+				$result['getcardexpired']=$people_model->getcardexpired();//количество карт, у которых истек срок действия
+				$result['getPeopleWithoutCard']=$people_model->getPeopleWithoutCard();//количество сотрудников без карты
+				$result['getCardNotActive']=$people_model->getCardNotActive();//количество неактивных идентификаторов
 				
 				// Определяем структуру данных
-				$keys = array(
+				/* $keys = array(
 					'people_count' => array($people_model, 'getPeopleCount'),
 					'key_people_delete' => array($people_model, 'getDeletedPeopleCount'),
 					'timeExpired' => function() use ($days) {
@@ -148,7 +159,7 @@ class Controller_Dashboard extends Controller_Template {
 						Kohana::$log->add(Log::ERROR, "Error getting {$key}: " . $e->getMessage());
 						$result[$key] = 0;
 					}
-				}
+				} */
 				
 				return $result;
 			}

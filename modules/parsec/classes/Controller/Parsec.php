@@ -91,7 +91,7 @@ class Controller_Parsec extends Controller_Template {
 				$this->redirect('parsec');
 			break;
 			
-			case 'delAllTasks'://удалдить все задачи
+			case 'delAllTasks'://удалить все задачи
 			
 				//$del_parsec = $this->request->post('id_parsec');
 				Model::factory('parsec')->dellAllTasks();

@@ -27,7 +27,7 @@
 				
 				// набор выводимых параметров и ссылок на эти параметры. Если ссылка указана, то она будет подствлеена в html
 				$items = array(
-					'key_count' => '',
+					'people_count' => '',
 					'key_people' => '',
 					'key_people_delete' => '',
 					'event_count_24' => '',
@@ -37,19 +37,54 @@
 					'count_unactive_card' => 'people/find_unActiveCard'
 				);
 				
-				foreach ($items as $key => $link):
-					if (isset($card[$key])):
+				foreach ($items as $key => $link)
+				{
+					if (isset($card[$key]))
+					{
 						$value = Arr::get($card[$key], 'count');
 						$name = Arr::get($card[$key], 'name');
 						echo HTML::chars($name) . ' ';
 						echo $link ? HTML::anchor($link, HTML::chars($value)) : HTML::chars($value);
 						echo '<br>';
-					endif;
-				endforeach; 
+					}
+				} 
+				
+
 				echo '-----'.'<br>';
+				
+				//порядок вывода сообщений на экран и связанные с ними ссылки
+				
+				$itemsOrderAndURL = array(
+					'people_count' => '',
+					'key_people' => '',
+					'key_people_delete' => '',
+					'count_card_late_next_week' => 'people/find_card_late_next_week',
+					'getcardexpired' => 'people/find_card_late',
+					'getPeopleWithoutCard' => 'people/people_without_card',
+					'getCardNotActive' => 'people/find_unActiveCard'
+				);
+				
+				foreach ($itemsOrderAndURL as $key => $link)
+				{
+					if (isset($windows1data[$key]))
+					{
+						$value = Arr::get($windows1data,$key);
+						$name = $key;
+						echo HTML::chars($name) . ' ';
+						echo $link ? HTML::anchor($link, HTML::chars($value)) : HTML::chars($value);
+						echo '<br>';
+					}
+				} 
+				
+					echo '++++++++++';			
+				
 				echo __('Количество пользователей :data', array(':data'=>Arr::get($windows1data, 'people_count'))).'<br>';
-				echo __('Количество удалденных пользователей :data', array(':data'=>Arr::get($windows1data, 'key_people_delete'))).'<br>';
-				echo __('Срок действия завершится до :date :count', array(':date'=>Arr::get($windows1data, 'timeExpired'), ':count'=>Arr::get($windows1data, 'count_card_late_next_week'))).'<br>';
+				echo __('Количество удаленных пользователей :data', array(':data'=>Arr::get($windows1data, 'key_people_delete'))).'<br>';
+				
+				echo __('Срок действия завершится до :date', array(':date'=>Arr::get($windows1data, 'timeExpired'), ':count'=>Arr::get($windows1data, 'count_card_late_next_week'))).' ';				
+				echo HTML::anchor(Arr::get($items, 'count_card_late_next_week'), Arr::get($windows1data, 'count_card_late_next_week')).'<br>';
+				
+				
 				echo __('Срок карты закончился :data', array(':data'=>Arr::get($windows1data, 'getcardexpired'))).'<br>';
 				echo __('Сотрудники без карты :data', array(':data'=>Arr::get($windows1data, 'getPeopleWithoutCard'))).'<br>';
 				echo __('Количество неактивных карт :data', array(':data'=>Arr::get($windows1data, 'getCardNotActive'))).'<br>';

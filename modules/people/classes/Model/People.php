@@ -506,13 +506,13 @@ where e.id_card is null';
 			 * @param int $data Количество дней от текущей даты
 			 * @return int Количество карт
 			 */
-			public function getCountCardLateNextTime($data)
+			public function getCountCardLateNextTime($date)
 			{
 				// Валидация: убеждаемся, что $data - целое число
-				$data = (int) $data;
+				//$data = (int) $data;
 				
 				// Расчет даты до SQL запроса
-				$date = date('Y-m-d H:i:s', strtotime("+{$data} days"));
+				//$date = date('Y-m-d H:i:s', strtotime("+{$data} days"));
 				
 				// Формируем SQL с прямой подстановкой даты
 				$sql = "SELECT COUNT(*) FROM card c WHERE c.timeend>'now' and c.timeend < CAST('{$date}' AS TIMESTAMP)";

@@ -2,14 +2,14 @@
 
 /**
  * Конфигурационный файл Artonit City
- * Сгенерировано: 2026-03-24 08:40:29
+ * Сгенерировано: 2026-04-01 08:04:11
  */
 
 return array(
     'dir_log' => 'C:\\Program Files (x86)\\Cardsoft\\DuoSE\\Access\\Log',
     'dir_compare' => 'C:\\xampp\\htdocs\\city',
     'stat_day_befor' => 2,
-    'city_name' => 'ПАО "Калибр"',
+    'city_name' => 'ЖК Хедлайнер',
     'ver' => '2.0.5',
     'timeUpdate' => '2026-03-30',
     'lightVerDay' => 3,
