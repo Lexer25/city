@@ -64,30 +64,33 @@
 					'getCardNotActive' => 'people/find_unActiveCard'
 				);
 				
+				
+				$itemsTitle = array(
+					'people_count' => 'Количество пользователей',
+					'key_people' => '',
+					'key_people_delete' => 'Количество удаленных пользователей',
+					'count_card_late_next_week' => __('Срок действия завершится до :date', array(':date'=>Arr::get($windows1data, 'timeExpired'))),
+					'getcardexpired' => 'Срок карты закончился',
+					'getPeopleWithoutCard' => 'Сотрудники без карты',
+					'getCardNotActive' => 'Количество неактивных карт'
+				);
+				
+				
+				
 				foreach ($itemsOrderAndURL as $key => $link)
 				{
 					if (isset($windows1data[$key]))
 					{
 						$value = Arr::get($windows1data,$key);
-						$name = $key;
+						$name = Arr::get($itemsTitle, $key, '-');
 						echo HTML::chars($name) . ' ';
 						echo $link ? HTML::anchor($link, HTML::chars($value)) : HTML::chars($value);
 						echo '<br>';
 					}
 				} 
 				
-					echo '++++++++++';			
-				
-				echo __('Количество пользователей :data', array(':data'=>Arr::get($windows1data, 'people_count'))).'<br>';
-				echo __('Количество удаленных пользователей :data', array(':data'=>Arr::get($windows1data, 'key_people_delete'))).'<br>';
-				
-				echo __('Срок действия завершится до :date', array(':date'=>Arr::get($windows1data, 'timeExpired'), ':count'=>Arr::get($windows1data, 'count_card_late_next_week'))).' ';				
-				echo HTML::anchor(Arr::get($items, 'count_card_late_next_week'), Arr::get($windows1data, 'count_card_late_next_week')).'<br>';
 				
 				
-				echo __('Срок карты закончился :data', array(':data'=>Arr::get($windows1data, 'getcardexpired'))).'<br>';
-				echo __('Сотрудники без карты :data', array(':data'=>Arr::get($windows1data, 'getPeopleWithoutCard'))).'<br>';
-				echo __('Количество неактивных карт :data', array(':data'=>Arr::get($windows1data, 'getCardNotActive'))).'<br>';
 			?>
 				
 				<!-- RFID формат -->
