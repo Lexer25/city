@@ -65,13 +65,15 @@ class Controller_Dashboard extends Controller_Template {
 		$t1=microtime(true);
 		//if(Arr::get($config_windows, 'windows1', FALSE)) $list=Model::Factory('Stat')->stat();
 		
-		if(Arr::get($config_windows, 'windows1', FALSE)) $list_windows1=Model::Factory('Stat')->getStatPeopleAndCard();//статистика для окна 1
+		//if(Arr::get($config_windows, 'windows1', FALSE)) $list_windows1=Model::Factory('Stat')->getStatPeopleAndCard();//статистика для окна 1
+		
+		if(Arr::get($config_windows, 'windows1', FALSE)) $list_windows1=$this->getWin1();
+		
 		
 		if(Arr::get($config_windows, 'windows2', FALSE)) $list_windows2=Model::Factory('Stat')->getEquipment();//оборудование
 		
 		if(Arr::get($config_windows, 'windows3', FALSE)) $list_windows3=Model::Factory('Stat')->getLoadOrder();//очередь загрузок
 		
-		$windows1data=$this->getWin1();
 		
 		$analyt_result = Model::Factory('Stat')->analyt_result();// 26.02.2020 подсчет аналитики
 		$timeExecute=microtime(1)-$t1;
@@ -83,15 +85,11 @@ class Controller_Dashboard extends Controller_Template {
 			'list_windows1' => $list_windows1,
 			'list_windows2' => $list_windows2,
 			'list_windows3' => $list_windows3,
-			//'list' => $list,
-			//'event_stat' => $event_stat,
-			//'event_stat_enable' => Arr::get($config_windows, 'windows4'),
 			'analyt_result' => $analyt_result,
-			//'timeExecute' => $timeExecute,	
 			'countErrKeyFormatRfid' => $countErrKeyFormatRfid,	
 			'about' => $about,	
-			'config_windows' => $config_windows,	
-			'windows1data'=>$windows1data,
+			'config_windows' => $config_windows,//информация о разрешенных окнах
+			
 			));
 		
 		$this->template->content = $content;

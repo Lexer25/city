@@ -655,55 +655,7 @@ class Model_Stat extends Model
 	}
 	
 	
-	/**11.03.2026 выборка данных для окна 1 Инфомрация по сотрудникам и картам
-	*/
-	public function getStatPeopleAndCard()
-	{
-		$res=array();
-		$res['card']['key_people']['name']=__('key_people');
-		$res['card']['key_people']['count']=DB::query(Database::SELECT, 'select count(*) from people p where p."ACTIVE"=1')
-		->execute(Database::instance('fb'))
-		->get('COUNT');
-		
-		$res['card']['key_people_delete']['name']=__('key_people_delete');
-		$res['card']['key_people_delete']['count']=DB::query(Database::SELECT, 'select count(*) from people p where p."ACTIVE"=0')
-		->execute(Database::instance('fb'))
-		->get('COUNT');
-		
-		//подсчет количества событий за последние 24 часа
-		$res['card']['event_count_24']['name']=__('event_count_24');
-		$res['card']['event_count_24']['count']=DB::query(Database::SELECT, 'select count(*) from events e where e.datetime>\''.date("d.m.Y H:i:s",strtotime("-1 days")).'\'')
-		->execute(Database::instance('fb'))
-		->get('COUNT');
-		
-		// Информация о картах, срок действия которых истекает в течении ближайшей недели
-		$count_day_befor_end_time=Kohana::$config->load('artonitcity_config')->count_day_befor_end_time;
-		$res['card']['count_card_late_next_week']['name']=__('count_card_late_next_week', array('count_day_befor_end_time' => date("d.m.Y",strtotime("$count_day_befor_end_time days"))));
-		$res['card']['count_card_late_next_week']['count']=DB::query(Database::SELECT, 'select count(*) from card c where c.timeend > \'now\' and c.timeend < \''. date("d.m.Y H:i:s",strtotime("$count_day_befor_end_time days")).'\'')
-		->execute(Database::instance('fb'))
-		->get('COUNT');
-		
-		// Информация о картах, срок действия которых истек
-		$res['card']['count_card_late']['name']=__('count_card_late');
-		$res['card']['count_card_late']['count']=DB::query(Database::SELECT, 'select count(*) from card c where c.timeend<\'now\' and c."ACTIVE">0.')
-		->execute(Database::instance('fb'))
-		->get('COUNT');
-		
-		// Количество пользователей без карт (17.10.2017)
-		$res['card']['people_without_card']['name']=__('people_without_card');
-		$res['card']['people_without_card']['count']=DB::query(Database::SELECT, 'select count(p.id_pep) from people p left join card c on c.id_pep=p.id_pep where c.id_card is null')
-		->execute(Database::instance('fb'))
-		->get('COUNT');
-		
-		// Информация о картах, срок действия которых истек. 2.10.2020 Которые не активны!!! 
-		$res['card']['count_unactive_card']['name']=__('count_unactive_card');
-		$res['card']['count_unactive_card']['count']=DB::query(Database::SELECT, 'select count(*) from card c where c."ACTIVE"<1.')
-		->execute(Database::instance('fb'))
-		->get('COUNT');
-		
-		return $res;
-		
-	}
+	
 	
 	/** 11.03.2026 набор данных для окна 2 Оборудование
 	*/

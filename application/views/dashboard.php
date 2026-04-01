@@ -18,93 +18,80 @@
 	?>
 
     <!-- Панель №1 - Информация по жильцам и картам -->
-	<?php if(Arr::get($config_windows, 'windows1')) :?>
-   <div class="panel panel-info col-md-3">
-		<div class="panel-heading row"><?php echo __('data_people_and_card'); ?></div>
-		<div class="panel-body">
-			<?php if (!empty($list_windows1['card'])): 
-				$card = $list_windows1['card'];
-				
-				// набор выводимых параметров и ссылок на эти параметры. Если ссылка указана, то она будет подствлеена в html
-				$items = array(
-					'people_count' => '',
-					'key_people' => '',
-					'key_people_delete' => '',
-					'event_count_24' => '',
-					'count_card_late_next_week' => 'people/find_card_late_next_week',
-					'count_card_late' => 'people/find_card_late',
-					'people_without_card' => 'people/people_without_card',
-					'count_unactive_card' => 'people/find_unActiveCard'
-				);
-				
-				foreach ($items as $key => $link)
-				{
-					if (isset($card[$key]))
-					{
-						$value = Arr::get($card[$key], 'count');
-						$name = Arr::get($card[$key], 'name');
-						echo HTML::chars($name) . ' ';
-						echo $link ? HTML::anchor($link, HTML::chars($value)) : HTML::chars($value);
-						echo '<br>';
-					}
-				} 
-				
-
-				echo '-----'.'<br>';
-				
-				//порядок вывода сообщений на экран и связанные с ними ссылки
-				
-				$itemsOrderAndURL = array(
-					'people_count' => '',
-					'key_people' => '',
-					'key_people_delete' => '',
-					'count_card_late_next_week' => 'people/find_card_late_next_week',
-					'getcardexpired' => 'people/find_card_late',
-					'getPeopleWithoutCard' => 'people/people_without_card',
-					'getCardNotActive' => 'people/find_unActiveCard'
-				);
-				
-				
-				$itemsTitle = array(
-					'people_count' => 'Количество пользователей',
-					'key_people' => '',
-					'key_people_delete' => 'Количество удаленных пользователей',
-					'count_card_late_next_week' => __('Срок действия завершится до :date', array(':date'=>Arr::get($windows1data, 'timeExpired'))),
-					'getcardexpired' => 'Срок карты закончился',
-					'getPeopleWithoutCard' => 'Сотрудники без карты',
-					'getCardNotActive' => 'Количество неактивных карт'
-				);
-				
-				
-				
-				foreach ($itemsOrderAndURL as $key => $link)
-				{
-					if (isset($windows1data[$key]))
-					{
-						$value = Arr::get($windows1data,$key);
-						$name = Arr::get($itemsTitle, $key, '-');
-						echo HTML::chars($name) . ' ';
-						echo $link ? HTML::anchor($link, HTML::chars($value)) : HTML::chars($value);
-						echo '<br>';
-					}
-				} 
-				
-				
-				
-			?>
-				
-				<!-- RFID формат -->
-				<span class="label label-<?php echo $countErrKeyFormatRfid > 0 ? 'danger' : 'success'; ?>">
-					<?php echo __('Неправильный формат RFID'); ?>
-				</span>
-				<?php echo HTML::anchor('dashboard/ErrKeyFormatRfid', $countErrKeyFormatRfid); ?>
-				
-			<?php else: ?>
-				<?php echo __('windows_disable'); ?>
-			<?php endif; ?>
-		</div>
-	</div>
-	<?php endif;?>
+	<?php if(Arr::get($config_windows, 'windows1'))
+	{?>
+		   <div class="panel panel-info col-md-3">
+				<div class="panel-heading row"><?php echo __('data_people_and_card'); ?></div>
+				<div class="panel-body">
+					<?php if (!empty($list_windows1))
+					{				
+						
+						
+						// порядок вывда данных на экран и ссылок на эти параметры. Если ссылка указана, то она будет подствлеена в html
+										
+										
+						//порядок вывода сообщений на экран и связанные с ними ссылки
+						
+						$itemsOrderAndURL = array(
+							'people_count' => '',
+							'key_people' => '',
+							'key_people_delete' => '',
+							'count_card_late_next_week' => 'people/find_card_late_next_week',
+							'getcardexpired' => 'people/find_card_late',
+							'getPeopleWithoutCard' => 'people/people_without_card',
+							'getCardNotActive' => 'people/find_unActiveCard'
+						);
+						
+						
+						$itemsTitle = array(
+							'people_count' => 'Количество пользователей',
+							'key_people' => '',
+							'key_people_delete' => 'Количество удаленных пользователей',
+							'count_card_late_next_week' => __('Срок действия завершится до :date', array(':date'=>Arr::get($list_windows1, 'timeExpired'))),
+							'getcardexpired' => 'Срок карты закончился',
+							'getPeopleWithoutCard' => 'Сотрудники без карты',
+							'getCardNotActive' => 'Количество неактивных карт'
+						);
+						
+						
+						
+						foreach ($itemsOrderAndURL as $key => $link)
+						{
+							if (isset($list_windows1[$key]))
+							{
+								$value = Arr::get($list_windows1,$key);
+								$name = Arr::get($itemsTitle, $key, '-');
+								echo HTML::chars($name) . ' ';
+								echo $link ? HTML::anchor($link, HTML::chars($value)) : HTML::chars($value);
+								echo '<br>';
+							}
+						} 
+						
+						
+						
+					?>
+						
+						<!-- RFID формат -->
+						<span class="label label-<?php echo $countErrKeyFormatRfid > 0 ? 'danger' : 'success'; ?>">
+							<?php echo __('Неправильный формат RFID'); ?>
+						</span>
+						<?php echo HTML::anchor('dashboard/ErrKeyFormatRfid', $countErrKeyFormatRfid);
+						
+					} else {
+						echo __('windows_1_no_data');
+					} ?>
+				</div>
+			</div>
+	<?php } else {
+		
+		?>
+		 <div class="panel panel-default col-md-3">
+				<div class="panel-heading row"><?php echo __('data_people_and_card'); ?></div>
+				<div class="panel-body">
+				<?php echo __('windows_disable');?>
+				</div>
+			</div>
+	<?php } ?>
 	
 	
     <!-- Панель №2 - Информация по оборудованию -->
