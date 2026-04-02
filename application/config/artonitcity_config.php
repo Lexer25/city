@@ -2,7 +2,7 @@
 
 /**
  * Конфигурационный файл Artonit City
- * Сгенерировано: 2026-04-01 09:04:03
+ * Сгенерировано: 2026-04-01 22:06:50
  */
 
 return array(
@@ -15,7 +15,7 @@ return array(
     'lightVerDay' => 3,
     'developer' => 'www.artonit.ru',
     'main_windows' => array(
-        'windows1' => false,
+        'windows1' => true,
         'windows2' => true,
         'windows3' => true,
         'windows4' => true,

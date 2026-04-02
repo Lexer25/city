@@ -116,48 +116,19 @@ class Controller_Dashboard extends Controller_Template {
 				$days = (int) $config->count_day_befor_end_time;
 				$dateExpired=date('d.m.Y', strtotime("+{$days} days"));//дата для расчета
 				$people_model = Model::factory('people');
-				$card_model = Model::factory('people');
+				$card_model = Model::factory('identifier');
 				
 				$result=array();
 				$result['people_count']=$people_model->getPeopleCount();//количество пользователей
 				$result['key_people_delete']=$people_model->getDeletedPeopleCount();//количество удаленных пользователей
-				$result['timeExpired']=$dateExpired;//дата для расчета
-				$result['count_card_late_next_week']=$people_model->getCountCardLateNextTime($result['timeExpired']);//количество карт, срок которых истечет до указанной даты
-				$result['getcardexpired']=$people_model->getcardexpired();//количество карт, у которых истек срок действия
 				$result['getPeopleWithoutCard']=$people_model->getPeopleWithoutCard();//количество сотрудников без карты
-				$result['getCardNotActive']=$people_model->getCardNotActive();//количество неактивных идентификаторов
 				
-				// Определяем структуру данных
-				/* $keys = array(
-					'people_count' => array($people_model, 'getPeopleCount'),
-					'key_people_delete' => array($people_model, 'getDeletedPeopleCount'),
-					'timeExpired' => function() use ($days) {
-						return date('d.m.Y', strtotime("+{$days} days"));
-					},
-					'count_card_late_next_week' => array($people_model, 'getCountCardLateNextTime'),
-					'getcardexpired' => array($people_model, 'getcardexpired'),
-					'getPeopleWithoutCard' => array($people_model, 'getPeopleWithoutCard'),
-					'getCardNotActive' => array($people_model, 'getCardNotActive'),
-				);
+                                $result['timeExpired']=$dateExpired;//дата для расчета
+				$result['count_card_late_next_week']=$card_model->getCountCardLateNextTime($result['timeExpired']);//количество карт, срок которых истечет до указанной даты
+				$result['getcardexpired']=$card_model->getcardexpired();//количество карт, у которых истек срок действия
+				$result['getCardNotActive']=$card_model->getCardNotActive();//количество неактивных идентификаторов
 				
-				$result = array();
-				foreach ($keys as $key => $callback) {
-					try {
-						if (is_array($callback)) {
-							// Для методов с параметрами
-							if ($key === 'count_card_late_next_week') {
-								$result[$key] = call_user_func($callback, $days);
-							} else {
-								$result[$key] = call_user_func($callback);
-							}
-						} else {
-							$result[$key] = $callback();
-						}
-					} catch (Exception $e) {
-						Kohana::$log->add(Log::ERROR, "Error getting {$key}: " . $e->getMessage());
-						$result[$key] = 0;
-					}
-				} */
+				
 				
 				return $result;
 			}
