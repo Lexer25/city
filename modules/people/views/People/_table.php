@@ -5,12 +5,12 @@
  * - $people_table_variant: 'card_late' | 'card_late_next_week' (по умолчанию card_late)
  * - $list, $title, $custom_info — см. ниже
  */
-  ini_set('memory_limit', '256M');
+ini_set('memory_limit', '256M');
 if (!isset($people_table_variant)) {
-	$people_table_variant = 'card_late';
+    $people_table_variant = 'card_late';
 }
 if (!isset($total_row_count) && isset($list) && is_array($list)) {
-	$total_row_count = count($list);
+    $total_row_count = count($list);
 }
 ?>
 
@@ -55,16 +55,16 @@ if (!isset($total_row_count) && isset($list) && is_array($list)) {
         </div>
         
         <!-- Дополнительная информация (если передана) -->
-        <?php if (isset($custom_info) && !empty($custom_info)): ?>
+        <?php if (isset($custom_info) && !empty($custom_info)) { ?>
             <div class="custom-info mb-3" style="margin-bottom: 15px;">
                 <?php echo $custom_info; ?>
             </div>
-        <?php endif; ?>
+        <?php } ?>
         
         <!-- Основная форма с таблицей -->
         <?php echo Form::open('identifier/control', array('class' => 'form-inline', 'id' => 'cards-form')); ?>
         
-        <?php if (isset($list) && !empty($list)): ?>
+        <?php if (isset($list) && !empty($list)) { ?>
             
             <!-- Пагинация НАД таблицей -->
             <div id="pager-top" class="pager" style="margin-bottom: 15px;">
@@ -120,21 +120,20 @@ if (!isset($total_row_count) && isset($list) && is_array($list)) {
 			
 			<th><?php echo __('card');?></th>
 			<th><?php echo __('card_date_end');?></th>
-			<?php if ($people_table_variant === 'card_late_next_week'): ?>
+			<?php if ($people_table_variant === 'card_late_next_week') { ?>
 			<th><?php echo __('overlong');?></th>
-			<?php else: ?>
+			<?php } else { ?>
 			<th><?php echo __('overlate');?></th>
 			<th><?php echo __('isactive');?></th>
-			<?php endif; ?>
+			<?php } ?>
 			
 			
-		</tr>
+			</tr>
 		</thead>
 		<tbody>
 		<?php
 		$pp=0;
-		foreach ($list as $key=>$contact)
-		{
+		foreach ($list as $key=>$contact) {
 			$timeend = Arr::get($contact, 'TIMEEND');
 
 			if ($people_table_variant === 'card_late_next_week') {
@@ -178,9 +177,8 @@ if (!isset($total_row_count) && isset($list) && is_array($list)) {
 				echo '<td>'.Arr::get($contact, 'ISACTIVE', 0).'</td>';
 				echo '</tr>';
 			}
-					
-			}
-				?>
+		}
+		?>
 		</tbody>
 	</table>
             </div>
@@ -223,17 +221,18 @@ if (!isset($total_row_count) && isset($list) && is_array($list)) {
                 </div>
             </div>
             
-        <?php else: ?>
+        <?php } else { ?>
             <div class="alert alert-warning">
                 <?php echo htmlspecialchars(__('Нет данных для отображения')); ?>
             </div>
-        <?php endif; ?>
+        <?php } ?>
         
 <!-- Панель действий -->
-<?php if (isset($show_actions) ? $show_actions : true): ?>
+<?php if (isset($show_actions) ? $show_actions : true) { ?>
     <div class="card mt-3" style="margin-top: 20px;">
         <div class="card-body">
             <!-- Блок с датой и кнопками в одном ряду -->
+			<?php if (Auth::instance()->logged_in()) { ?>
             <div class="row mb-3">
                 <div class="col-md-12">
                     <div class="form-inline" style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
@@ -310,9 +309,15 @@ if (!isset($total_row_count) && isset($list) && is_array($list)) {
                     </small>
                 </div>
             </div>
+			
+			 <?php } else { ?>
+                            <div class="alert alert-danger w-100">
+                                <?php echo htmlspecialchars(__('Для выполнения действий необходимо авторизоваться')); ?>
+                            </div>
+							<?php } ?>
         </div>
     </div>
-<?php endif; ?>
+<?php } ?>
         
         <?php echo Form::close(); ?>
     </div>
@@ -599,9 +604,9 @@ function updateMasterCheckbox() {
 });
 </script>
 
-<?php if (isset($exec_time)): ?>
+<?php if (isset($exec_time)) { ?>
 <!-- Информация о времени генерации -->
 <span id="time-bottom" style="display:none;">
     <?php echo __('Страница подготовлена за :time сек.', array(':time' => number_format($exec_time, 3))); ?>
 </span>
-<?php endif; ?>
+<?php } ?>

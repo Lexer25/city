@@ -14,7 +14,7 @@
  * - $title: заголовок таблицы (опционально)
  */
  
- ini_set('memory_limit', '256M');
+ini_set('memory_limit', '256M');
 ?>
 
 <div class="panel panel-primary">
@@ -59,16 +59,16 @@
         </div>
         
         <!-- Дополнительная информация (если передана) -->
-        <?php if (isset($custom_info) && !empty($custom_info)): ?>
+        <?php if (isset($custom_info) && !empty($custom_info)) { ?>
             <div class="custom-info mb-3" style="margin-bottom: 15px;">
                 <?php echo $custom_info; ?>
             </div>
-        <?php endif; ?>
+        <?php } ?>
         
         <!-- Основная форма с таблицей -->
         <?php echo Form::open('identifier/control', array('class' => 'form-inline', 'id' => 'cards-form')); ?>
         
-        <?php if (isset($list) && !empty($list)): ?>
+        <?php if (isset($list) && !empty($list)) { ?>
             
             <!-- Пагинация НАД таблицей -->
             <div id="pager-top" class="pager" style="margin-bottom: 15px;">
@@ -138,19 +138,19 @@
                                     </label>
                                 </div>
                             </th>
-                            <?php foreach ($headers as $header_key => $header_title): ?>
+                            <?php foreach ($headers as $header_key => $header_title) { ?>
                                 <th><?php echo htmlspecialchars($header_title); ?></th>
-                            <?php endforeach; ?>
+                            <?php } ?>
                         </th>
                     </thead>
                     
                     <tbody>
                         <?php 
                         $sn = 0;
-                        foreach ($list as $index => $row): 
+                        foreach ($list as $index => $row) {
                             $cardId = isset($row['ID_CARD']) ? $row['ID_CARD'] : '';
                             $safeCardId = htmlspecialchars($cardId, ENT_QUOTES, 'UTF-8');
-						?>
+                        ?>
                             <tr>
                                 <td class="text-center"><?php echo ++$sn; ?></td>
                                 <td class="text-center">
@@ -161,7 +161,7 @@
                                         )); ?>
                                     </label>
                                 </td>
-                                <?php foreach (array_keys($headers) as $field): ?>
+                                <?php foreach (array_keys($headers) as $field) { ?>
                                     <td>
                                         <?php
                                         $value = isset($row[$field]) ? $row[$field] : '';
@@ -172,9 +172,9 @@
                                         echo htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
                                         ?>
                                     </td>
-                                <?php endforeach; ?>
+                                <?php } ?>
                             </tr>
-                        <?php endforeach; ?>
+                        <?php } ?>
                     </tbody>
                 </table>
             </div>
@@ -217,18 +217,18 @@
                 </div>
             </div>
             
-        <?php else: ?>
+        <?php } else { ?>
             <div class="alert alert-warning">
                 <?php echo htmlspecialchars(__('Нет данных для отображения')); ?>
             </div>
-        <?php endif; ?>
+        <?php } ?>
         
         <!-- Панель действий -->
-        <?php if (isset($show_actions) ? $show_actions : true): ?>
+        <?php if (isset($show_actions) ? $show_actions : true) { ?>
             <div class="card mt-3" style="margin-top: 20px;">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
-                        <?php if (Auth::instance()->logged_in()): ?>
+                        <?php if (Auth::instance()->logged_in()) { ?>
                             <div>
                                 <button type="submit" 
                                         class="btn btn-success" 
@@ -251,15 +251,15 @@
                             <div class="text-muted">
                                 <small><?php echo __('Выбрано карт'); ?>: <span id="selected-count">0</span></small>
                             </div>
-                        <?php else: ?>
+                        <?php } else { ?>
                             <div class="alert alert-danger w-100">
                                 <?php echo htmlspecialchars(__('Для выполнения действий необходимо авторизоваться')); ?>
                             </div>
-                        <?php endif; ?>
+                        <?php } ?>
                     </div>
                 </div>
             </div>
-        <?php endif; ?>
+        <?php } ?>
         
         <?php echo Form::close(); ?>
     </div>
@@ -531,9 +531,9 @@ $(document).ready(function() {
 });
 </script>
 
-<?php if (isset($exec_time)): ?>
+<?php if (isset($exec_time)) { ?>
 <!-- Информация о времени генерации -->
 <span id="time-bottom" style="display:none;">
     <?php echo __('Страница подготовлена за :time сек.', array(':time' => number_format($exec_time, 3))); ?>
 </span>
-<?php endif; ?>
+<?php } ?>
