@@ -482,8 +482,11 @@ where e.id_card is null';
 		
 		}
 		
-			
-		public function getPeopleCount()
+		
+		/** 2.04.2026 количество сотрудников в базе данных
+		$mode - SKUD считает всех, кроме тех, кто находится в организации 2 и 3 (Гость и Архив), GUEST - считает только тех, кто находится в организации 2 и 3
+		*/
+		public function getPeopleCount($mode='SKUD')
 		{
 				$query=DB::query(Database::SELECT, 'select count(*) from people p where p."ACTIVE"=1')
 				->execute(Database::instance('fb'));
@@ -509,7 +512,7 @@ where e.id_card is null';
 		// Количество пользователей без карт (17.10.2017)
 		public function getPeopleWithoutCard()
 		{
-			echo Debug::vars('542');//exit;
+			
 			$query=DB::query(Database::SELECT, 'select count(p.id_pep) from people p left join card c on c.id_pep=p.id_pep where c.id_card is null')
 				->execute(Database::instance('fb'));
 			//echo Debug::vars('544', $query);exit;

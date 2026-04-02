@@ -67,8 +67,12 @@ class Controller_Dashboard extends Controller_Template {
 		
 		//if(Arr::get($config_windows, 'windows1', FALSE)) $list_windows1=Model::Factory('Stat')->getStatPeopleAndCard();//статистика для окна 1
 		
-		if(Arr::get($config_windows, 'windows1', FALSE)) $list_windows1=$this->getWin1();
-		
+		if(Arr::get($config_windows, 'windows1', FALSE)) 
+		{
+			$list_windows1=$this->getWin1();
+			$list_windowsGuest=$this->getWin1Guest();
+			
+		}
 		
 		if(Arr::get($config_windows, 'windows2', FALSE)) $list_windows2=Model::Factory('Stat')->getEquipment();//оборудование
 		
@@ -98,17 +102,7 @@ class Controller_Dashboard extends Controller_Template {
 	}
 	
 	/**31.03.2026 Сбор информации для окна №1
-	$items = array(
-					'key_count' => '',
-					'key_people' => '',
-					'key_people_delete' => '',
-					'event_count_24' => '',
-					'count_card_late_next_week' => 'people/find_card_late_next_week',
-					'count_card_late' => 'people/find_card_late',
-					'people_without_card' => 'people/people_without_card',
-					'count_unactive_card' => 'people/find_unActiveCard'
-				);
-				
+					
 	*/
 			public function getWin1()
 			{
@@ -132,6 +126,42 @@ class Controller_Dashboard extends Controller_Template {
 				
 				return $result;
 			}
+			
+			
+			
+		/**2.04.2026 Сбор информации для окна №1 по бюро пропусков
+					
+		*/
+			public function getWin1Guest()
+			{
+				$config = Kohana::$config->load('artonitcity_config');
+				$days = (int) $config->count_day_befor_end_time;
+				$dateExpired=date('d.m.Y', strtotime("+{$days} days"));//дата для расчета
+				$people_model = Model::factory('people');
+				$card_model = Model::factory('identifier');
+				
+				$result=array();
+				$result['people_count']=$people_model->getPeopleCount();//количество пользователей
+				$result['key_people_delete']=$people_model->getDeletedPeopleCount();//количество удаленных пользователей
+				$result['getPeopleWithoutCard']=$people_model->getPeopleWithoutCard();//количество сотрудников без карты
+				
+                                $result['timeExpired']=$dateExpired;//дата для расчета
+				$result['count_card_late_next_week']=$card_model->getCountCardLateNextTime($result['timeExpired']);//количество карт, срок которых истечет до указанной даты
+				$result['getcardexpired']=$card_model->getcardexpired();//количество карт, у которых истек срок действия
+				$result['getCardNotActive']=$card_model->getCardNotActive();//количество неактивных идентификаторов
+				
+				
+				
+				return $result;
+			}
+			
+			
+			
+			
+			
+			
+			
+			
 	/** 14.09.2024 Просмотр списка карт с неправильным форматом
 	*/
 	public function action_ErrKeyFormatRfid()

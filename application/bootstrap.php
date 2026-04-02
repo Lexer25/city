@@ -146,6 +146,7 @@ Kohana::modules(array(
 	 'parsec' => MODPATH.'parsec', //'раздел для работы с parsec
 	 'setting' => MODPATH . 'setting',//настройка Сити через веб-форму
 	 'about' => MODPATH.'about', // About module
+	 'dbsetting' => MODPATH.'dbsetting', // Database management module
 	));
 
 /**

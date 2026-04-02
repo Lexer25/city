@@ -54,7 +54,7 @@
 						);
 						
 						
-						
+						echo '<p>СКУД</p>';
 						foreach ($itemsOrderAndURL as $key => $link)
 						{
 							if (isset($list_windows1[$key]))
@@ -66,6 +66,8 @@
 								echo '<br>';
 							}
 						} 
+						echo '<p>Бюро пропусков</p>';
+						
 						
 						
 						
