@@ -27,7 +27,8 @@
     <link rel="stylesheet" href="/city/static/css/bootstrap-datetimepicker.min.css">
     <link rel="stylesheet" href="/city/static/css/modal.css">
     <link rel="stylesheet" href="/city/static/css/city.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/theme.blue.min.css">
+   
+    <link rel="stylesheet" href="/city/static/css/2.31.3/theme.blue.min.css">
     
     <!-- JavaScript библиотеки -->
     <script src="/city/static/js/jquery-2.2.4.js"></script>
@@ -37,12 +38,11 @@
    
 
 <!-- В head или перед закрывающим body -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/theme.blue.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/jquery.tablesorter.pager.min.css">
+<link rel="stylesheet" href="/city/static/css/2.31.3/jquery.tablesorter.pager.min.css">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.widgets.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/extras/jquery.tablesorter.pager.min.js"></script>
+<script src="/city/static/js/2.31.3/jquery.tablesorter.min.js"></script>
+<script src="/city/static/js/2.31.3/jquery.tablesorter.widgets.min.js"></script>
+<script src="/city/static/js/2.31.3/jquery.tablesorter.pager.min.js"></script>
 
 
 </head>
