@@ -293,7 +293,7 @@ class Model_identifier extends Model
 		{
 			$sql='select count(*) from card c
 				join people p on p.id_pep=c.id_pep
-				where p.id_pep not in (2,3)
+				where p.id_org not in (2,3)
 				';
 			$query=DB::query(Database::SELECT, $sql)
 			->execute(Database::instance('fb'));
@@ -309,8 +309,9 @@ class Model_identifier extends Model
 		{
 			$sql='select count(*) from card c
 				join people p on p.id_pep=c.id_pep
-				where p.id_pep in (2)
+				where p.id_org in (2)
 				';
+			//echo Debug::vars('314', $sql); exit;
 			$query=DB::query(Database::SELECT, $sql)
 			->execute(Database::instance('fb'));
 		return $query->get('COUNT');
@@ -324,7 +325,7 @@ class Model_identifier extends Model
 		{
 			$sql='select count(*) from card c
 				join people p on p.id_pep=c.id_pep
-				where p.id_pep in (3)
+				where p.id_org in (3)
 				';
 			$query=DB::query(Database::SELECT, $sql)
 			->execute(Database::instance('fb'));

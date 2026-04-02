@@ -93,7 +93,7 @@
 						{
 							if (isset($list_windowsGuest[$key]))
 							{
-								$value = Arr::get($list_windows1,$key, 0);
+								$value = Arr::get($list_windowsGuest,$key, 0);
 								$name = Arr::get($itemsTitle, $key, '-');
 								echo HTML::chars($name) . ' ';
 								echo $link ? HTML::anchor($link, HTML::chars($value)) : HTML::chars($value);
