@@ -130,24 +130,18 @@ class Model_identifier extends Model
 	*/
 	public function allCards()
 	{
-	
-	
 		$listWhoGo = $this->cardsWithEvents();			
 		$listIdentifier = $this->cardsFullList();			
-	
-	
-	foreach ($listIdentifier as &$key)
-	{
-		
-		$key['lastevent']=Arr::get(Arr::get($listWhoGo,Arr::get($key,'ID_CARD')), 'MAX');
-		
-		
-	}
-		unset($key);
-		
-	return $listIdentifier;		
+
+		foreach ($listIdentifier as &$key)
+		{
 			
-	
+			$key['lastevent']=Arr::get(Arr::get($listWhoGo,Arr::get($key,'ID_CARD')), 'MAX');
+		
+		}
+			unset($key);
+			
+		return $listIdentifier;		
 		
 	}
 	
@@ -290,6 +284,57 @@ class Model_identifier extends Model
 		return $query->get('COUNT');
 			
 		}
+		
+		
+		/**2.04.2026 Количество карт, выданных сотрудникам
+		*/
+		
+		public function getPeopleCardCount()
+		{
+			$sql='select count(*) from card c
+				join people p on p.id_pep=c.id_pep
+				where p.id_pep not in (2,3)
+				';
+			$query=DB::query(Database::SELECT, $sql)
+			->execute(Database::instance('fb'));
+		return $query->get('COUNT');
+			
+		}
+		
+		
+		/**2.04.2026 Количество карт, выданных гостям
+		*/
+		
+		public function getGuestCardCount()
+		{
+			$sql='select count(*) from card c
+				join people p on p.id_pep=c.id_pep
+				where p.id_pep in (2)
+				';
+			$query=DB::query(Database::SELECT, $sql)
+			->execute(Database::instance('fb'));
+		return $query->get('COUNT');
+			
+		}
+		
+		/**2.04.2026 Количество карт, выданных гостям в архиве
+		*/
+		
+		public function getGuestArchiveCardCount()
+		{
+			$sql='select count(*) from card c
+				join people p on p.id_pep=c.id_pep
+				where p.id_pep in (3)
+				';
+			$query=DB::query(Database::SELECT, $sql)
+			->execute(Database::instance('fb'));
+		return $query->get('COUNT');
+			
+		}
+		
+		
+		
+		
 	
 }
 	

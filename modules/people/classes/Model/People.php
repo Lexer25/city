@@ -484,36 +484,37 @@ where e.id_card is null';
 		
 		
 		/** 2.04.2026 количество сотрудников в базе данных
-		$mode - SKUD считает всех, кроме тех, кто находится в организации 2 и 3 (Гость и Архив), GUEST - считает только тех, кто находится в организации 2 и 3
+		считает всех, кроме тех, кто находится в организации 2 и 3 (Гость и Архив)
 		*/
-		public function getPeopleCount($mode='SKUD')
+		public function getPeopleCount()
 		{
-				$query=DB::query(Database::SELECT, 'select count(*) from people p where p."ACTIVE"=1')
+				$query=DB::query(Database::SELECT, 'select count(*) from people p where p."ACTIVE"=1 and p.id_org not in (2,3)')
 				->execute(Database::instance('fb'));
 				
 				return $query->get('COUNT');
 			
 		}
+				
+		/** 2.04.2026 количество неактивных сотрудников в базе данных
+		считает всех, кроме тех, кто находится в организации 2 и 3 (Гость и Архив)
+		*/
 		
 		public function getDeletedPeopleCount()
 		{
-				$query=DB::query(Database::SELECT, 'select count(*) from people p where p."ACTIVE"=0')
+				$query=DB::query(Database::SELECT, 'select count(*) from people p where p."ACTIVE"=0 and p.id_org not in (2,3)')
 				->execute(Database::instance('fb'));
 				return $query->get('COUNT');
 			
 		}
 		
-			
-			
-			
 		
-		
-		
-		// Количество пользователей без карт (17.10.2017)
+		/* 2.04.2026 количество сотрудников без карты
+		считает всех, кроме тех, кто находится в организации 2 и 3 (Гость и Архив)
+		*/
 		public function getPeopleWithoutCard()
 		{
 			
-			$query=DB::query(Database::SELECT, 'select count(p.id_pep) from people p left join card c on c.id_pep=p.id_pep where c.id_card is null')
+			$query=DB::query(Database::SELECT, 'select count(p.id_pep) from people p left join card c on c.id_pep=p.id_pep where c.id_card is null and p.id_org not in (2,3)')
 				->execute(Database::instance('fb'));
 			//echo Debug::vars('544', $query);exit;
 			return $query->get('COUNT');
@@ -521,7 +522,29 @@ where e.id_card is null';
 		}
 		
 		
+		/** 2.04.2026 количество гостей в базе данных
+		считает всех, кроме тех, кто находится в организации 2 и 3 (Гость и Архив)
+		*/
+		public function getGuestCount()
+		{
+				$query=DB::query(Database::SELECT, 'select count(*) from people p where p."ACTIVE"=1 and p.id_org in (2)')
+				->execute(Database::instance('fb'));
+				
+				return $query->get('COUNT');
+			
+		}
 		
+		/** 2.04.2026 количество гостей в архиве базе данных
+		считает всех, кроме тех, кто находится в организации 2 и 3 (Гость и Архив)
+		*/
+		public function getGuestArchiveCount()
+		{
+				$query=DB::query(Database::SELECT, 'select count(*) from people p where p."ACTIVE"=1 and p.id_org in (3)')
+				->execute(Database::instance('fb'));
+				
+				return $query->get('COUNT');
+			
+		}
 	
 }
 

@@ -36,6 +36,7 @@
 							'people_count' => '',
 							'key_people' => '',
 							'key_people_delete' => '',
+							'getPeopleCardCount' => 'identifier',
 							'count_card_late_next_week' => 'people/find_card_late_next_week',
 							'getcardexpired' => 'people/find_card_late',
 							'getPeopleWithoutCard' => 'people/people_without_card',
@@ -50,7 +51,8 @@
 							'count_card_late_next_week' => __('Срок действия завершится до :date', array(':date'=>Arr::get($list_windows1, 'timeExpired'))),
 							'getcardexpired' => 'Срок карты закончился',
 							'getPeopleWithoutCard' => 'Сотрудники без карты',
-							'getCardNotActive' => 'Количество неактивных карт'
+							'getCardNotActive' => 'Количество неактивных карт',
+							'getPeopleCardCount' => 'Всего карт у сотрудников'
 						);
 						
 						
@@ -66,7 +68,38 @@
 								echo '<br>';
 							}
 						} 
+						
+						//вывод данных по гостям
 						echo '<p>Бюро пропусков</p>';
+						
+						$itemsOrderAndURL = array(
+							'guestCount' => '',
+							'guestArchiveCount' => '',
+							'guestCardCount' => '',
+							'guestArchiveCardCount' => '',
+							
+						);
+						
+						
+						$itemsTitle = array(
+							'guestCount' => 'Количество гостей',
+							'guestArchiveCount' => 'Количество гостей в архиве',
+							'guestCardCount' => 'Выдано гостевых карт',
+							'guestArchiveCardCount' => 'Карты в Ахиве',
+							
+						);
+						
+						foreach ($itemsOrderAndURL as $key => $link)
+						{
+							if (isset($list_windowsGuest[$key]))
+							{
+								$value = Arr::get($list_windows1,$key, 0);
+								$name = Arr::get($itemsTitle, $key, '-');
+								echo HTML::chars($name) . ' ';
+								echo $link ? HTML::anchor($link, HTML::chars($value)) : HTML::chars($value);
+								echo '<br>';
+							}
+						} 
 						
 						
 						

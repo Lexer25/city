@@ -87,6 +87,7 @@ class Controller_Dashboard extends Controller_Template {
 		$about=Model::factory('Parkdb')->aboutDB($_connectName);
 		$content = View::factory('dashboard', array(
 			'list_windows1' => $list_windows1,
+			'list_windowsGuest' => $list_windowsGuest,
 			'list_windows2' => $list_windows2,
 			'list_windows3' => $list_windows3,
 			'analyt_result' => $analyt_result,
@@ -121,6 +122,7 @@ class Controller_Dashboard extends Controller_Template {
 				$result['count_card_late_next_week']=$card_model->getCountCardLateNextTime($result['timeExpired']);//количество карт, срок которых истечет до указанной даты
 				$result['getcardexpired']=$card_model->getcardexpired();//количество карт, у которых истек срок действия
 				$result['getCardNotActive']=$card_model->getCardNotActive();//количество неактивных идентификаторов
+				$result['getPeopleCardCount']=$card_model->getPeopleCardCount();//количество неактивных идентификаторов
 				
 				
 				
@@ -141,14 +143,12 @@ class Controller_Dashboard extends Controller_Template {
 				$card_model = Model::factory('identifier');
 				
 				$result=array();
-				$result['people_count']=$people_model->getPeopleCount();//количество пользователей
-				$result['key_people_delete']=$people_model->getDeletedPeopleCount();//количество удаленных пользователей
-				$result['getPeopleWithoutCard']=$people_model->getPeopleWithoutCard();//количество сотрудников без карты
-				
-                                $result['timeExpired']=$dateExpired;//дата для расчета
-				$result['count_card_late_next_week']=$card_model->getCountCardLateNextTime($result['timeExpired']);//количество карт, срок которых истечет до указанной даты
-				$result['getcardexpired']=$card_model->getcardexpired();//количество карт, у которых истек срок действия
-				$result['getCardNotActive']=$card_model->getCardNotActive();//количество неактивных идентификаторов
+				$result['guestCount']=$people_model->getGuestCount();//количество гостей
+				$result['guestArchiveCount']=$people_model->getGuestArchiveCount();//количество гостей в архиве
+				$result['guestCardCount']=$card_model->getGuestCardCount();//количество карт у гостей
+				$result['guestArchiveCardCount']=$card_model->getGuestArchiveCardCount();//количество карт у гостей в архиве
+								
+               
 				
 				
 				
