@@ -120,37 +120,84 @@ class Controller_Dbsetting extends Controller_Template {
      */
     public function action_backup()
     {
-        $backup_dir = $this->config->get('backup_dir');
-        $database_path = $this->config->get('database_path');
+        // Get parameters from POST or use defaults from config
+        //$database_path = $this->request->post('database_path', $this->config->get('database_path'));
+        //$backup_dir = $this->request->post('backup_dir', $this->config->get('backup_dir'));
         $firebird_bin = $this->config->get('firebird_bin');
+
+        $database_path = Arr::get($_POST, 'database_path');
+        $backup_dir = Arr::get($_POST, 'backup_dir');
+        //$firebird_bin = Arr::get($_POST, 'firebird_bin');
+
+    //echo Debug::vars('128', $database_path);//exit;   
+     //echo Debug::vars('131', $firebird_bin);//exit;   
+        // Decode URL-encoded paths (browsers encode : and \ in POST data)
+        $database_path = urldecode($database_path);
+        $backup_dir = urldecode($backup_dir);
+        // Log for debugging
+        Log::instance()->add(Log::DEBUG, 'Backup attempt - Database path: ' . $database_path);
+        Log::instance()->add(Log::DEBUG, 'Backup attempt - Backup dir: ' . $backup_dir);
+        
+        // Validate database path
+        if (empty($database_path)) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => 'Путь к базе данных пуст.'
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        // Check if file exists
+        if (!file_exists($database_path)) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => 'Файл базы данных не найден: ' . HTML::chars($database_path) .
+                         '. Пожалуйста, проверьте путь и убедитесь, что файл существует.'
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
         
         // Ensure backup directory exists
         if (!is_dir($backup_dir)) {
-            mkdir($backup_dir, 0777, true);
+            if (!mkdir($backup_dir, 0777, true)) {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'error',
+                    'text' => 'Не удалось создать папку для резервных копий: ' . HTML::chars($backup_dir)
+                ));
+                $this->redirect('dbsetting');
+                return;
+            }
         }
         
-        $timestamp = date('Ymd_His');
-        $backup_file = $backup_dir . 'backup_' . $timestamp . '.fbk';
-        
+        // Generate filename: database filename + year-month-day-time
+        $db_filename = pathinfo($database_path, PATHINFO_FILENAME); // e.g., "CITY"
+        $timestamp = date('Y-m-d_His'); // e.g., "2026-04-03_083138"
+        $backup_file = $backup_dir . $db_filename . '_' . $timestamp . '.fbk';
+  
         $gbak = escapeshellarg($firebird_bin . 'gbak.exe');
-        $db = escapeshellarg($database_path);
+        $db = '127.0.0.1:'.escapeshellarg($database_path);
         $backup = escapeshellarg($backup_file);
         
         // Build command
-        $command = $gbak . ' -b -user SYSDBA -masterkey ' . $db . ' ' . $backup;
-        
+        $command = $gbak . ' -b -v -ig -g -user SYSDBA -PASSWORD temp ' . $db . ' ' . $backup;
+   
+        Log::instance()->add(Log::DEBUG, 'Executing backup command: ' . $command);
         exec($command, $output, $return_var);
         
         if ($return_var === 0) {
             Session::instance()->set('flash_message', array(
                 'type' => 'success',
-                'text' => __('Backup created successfully: ') . $backup_file
+                'text' => 'Резервная копия успешно создана: ' . $backup_file
             ));
+            Log::instance()->add(Log::INFO, 'Backup created: ' . $backup_file);
         } else {
             Session::instance()->set('flash_message', array(
                 'type' => 'error',
-                'text' => __('Backup failed. Error code: ') . $return_var
+                'text' => 'Ошибка создания резервной копии. Код ошибки: ' . $return_var . '. Проверьте логи приложения для деталей.'
             ));
+            Log::instance()->add(Log::ERROR, 'Backup failed. Command: ' . $command . ', Output: ' . implode("\n", $output));
         }
         
         $this->redirect('dbsetting');
@@ -206,22 +253,72 @@ class Controller_Dbsetting extends Controller_Template {
     }
     
     /**
+     * Find the correct Firebird service name
+     * @return string|null The service name if found, null otherwise
+     */
+    protected function find_firebird_service()
+    {
+        // Try multiple possible service names
+        $possible_services = array(
+            $this->config->get('service_name', 'FirebirdServerDefault'),
+            'FirebirdServerDefaultInstance',
+            'FirebirdServerDefault',
+            'FirebirdServer',
+            'Firebird'
+        );
+        
+        // Remove duplicates while preserving order
+        $possible_services = array_unique($possible_services);
+        
+        foreach ($possible_services as $service) {
+            $command = 'sc query ' . escapeshellarg($service) . ' 2>nul';
+            exec($command, $output, $return_var);
+            
+            if ($return_var === 0) {
+                // Service exists
+                return $service;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
      * Get Firebird service status
      */
     protected function get_service_status()
     {
-        $service = $this->config->get('service_name', 'FirebirdServerDefault');
-        $command = 'sc query ' . escapeshellarg($service) . ' | find "STATE"';
+        $service = $this->find_firebird_service();
+     
+        if ($service) {
+            // Get full service output without filtering
+            $command = 'sc query ' . escapeshellarg($service) . ' 2>nul';
+            exec($command, $output, $return_var);
+            
+            if ($return_var === 0 && !empty($output)) {
+                // Parse the output for state codes (language-independent)
+                // State codes: 4 = RUNNING, 1 = STOPPED
+                foreach ($output as $line) {
+                    // Check for state code 4 (RUNNING)
+                  
+                    // check for text patterns as fallback
+                    if (strpos($line, 'RUNNING') !== false) {
+                        return 'running';
+                    }
+                    if (strpos($line, 'STOPPED') !== false) {
+                        return 'stopped';
+                    }
+                }
+            }
+        }
         
+        // If we couldn't determine status, try alternative method
+        // Check if any Firebird process is running
+        $command = 'tasklist /FI "IMAGENAME eq fbserver.exe" /FI "STATUS eq running" 2>nul | find "fbserver.exe"';
         exec($command, $output, $return_var);
         
-        if ($return_var === 0 && !empty($output)) {
-            $status_line = $output[0];
-            if (strpos($status_line, 'RUNNING') !== false) {
-                return 'running';
-            } elseif (strpos($status_line, 'STOPPED') !== false) {
-                return 'stopped';
-            }
+        if ($return_var === 0) {
+            return 'running (detected via process)';
         }
         
         return 'unknown';
@@ -232,7 +329,17 @@ class Controller_Dbsetting extends Controller_Template {
      */
     public function action_stop_service()
     {
-        $service = $this->config->get('service_name', 'FirebirdServerDefault');
+        $service = $this->find_firebird_service();
+        
+        if (!$service) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => __('Firebird service not found.')
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
+        
         $command = 'net stop ' . escapeshellarg($service);
         
         exec($command, $output, $return_var);
@@ -257,7 +364,17 @@ class Controller_Dbsetting extends Controller_Template {
      */
     public function action_start_service()
     {
-        $service = $this->config->get('service_name', 'FirebirdServerDefault');
+        $service = $this->find_firebird_service();
+        
+        if (!$service) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => __('Firebird service not found.')
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
+        
         $command = 'net start ' . escapeshellarg($service);
         
         exec($command, $output, $return_var);
@@ -282,8 +399,10 @@ class Controller_Dbsetting extends Controller_Template {
      */
     protected function stop_service()
     {
-        $service = $this->config->get('service_name', 'FirebirdServerDefault');
-        exec('net stop ' . escapeshellarg($service));
+        $service = $this->find_firebird_service();
+        if ($service) {
+            exec('net stop ' . escapeshellarg($service));
+        }
     }
     
     /**
@@ -291,8 +410,10 @@ class Controller_Dbsetting extends Controller_Template {
      */
     protected function start_service()
     {
-        $service = $this->config->get('service_name', 'FirebirdServerDefault');
-        exec('net start ' . escapeshellarg($service));
+        $service = $this->find_firebird_service();
+        if ($service) {
+            exec('net start ' . escapeshellarg($service));
+        }
     }
     
     /**
@@ -422,5 +543,101 @@ class Controller_Dbsetting extends Controller_Template {
         }
         
         return true;
+    }
+    
+    /**
+     * Display configuration editor modal
+     */
+    public function action_edit_config()
+    {
+        $config_path = $this->config->get('database_config_path');
+        $module_config_path = MODPATH . 'dbsetting/config/dbsetting.php';
+        
+        // Read current config file
+        $config_content = '';
+        if (file_exists($module_config_path)) {
+            $config_content = file_get_contents($module_config_path);
+        }
+        
+        $content = View::factory('dbsetting/config_editor')
+            ->set('config_content', $config_content)
+            ->set('config_path', $module_config_path);
+        
+        $this->template->title = 'Редактирование конфигурации';
+        $this->template->content = $content;
+    }
+    
+    /**
+     * Save configuration changes
+     */
+    public function action_save_config()
+    {
+        if ($this->request->method() !== 'POST') {
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        // Validate CSRF token
+        $posted_token = $this->request->post('csrf_token');
+        $expected_token = md5(session_id() . 'dbsetting_config_edit');
+        if ($posted_token !== $expected_token) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => 'Ошибка проверки токена безопасности. Пожалуйста, попробуйте снова.'
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        $config_content = $this->request->post('config_content');
+        $module_config_path = MODPATH . 'dbsetting/config/dbsetting.php';
+        
+        // Validate that we're editing the correct file
+        if (empty($config_content) || !file_exists($module_config_path)) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => 'Неверная конфигурация или файл не найден.'
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        // Basic PHP syntax validation - check if it contains valid PHP opening tag
+        if (strpos($config_content, '<?php') === false) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => 'Конфигурация должна начинаться с PHP открывающего тега <?php'
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        // Create backup before editing
+        $backup_path = $module_config_path . '.backup_' . date('Y-m-d_His');
+        if (!copy($module_config_path, $backup_path)) {
+            Log::instance()->add(Log::WARNING, 'Failed to create backup of module config file');
+        }
+        
+        // Write new content
+        $result = file_put_contents($module_config_path, $config_content);
+        
+        if ($result === false) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => 'Не удалось сохранить файл конфигурации. Проверьте права доступа.'
+            ));
+            Log::instance()->add(Log::ERROR, 'Failed to write module config file: ' . $module_config_path);
+        } else {
+            Session::instance()->set('flash_message', array(
+                'type' => 'success',
+                'text' => 'Конфигурация успешно сохранена. Создана резервная копия: ' . basename($backup_path)
+            ));
+            Log::instance()->add(Log::INFO, 'Module configuration updated: ' . $module_config_path);
+            
+            // Clear config cache to reload new values
+            Kohana::$config->load('dbsetting', true);
+        }
+        
+        $this->redirect('dbsetting');
     }
 }

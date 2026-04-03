@@ -108,6 +108,11 @@
                         'title' => __('setting.menu_title'),
                         'url' => 'setting',
                         'condition' => true
+                    ),
+					'dbsetting' => array(
+                        'title' => __('База данных'),
+                        'url' => 'dbsetting',
+                        'condition' => true
                     )
 					
                 );
