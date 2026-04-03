@@ -22,20 +22,28 @@ class Auth_File extends Auth {
 	{
 		parent::__construct($config);
 		
-		// Load user list
+		// Load user list from config first
 		$this->_users = Arr::get($config, 'users', array());
+		
 		//Бухаров А.В. 15 авг 2018 г. Логин и пароль берутся из БД СКУД.
-		$sql='select p.login, p.pswd from people p
-			where p.pswd<>\'\'';
-		$query = DB::query(Database::SELECT, iconv('UTF-8','windows-1251',$sql))
-		->execute(Database::instance('fb'))
-		->as_array();
-		$res=array();
-		foreach ($query as $key=>$value)
-		{
-			$res[Arr::get($value, 'LOGIN')]=$this->hash(Arr::get($value, 'PSWD'));
+		try {
+			$sql='select p.login, p.pswd from people p
+				where p.pswd<>\'\'';
+			$query = DB::query(Database::SELECT, iconv('UTF-8','windows-1251',$sql))
+			->execute(Database::instance('fb'))
+			->as_array();
+			$res=array();
+			foreach ($query as $key=>$value)
+			{
+				$res[Arr::get($value, 'LOGIN')]=$this->hash(Arr::get($value, 'PSWD'));
+			}
+			$this->_users = $res;
+		} catch (Exception $e) {
+			// Log the error but don't crash the application
+			Log::instance()->add(Log::ERROR, 'Auth_File: Failed to load users from database: ' . $e->getMessage());
+			// Keep the users from config (if any) or empty array
+			// This allows the application to continue running
 		}
-		$this->_users = $res;
 		
 	}
 	

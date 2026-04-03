@@ -16,6 +16,17 @@
         </div>
     <?php endif; ?>
     
+    <?php if (isset($db_error) && !empty($db_error)): ?>
+        <div class="alert alert-warning alert-dismissible fade in" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <h4><i class="glyphicon glyphicon-warning-sign"></i> Database Connection Error</h4>
+            <p>The current database connection is failing with error: <code><?php echo HTML::chars($db_error); ?></code></p>
+            <p>This module allows you to fix the database connection. Please select a working DSN from the list below.</p>
+        </div>
+    <?php endif; ?>
+    
     <div class="row">
         <div class="col-md-12">
             <!-- ODBC Selection -->

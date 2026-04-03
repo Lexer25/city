@@ -36,6 +36,10 @@
 					<ul class="nav navbar-nav">
 						<li><?php echo HTML::anchor('skud', __('сводная'));?></li>
 					</ul>
+					<ul class="nav navbar-nav">
+						<li><?php echo HTML::anchor('dbsetting', __('Настройка'));?></li>
+					</ul>
+					
 				</div>
 			</div>
 			<div class="panel panel-primary">

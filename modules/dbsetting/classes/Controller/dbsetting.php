@@ -16,10 +16,30 @@ class Controller_Dbsetting extends Controller_Template {
     // Current selected DSN (from session)
     protected $current_dsn;
     
+    // Database error message if connection fails
+    protected $db_error = null;
+    
     public function before()
     {
-        parent::before();
         
+		try {
+            parent::before();
+        } catch (Exception $e) {
+            // Check if this is a database connection error
+            if (strpos($e->getMessage(), 'unavailable database') !== false ||
+                strpos($e->getMessage(), 'SQLConnect') !== false ||
+                strpos($e->getMessage(), 'Database_Exception') !== false) {
+                // This is a database connection error - we can continue since this module
+                // is specifically for fixing database connections
+                Log::instance()->add(Log::WARNING, 'Database connection failed in dbsetting module: ' . $e->getMessage());
+                // Store the error to display to user
+                $this->db_error = $e->getMessage();
+            } else {
+                // Re-throw non-database exceptions
+                throw $e;
+            }
+        }
+    
         // Load module configuration
         $this->config = Kohana::$config->load('dbsetting');
         
@@ -28,7 +48,7 @@ class Controller_Dbsetting extends Controller_Template {
         
         // Get current DSN from session or read from database.php
         $this->current_dsn = Session::instance()->get('current_dsn', $this->get_current_dsn_from_config());
-        
+     
         // Set template variables
         $this->template->title = __('Database Settings');
     }
@@ -38,12 +58,20 @@ class Controller_Dbsetting extends Controller_Template {
      */
     public function action_index()
     {
+        try {
+            $service_status = $this->get_service_status();
+        } catch (Exception $e) {
+            // If we can't get service status, set it to unknown
+            $service_status = 'unknown';
+            Log::instance()->add(Log::ERROR, 'Failed to get service status: ' . $e->getMessage());
+        }
         $content = View::factory('dbsetting/index')
             ->set('odbc_dsns', $this->odbc_dsns)
             ->set('current_dsn', $this->current_dsn)
-            ->set('service_status', $this->get_service_status())
+            ->set('service_status', $service_status)
             ->set('backup_dir', $this->config->get('backup_dir'))
-            ->set('database_path', $this->config->get('database_path'));
+            ->set('database_path', $this->config->get('database_path'))
+            ->set('db_error', $this->db_error);
         
         $this->template->content = $content;
     }
