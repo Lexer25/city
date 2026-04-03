@@ -63,13 +63,19 @@ class Controller_Dbsetting extends Controller_Template {
                 Session::instance()->set('current_dsn', $dsn_value);
                 
                 // Update database configuration file
-                $this->update_database_config($dsn_value);
-                
-                // Set success message
-                Session::instance()->set('flash_message', array(
-                    'type' => 'success',
-                    'text' => __('Database DSN changed to ') . $selected . ' and saved to config file'
-                ));
+                if ($this->update_database_config($dsn_value)) {
+                    // Set success message
+                    Session::instance()->set('flash_message', array(
+                        'type' => 'success',
+                        'text' => __('Database DSN changed to ') . $selected . ' and saved to config file'
+                    ));
+                } else {
+                    // Set error message if config update failed
+                    Session::instance()->set('flash_message', array(
+                        'type' => 'error',
+                        'text' => __('Failed to update database configuration file. Check logs for details.')
+                    ));
+                }
             } else {
                 Session::instance()->set('flash_message', array(
                     'type' => 'error',
@@ -268,30 +274,25 @@ class Controller_Dbsetting extends Controller_Template {
     {
         $dsns = array();
         
-        // Read ODBC DSNs from Windows Registry
-        // Using reg query command to get user DSNs
-        $command = 'reg query "HKEY_CURRENT_USER\Software\ODBC\ODBC.INI\ODBC Data Sources" /s 2>nul';
-        exec($command, $output, $return_var);
+        // Registry paths to check
+        $registry_paths = array(
+            'HKEY_CURRENT_USER\Software\ODBC\ODBC.INI\ODBC Data Sources',
+            'HKEY_LOCAL_MACHINE\SOFTWARE\ODBC\ODBC.INI\ODBC Data Sources'
+        );
         
-        if ($return_var === 0 && !empty($output)) {
-            foreach ($output as $line) {
-                if (preg_match('/^\s*(\w+)\s+REG_SZ\s+(.*)$/', $line, $matches)) {
-                    $dsn_name = trim($matches[1]);
-                    $dsns[$dsn_name] = 'odbc:' . $dsn_name;
-                }
-            }
-        }
-        
-        // Also check system DSNs
-        $command = 'reg query "HKEY_LOCAL_MACHINE\SOFTWARE\ODBC\ODBC.INI\ODBC Data Sources" /s 2>nul';
-        exec($command, $output, $return_var);
-        
-        if ($return_var === 0 && !empty($output)) {
-            foreach ($output as $line) {
-                if (preg_match('/^\s*(\w+)\s+REG_SZ\s+(.*)$/', $line, $matches)) {
-                    $dsn_name = trim($matches[1]);
-                    if (!isset($dsns[$dsn_name])) {
-                        $dsns[$dsn_name] = 'odbc:' . $dsn_name;
+        foreach ($registry_paths as $registry_path) {
+            $command = 'reg query "' . $registry_path . '" 2>nul';
+            exec($command, $output, $return_var);
+            
+            if ($return_var === 0 && !empty($output)) {
+                foreach ($output as $line) {
+                    // Improved regex to handle DSN names with spaces and special characters
+                    if (preg_match('/^\s*([^\s].*?)\s+REG_SZ\s+(.*)$/', $line, $matches)) {
+                        $dsn_name = trim($matches[1]);
+                        // Skip empty lines and default entries
+                        if (!empty($dsn_name) && $dsn_name !== '(Default)') {
+                            $dsns[$dsn_name] = 'odbc:' . $dsn_name;
+                        }
                     }
                 }
             }
@@ -306,6 +307,9 @@ class Controller_Dbsetting extends Controller_Template {
                 'HL' => 'odbc:HL',
             );
         }
+        
+        // Sort DSNs alphabetically for better UX
+        ksort($dsns);
         
         return $dsns;
     }
@@ -334,15 +338,61 @@ class Controller_Dbsetting extends Controller_Template {
     protected function update_database_config($dsn)
     {
         $config_path = $this->config->get('database_config_path', APPPATH . 'config/database.php');
-        if (file_exists($config_path)) {
-            $content = file_get_contents($config_path);
-            // Replace dsn line with new value
+        
+        if (!file_exists($config_path)) {
+            Log::instance()->add(Log::ERROR, 'Database config file not found: ' . $config_path);
+            return false;
+        }
+        
+        $content = file_get_contents($config_path);
+        if ($content === false) {
+            Log::instance()->add(Log::ERROR, 'Failed to read database config file: ' . $config_path);
+            return false;
+        }
+        
+        // Validate DSN format
+        if (!preg_match('/^odbc:[a-zA-Z0-9_\-\.\s]+$/', $dsn)) {
+            Log::instance()->add(Log::ERROR, 'Invalid DSN format: ' . $dsn);
+            return false;
+        }
+        
+        // Escape single quotes in DSN for replacement
+        $escaped_dsn = str_replace("'", "\\'", $dsn);
+        
+        // Replace dsn line with new value - more robust pattern
+        $new_content = preg_replace(
+            "/('dsn'\\s*=>\\s*')[^']*(')/",
+            "\$1$escaped_dsn\$2",
+            $content
+        );
+        
+        // Check if replacement was successful
+        if ($new_content === $content) {
+            // Try alternative pattern with double quotes
             $new_content = preg_replace(
-                "/'dsn'\s*=>\s*'[^']*'/",
-                "'dsn' => '$dsn'",
+                '/("dsn"\\s*=>\\s*")[^"]*(")/',
+                "\$1$dsn\$2",
                 $content
             );
-            file_put_contents($config_path, $new_content);
         }
+        
+        if ($new_content === $content) {
+            Log::instance()->add(Log::ERROR, 'Failed to find dsn configuration in config file');
+            return false;
+        }
+        
+        // Create backup before writing
+        $backup_path = $config_path . '.backup_' . date('Y-m-d_His');
+        if (!copy($config_path, $backup_path)) {
+            Log::instance()->add(Log::WARNING, 'Failed to create backup of config file');
+        }
+        
+        $result = file_put_contents($config_path, $new_content);
+        if ($result === false) {
+            Log::instance()->add(Log::ERROR, 'Failed to write database config file: ' . $config_path);
+            return false;
+        }
+        
+        return true;
     }
 }

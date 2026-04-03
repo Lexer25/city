@@ -150,119 +150,132 @@ class Model_identifier extends Model
 	
 	
 	/**29.03.2026 функция продлевает time_end для указанного массива карт.
-		*/	
+		*/
 	public function prolong($cards, $date)
 	{
-		//добавляю апострофы
-		$cards_quoted = array_map(function($card) {
-        return "'" . $card . "'";
-    }, $cards);
-    
-    $cards_string = implode(',', $cards_quoted);
-    
-    $sql = 'update card c 
-            set c.timeend=\''.$date.'\'
-            WHERE c.id_card IN (' . $cards_string . ')';
-    
+		if (empty($cards)) {
+			return false;
+		}
+		
+		// Validate date format
+		if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+			$this->mess = 'Invalid date format';
+			return false;
+		}
+		
+		// Use parameterized query to prevent SQL injection
+		$placeholders = implode(',', array_fill(0, count($cards), '?'));
+		$sql = 'UPDATE card c
+				SET c.timeend = ?
+				WHERE c.id_card IN (' . $placeholders . ')';
+		
+		// Prepare parameters: date first, then card IDs
+		$params = array_merge([$date], $cards);
 
-		try
-			{
-			$query = DB::query(Database::UPDATE, $sql)
-			->execute(Database::instance('fb'));
-			return true;
-			} catch (Exception $e) {
-				Log::instance()->add(Log::DEBUG, $e->getMessage());
-				$this->mess=$e->getMessage();
-				return 	false;
+		try {
+			$query = DB::query(Database::UPDATE, $sql);
+			
+			// Bind parameters
+			foreach ($params as $i => $value) {
+				$query->param($i, $value);
 			}
 			
-		
+			$query->execute(Database::instance('fb'));
+			return true;
+		} catch (Exception $e) {
+			Log::instance()->add(Log::DEBUG, $e->getMessage());
+			$this->mess = $e->getMessage();
+			return false;
+		}
 	}
 	
 	
 	/**1.02.2026 функция устанавилвает ACTIVE=0 для указанного массива карт.
-		*/	
+		*/
 	public function setUnactive($cards)
 	{
-		//добавляю апострофы
-		$cards_quoted = array_map(function($card) {
-        return "'" . $card . "'";
-    }, $cards);
-    
-    $cards_string = implode(',', $cards_quoted);
-    
-    $sql = 'UPDATE card c 
-            SET c."ACTIVE" = 0 
-            WHERE c.id_card IN (' . $cards_string . ')';
-    
+		if (empty($cards)) {
+			return false;
+		}
+		
+		// Use parameterized query to prevent SQL injection
+		$placeholders = implode(',', array_fill(0, count($cards), '?'));
+		$sql = 'UPDATE card c
+				SET c."ACTIVE" = 0
+				WHERE c.id_card IN (' . $placeholders . ')';
 
-		try
-			{
-			$query = DB::query(Database::UPDATE, $sql)
-			->execute(Database::instance('fb'));
-			return true;
-			} catch (Exception $e) {
-				Log::instance()->add(Log::DEBUG, $e->getMessage());
-				$this->mess=$e->getMessage();
-				return 	false;
+		try {
+			$query = DB::query(Database::UPDATE, $sql);
+			
+			// Bind parameters
+			foreach ($cards as $i => $card) {
+				$query->param($i, $card);
 			}
 			
-		
+			$query->execute(Database::instance('fb'));
+			return true;
+		} catch (Exception $e) {
+			Log::instance()->add(Log::DEBUG, $e->getMessage());
+			$this->mess = $e->getMessage();
+			return false;
+		}
 	}
 	
 	
 	
 	/**27.03.2026 удаляет карты из указанного массива карт.
-		*/	
+		*/
 	public function delCardArray($cards)
 	{
-		//добавляю апострофы
-		$cards_quoted = array_map(function($card) {
-        return "'" . $card . "'";
-    }, $cards);
+		if (empty($cards)) {
+			return false;
+		}
 		
-		 $cards_string = implode(',', $cards_quoted);
-		 
-		$sql='delete from card c 
-			WHERE c.id_card IN (' . $cards_string . ')';
+		// Use parameterized query to prevent SQL injection
+		$placeholders = implode(',', array_fill(0, count($cards), '?'));
+		$sql = 'DELETE FROM card c
+				WHERE c.id_card IN (' . $placeholders . ')';
+
+		try {
+			$query = DB::query(Database::DELETE, $sql);
 			
-	//echo Debug::vars('197', $sql);exit;	
-		try
-			{
-			$query = DB::query(Database::DELETE, $sql)
-			->execute(Database::instance('fb'));
-			return true;
-			} catch (Exception $e) {
-				Log::instance()->add(Log::DEBUG, $e->getMessage());
-				$this->mess=$e->getMessage();
-				return 	false;
+			// Bind parameters
+			foreach ($cards as $i => $card) {
+				$query->param($i, $card);
 			}
 			
-		
+			$query->execute(Database::instance('fb'));
+			return true;
+		} catch (Exception $e) {
+			Log::instance()->add(Log::DEBUG, $e->getMessage());
+			$this->mess = $e->getMessage();
+			return false;
+		}
 	}
 	
 	
 	/**
 			 * Получает количество карт, срок действия которых истекает до указанной даты
-			 * 
-			 * @param int $data Количество дней от текущей даты
+			 *
+			 * @param string $date Дата в формате Y-m-d H:i:s
 			 * @return int Количество карт
 			 */
 			public function getCountCardLateNextTime($date)
 			{
-				// Валидация: убеждаемся, что $data - целое число
-				//$data = (int) $data;
-				
-				// Расчет даты до SQL запроса
-				//$date = date('Y-m-d H:i:s', strtotime("+{$data} days"));
-				
-				// Формируем SQL с прямой подстановкой даты
-				$sql = "SELECT COUNT(*) FROM card c WHERE c.timeend>'now' and c.timeend < CAST('{$date}' AS TIMESTAMP)";
-				
-				$query = DB::query(Database::SELECT, $sql);
-				$result = $query->execute(Database::instance('fb'));
-				
-				return (int) $result->get('COUNT');
+			 // Validate date format
+			 if (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $date)) {
+			 	return 0;
+			 }
+			 
+			 // Use parameterized query to prevent SQL injection
+			 $sql = "SELECT COUNT(*) FROM card c WHERE c.timeend > 'now' AND c.timeend < CAST(? AS TIMESTAMP)";
+			 
+			 $query = DB::query(Database::SELECT, $sql)
+			 	->param(0, $date);
+			 
+			 $result = $query->execute(Database::instance('fb'));
+			 
+			 return (int) $result->get('COUNT');
 			}
                         
                  
