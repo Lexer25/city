@@ -10,7 +10,7 @@ class Controller_Dbsetting extends Controller_Template {
     // Module configuration
     protected $config;
     
-    // Available ODBC DSNs
+    // Available ODBC DSNs from Windows Registry
     protected $odbc_dsns;
     
     // Current selected DSN (from session)
@@ -22,10 +22,12 @@ class Controller_Dbsetting extends Controller_Template {
         
         // Load module configuration
         $this->config = Kohana::$config->load('dbsetting');
-        $this->odbc_dsns = $this->config->get('odbc_dsns', array());
         
-        // Get current DSN from session
-        $this->current_dsn = Session::instance()->get('current_dsn', 'odbc:HL');
+        // Get ODBC DSNs from Windows Registry
+        $this->odbc_dsns = $this->get_odbc_dsns_from_registry();
+        
+        // Get current DSN from session or read from database.php
+        $this->current_dsn = Session::instance()->get('current_dsn', $this->get_current_dsn_from_config());
         
         // Set template variables
         $this->template->title = __('Database Settings');
@@ -55,16 +57,18 @@ class Controller_Dbsetting extends Controller_Template {
             $selected = $this->request->post('dsn');
             
             if (array_key_exists($selected, $this->odbc_dsns)) {
-                // Store in session
-                Session::instance()->set('current_dsn', $this->odbc_dsns[$selected]);
+                $dsn_value = $this->odbc_dsns[$selected];
                 
-                // Update database configuration file (optional)
-                // $this->update_database_config($this->odbc_dsns[$selected]);
+                // Store in session
+                Session::instance()->set('current_dsn', $dsn_value);
+                
+                // Update database configuration file
+                $this->update_database_config($dsn_value);
                 
                 // Set success message
                 Session::instance()->set('flash_message', array(
                     'type' => 'success',
-                    'text' => __('Database DSN changed to ') . $selected
+                    'text' => __('Database DSN changed to ') . $selected . ' and saved to config file'
                 ));
             } else {
                 Session::instance()->set('flash_message', array(
@@ -258,16 +262,83 @@ class Controller_Dbsetting extends Controller_Template {
     }
     
     /**
-     * Update database.php config file (optional)
+     * Get ODBC DSNs from Windows Registry
+     */
+    protected function get_odbc_dsns_from_registry()
+    {
+        $dsns = array();
+        
+        // Read ODBC DSNs from Windows Registry
+        // Using reg query command to get user DSNs
+        $command = 'reg query "HKEY_CURRENT_USER\Software\ODBC\ODBC.INI\ODBC Data Sources" /s 2>nul';
+        exec($command, $output, $return_var);
+        
+        if ($return_var === 0 && !empty($output)) {
+            foreach ($output as $line) {
+                if (preg_match('/^\s*(\w+)\s+REG_SZ\s+(.*)$/', $line, $matches)) {
+                    $dsn_name = trim($matches[1]);
+                    $dsns[$dsn_name] = 'odbc:' . $dsn_name;
+                }
+            }
+        }
+        
+        // Also check system DSNs
+        $command = 'reg query "HKEY_LOCAL_MACHINE\SOFTWARE\ODBC\ODBC.INI\ODBC Data Sources" /s 2>nul';
+        exec($command, $output, $return_var);
+        
+        if ($return_var === 0 && !empty($output)) {
+            foreach ($output as $line) {
+                if (preg_match('/^\s*(\w+)\s+REG_SZ\s+(.*)$/', $line, $matches)) {
+                    $dsn_name = trim($matches[1]);
+                    if (!isset($dsns[$dsn_name])) {
+                        $dsns[$dsn_name] = 'odbc:' . $dsn_name;
+                    }
+                }
+            }
+        }
+        
+        // If no DSNs found, return default ones
+        if (empty($dsns)) {
+            $dsns = array(
+                'SDUO' => 'odbc:SDUO',
+                'Kalibr' => 'odbc:Kalibr',
+                'Kalibr_25' => 'odbc:Kalibr_25',
+                'HL' => 'odbc:HL',
+            );
+        }
+        
+        return $dsns;
+    }
+    
+    /**
+     * Get current DSN from database.php config file
+     */
+    protected function get_current_dsn_from_config()
+    {
+        $config_path = $this->config->get('database_config_path', APPPATH . 'config/database.php');
+        
+        if (file_exists($config_path)) {
+            $content = file_get_contents($config_path);
+            // Extract dsn value from config
+            if (preg_match("/'dsn'\s*=>\s*'([^']*)'/", $content, $matches)) {
+                return $matches[1];
+            }
+        }
+        
+        return 'odbc:HL'; // Default fallback
+    }
+    
+    /**
+     * Update database.php config file
      */
     protected function update_database_config($dsn)
     {
-        $config_path = APPPATH . 'config/database.php';
+        $config_path = $this->config->get('database_config_path', APPPATH . 'config/database.php');
         if (file_exists($config_path)) {
             $content = file_get_contents($config_path);
-            // Simple replacement of dsn line (this is a naive implementation)
+            // Replace dsn line with new value
             $new_content = preg_replace(
-                "/'dsn'\s*=>\s*'odbc:[^']*'/",
+                "/'dsn'\s*=>\s*'[^']*'/",
                 "'dsn' => '$dsn'",
                 $content
             );

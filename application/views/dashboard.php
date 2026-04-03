@@ -56,7 +56,7 @@
 						);
 						
 						
-						echo '<p>СКУД</p>';
+						echo '<b>СКУД</b><br>';
 						foreach ($itemsOrderAndURL as $key => $link)
 						{
 							if (isset($list_windows1[$key]))
@@ -70,7 +70,8 @@
 						} 
 						
 						//вывод данных по гостям
-						echo '<p>Бюро пропусков</p>';
+						echo '<hr>';
+						echo '<b>Бюро пропусков</b><br>';
 						
 						$itemsOrderAndURL = array(
 							'guestCount' => '',
@@ -105,7 +106,7 @@
 						
 						
 					?>
-						
+						<hr>
 						<!-- RFID формат -->
 						<span class="label label-<?php echo $countErrKeyFormatRfid > 0 ? 'danger' : 'success'; ?>">
 							<?php echo __('Неправильный формат RFID'); ?>

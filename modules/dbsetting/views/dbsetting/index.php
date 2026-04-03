@@ -21,12 +21,13 @@
             <!-- ODBC Selection -->
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">ODBC Database</h3>
+                    <h3 class="panel-title">ODBC Database <small>DSN from Windows Registry</small></h3>
                 </div>
                 <div class="panel-body">
                     <form action="<?php echo URL::site('dbsetting/select_dsn'); ?>" method="post" class="form-inline">
                         <div class="form-group">
                             <label>Current: <strong><?php echo HTML::chars($current_dsn); ?></strong></label>
+                            <small class="text-muted">(saved in config/database.php)</small>
                         </div>
                         <div class="form-group" style="margin-left: 20px;">
                             <label for="dsn">Switch to:</label>
