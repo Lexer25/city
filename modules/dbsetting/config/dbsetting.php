@@ -5,7 +5,7 @@ return array(
     'firebird_bin' => 'C:\\Program Files (x86)\\Firebird\\Firebird_1_5_6\\bin\\',
     // Default database file path (used for backup/restore)
     //'database_path' => 'C:\\Program Files\\Firebird\\Firebird_1_5_6\\data\\CITY.FDB',
-    'database_path' =>'D:\\rrr\\hl\\ShieldPro_rest.GDB',
+    'database_path' =>'ShieldPro_rest.GDB',
     // Backup directory
     'backup_dir' => 'C:\\service_skud\\',
     // Firebird service name

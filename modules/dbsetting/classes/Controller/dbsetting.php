@@ -116,6 +116,111 @@ class Controller_Dbsetting extends Controller_Template {
     }
     
     /**
+     * Save selected database path to module configuration
+     */
+    public function action_save_database_path()
+    {
+        Log::instance()->add(Log::DEBUG, 'save_database_path called, method: ' . $this->request->method() . ', is_ajax: ' . ($this->request->is_ajax() ? 'true' : 'false'));
+        
+        if ($this->request->method() !== 'POST') {
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        $database_path = $this->request->post('database_path');
+        Log::instance()->add(Log::DEBUG, 'database_path posted: ' . $database_path);
+        
+        // Validate CSRF token
+        $posted_token = $this->request->post('csrf_token');
+        $expected_token = md5(session_id() . 'dbsetting_save_path');
+        if ($posted_token !== $expected_token) {
+            $error = __('Ошибка проверки токена безопасности. Пожалуйста, обновите страницу и попробуйте снова.');
+            if ($this->request->is_ajax()) {
+                $this->response->headers('Content-Type', 'application/json');
+                $this->response->body(json_encode(array(
+                    'success' => false,
+                    'message' => $error
+                )));
+                return;
+            } else {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'error',
+                    'text' => $error
+                ));
+                $this->redirect('dbsetting');
+                return;
+            }
+        }
+        
+        if (empty($database_path)) {
+            $error = __('Путь к базе данных не может быть пустым.');
+            if ($this->request->is_ajax()) {
+                $this->response->headers('Content-Type', 'application/json');
+                $this->response->body(json_encode(array(
+                    'success' => false,
+                    'message' => $error
+                )));
+                return;
+            } else {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'error',
+                    'text' => $error
+                ));
+                $this->redirect('dbsetting');
+                return;
+            }
+        }
+        
+        // Decode URL-encoded paths (browsers encode : and \ in POST data)
+        $database_path = urldecode($database_path);
+        
+        $file_exists = file_exists($database_path);
+        
+        // Update module configuration
+        $success = $this->update_module_database_path($database_path);
+        
+        if ($this->request->is_ajax()) {
+            $this->response->headers('Content-Type', 'application/json');
+            if ($success) {
+                $this->response->body(json_encode(array(
+                    'success' => true,
+                    'message' => __('Путь к базе данных сохранен в конфигурации: ') . HTML::chars($database_path),
+                    'file_exists' => $file_exists
+                )));
+            } else {
+                $this->response->body(json_encode(array(
+                    'success' => false,
+                    'message' => __('Не удалось сохранить путь к базе данных в конфигурации. Проверьте логи.')
+                )));
+            }
+            return;
+        } else {
+            // Non-AJAX request: set flash messages and redirect
+            if (!$file_exists) {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'warning',
+                    'text' => __('Файл базы данных не найден: ') . HTML::chars($database_path) .
+                             __(' (путь сохранен, но файл отсутствует)')
+                ));
+            }
+            
+            if ($success) {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'success',
+                    'text' => __('Путь к базе данных сохранен в конфигурации: ') . HTML::chars($database_path)
+                ));
+            } else {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'error',
+                    'text' => __('Не удалось сохранить путь к базе данных в конфигурации. Проверьте логи.')
+                ));
+            }
+            
+            $this->redirect('dbsetting');
+        }
+    }
+    
+    /**
      * Create database backup
      */
     public function action_backup()
@@ -544,7 +649,77 @@ class Controller_Dbsetting extends Controller_Template {
         
         return true;
     }
-    
+
+    /**
+     * Update module configuration file (dbsetting.php) with new database path
+     * @param string $database_path New database file path
+     * @return bool Success
+     */
+    protected function update_module_database_path($database_path)
+    {
+        $module_config_path = MODPATH . 'dbsetting/config/dbsetting.php';
+        
+        if (!file_exists($module_config_path)) {
+            Log::instance()->add(Log::ERROR, 'Module config file not found: ' . $module_config_path);
+            return false;
+        }
+        
+        $content = file_get_contents($module_config_path);
+        if ($content === false) {
+            Log::instance()->add(Log::ERROR, 'Failed to read module config file: ' . $module_config_path);
+            return false;
+        }
+        
+        // Validate path contains at least something
+        if (empty($database_path)) {
+            Log::instance()->add(Log::ERROR, 'Empty database path provided');
+            return false;
+        }
+        
+        // Escape single quotes in path for replacement
+        $escaped_path = str_replace("'", "\\'", $database_path);
+        
+        // Replace database_path line with new value - pattern matches 'database_path' =>'...'
+        // Uses multiline mode (m) to match start of line, and negative lookahead to skip commented lines
+        $new_content = preg_replace(
+            "/^(?!\\s*\\/\\/)(\\s*'database_path'\\s*=>\\s*')[^']*(')/m",
+            "\$1$escaped_path\$2",
+            $content
+        );
+        
+        // Check if replacement was successful
+        if ($new_content === $content) {
+            // Try alternative pattern with double quotes
+            $new_content = preg_replace(
+                '/^(?!\\s*\\/\\/)(\\s*"database_path"\\s*=>\\s*")[^"]*(")/m',
+                "\$1$database_path\$2",
+                $content
+            );
+        }
+        
+        if ($new_content === $content) {
+            Log::instance()->add(Log::ERROR, 'Failed to find database_path configuration in module config file');
+            return false;
+        }
+        
+        // Create backup before writing
+        $backup_path = $module_config_path . '.backup_' . date('Y-m-d_His');
+        if (!copy($module_config_path, $backup_path)) {
+            Log::instance()->add(Log::WARNING, 'Failed to create backup of module config file');
+        }
+        
+        $result = file_put_contents($module_config_path, $new_content);
+        if ($result === false) {
+            Log::instance()->add(Log::ERROR, 'Failed to write module config file: ' . $module_config_path);
+            return false;
+        }
+        
+        // Clear config cache to reload new values
+        Kohana::$config->load('dbsetting', true);
+        
+        return true;
+    }
+
     /**
      * Display configuration editor modal
      */

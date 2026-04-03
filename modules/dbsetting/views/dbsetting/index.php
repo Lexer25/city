@@ -77,6 +77,9 @@
                                     <button type="button" class="btn btn-default btn-sm" onclick="browseDatabaseFile()">
                                         <span class="glyphicon glyphicon-folder-open"></span> Обзор
                                     </button>
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="saveDatabasePath()">
+                                        <span class="glyphicon glyphicon-floppy-disk"></span> Сохранить
+                                    </button>
                                 </span>
                             </div>
                             <small class="text-muted">Текущая база данных из настроек Firebird</small>
@@ -214,7 +217,25 @@
     </div>
 </div>
 
+<style>
+.glyphicon.spinning {
+    animation: spin 1s infinite linear;
+    -webkit-animation: spin2 1s infinite linear;
+}
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg); }
+    to { transform: scale(1) rotate(360deg); }
+}
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+</style>
+
 <script>
+// CSRF token for AJAX requests
+var csrf_token = '<?php echo md5(session_id() . "dbsetting_save_path"); ?>';
+
 function browseDatabaseFile() {
     // Create a file input element
     var fileInput = document.createElement('input');
@@ -235,6 +256,66 @@ function browseDatabaseFile() {
     document.body.appendChild(fileInput);
     fileInput.click();
     document.body.removeChild(fileInput);
+}
+
+function saveDatabasePath() {
+    var dbPath = document.getElementById('database_path').value;
+    if (!dbPath) {
+        alert('Пожалуйста, укажите путь к базе данных.');
+        return;
+    }
+    
+    // Show loading indicator
+    var saveBtn = document.querySelector('button[onclick="saveDatabasePath()"]');
+    var originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<span class="glyphicon glyphicon-refresh spinning"></span> Сохранение...';
+    saveBtn.disabled = true;
+    
+    // Create form data
+    var formData = new FormData();
+    formData.append('database_path', dbPath);
+    formData.append('csrf_token', csrf_token);
+    
+    // Send POST request
+    fetch('<?php echo URL::site("dbsetting/save_database_path"); ?>', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return response.json().then(data => ({ ok: true, data }));
+        } else {
+            return response.text().then(text => ({ ok: false, text }));
+        }
+    })
+    .then(result => {
+        // Restore button
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+        
+        if (result.ok) {
+            var data = result.data;
+            if (data.success) {
+                alert('Путь успешно сохранен в конфигурации.');
+            } else {
+                alert('Ошибка: ' + (data.message || 'Не удалось сохранить путь.'));
+            }
+        } else {
+            // Non-JSON response, likely HTML error page
+            console.error('Non-JSON response:', result.text.substring(0, 200));
+            alert('Сервер вернул некорректный ответ. Возможно, произошла ошибка на сервере. Проверьте консоль для деталей.');
+        }
+    })
+    .catch(error => {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+        alert('Ошибка сети: ' + error.message);
+    });
 }
 
 function updateFilenamePreview() {
