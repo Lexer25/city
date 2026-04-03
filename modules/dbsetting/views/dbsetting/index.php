@@ -246,7 +246,24 @@ function browseDatabaseFile() {
     // Add change event listener
     fileInput.addEventListener('change', function(e) {
         if (this.files && this.files[0]) {
-            var filePath = this.files[0].path || this.files[0].name;
+            console.log('File selected:', this.files[0]);
+            console.log('File path property:', this.files[0].path);
+            console.log('Input value:', this.value);
+            var filePath = '';
+            // Try to get full path from various properties
+            if (this.files[0].path) {
+                filePath = this.files[0].path; // Full path in some environments (Electron, older Chrome)
+            } else if (this.value) {
+                // In some browsers, input.value contains the full path (though may be fakepath)
+                filePath = this.value;
+                // Remove fakepath prefix if present
+                if (filePath.indexOf('C:\\fakepath\\') === 0) {
+                    filePath = filePath.substring(12);
+                }
+            } else {
+                filePath = this.files[0].name; // Fallback to filename only
+            }
+            console.log('Selected filePath:', filePath);
             document.getElementById('database_path').value = filePath;
             updateFilenamePreview();
         }
