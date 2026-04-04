@@ -67,22 +67,38 @@
                 <div class="panel-body">
                     <form action="<?php echo URL::site('dbsetting/backup'); ?>" method="post">
                         <div class="form-group">
-                            <label for="database_path">База данных для резервного копирования:</label>
+                            <label>Путь к папке с базой данных:</label>
                             <div class="input-group">
-                                <input type="text" name="database_path" id="database_path"
+                                <input type="text" name="database_dir" id="database_dir"
                                        class="form-control input-sm"
-                                       value="<?php echo HTML::chars($database_path); ?>"
-                                       placeholder="C:\path\to\database.fdb" required>
+                                       value="<?php echo HTML::chars($database_dir); ?>"
+                                       placeholder="D:\rrr\hl" required>
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="saveDatabaseDir()">
+                                        <span class="glyphicon glyphicon-floppy-disk"></span> Сохранить путь
+                                    </button>
+                                </span>
+                            </div>
+                            <small class="text-muted">Папка, в которой находится файл базы данных</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Имя файла базы данных:</label>
+                            <div class="input-group">
+                                <input type="text" name="database_filename" id="database_filename"
+                                       class="form-control input-sm"
+                                       value="<?php echo HTML::chars($database_filename); ?>"
+                                       placeholder="ShieldPro_rest.GDB" required>
                                 <span class="input-group-btn">
                                     <button type="button" class="btn btn-default btn-sm" onclick="browseDatabaseFile()">
                                         <span class="glyphicon glyphicon-folder-open"></span> Обзор
                                     </button>
-                                    <button type="button" class="btn btn-primary btn-sm" onclick="saveDatabasePath()">
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="saveDatabaseFilename()">
                                         <span class="glyphicon glyphicon-floppy-disk"></span> Сохранить
                                     </button>
                                 </span>
                             </div>
-                            <small class="text-muted">Текущая база данных из настроек Firebird</small>
+                            <small class="text-muted">Имя файла базы данных (выберите через Обзор или введите вручную)</small>
                         </div>
                         
                         <div class="form-group">
@@ -235,6 +251,7 @@
 <script>
 // CSRF token for AJAX requests
 var csrf_token = '<?php echo md5(session_id() . "dbsetting_save_path"); ?>';
+console.log('dbsetting script loaded, csrf_token:', csrf_token);
 
 function browseDatabaseFile() {
     // Create a file input element
@@ -264,8 +281,25 @@ function browseDatabaseFile() {
                 filePath = this.files[0].name; // Fallback to filename only
             }
             console.log('Selected filePath:', filePath);
-            document.getElementById('database_path').value = filePath;
-            updateFilenamePreview();
+            
+            // Split into directory and filename
+            var lastSeparator = Math.max(filePath.lastIndexOf('\\'), filePath.lastIndexOf('/'));
+            if (lastSeparator >= 0) {
+                var dir = filePath.substring(0, lastSeparator);
+                var filename = filePath.substring(lastSeparator + 1);
+                document.getElementById('database_dir').value = dir;
+                document.getElementById('database_filename').value = filename;
+            } else {
+                // No separator, treat as filename only
+                document.getElementById('database_filename').value = filePath;
+                // Keep directory unchanged
+            }
+            
+            // Check if the path looks like a filename only (no directory separators)
+            if (filePath && !filePath.includes('\\') && !filePath.includes('/') && !filePath.includes(':')) {
+                console.warn('Браузер предоставил только имя файла, а не полный путь.');
+                alert('Внимание: Браузер не предоставляет полный путь к файлу.\n\nВыбран только файл: ' + filePath + '\n\nПожалуйста, скопируйте полный путь к файлу из проводника Windows и вставьте его в поле вручную.');
+            }
         }
     });
     
@@ -275,26 +309,26 @@ function browseDatabaseFile() {
     document.body.removeChild(fileInput);
 }
 
-function saveDatabasePath() {
-    var dbPath = document.getElementById('database_path').value;
-    if (!dbPath) {
-        alert('Пожалуйста, укажите путь к базе данных.');
+function saveDatabaseDir() {
+    var dbDir = document.getElementById('database_dir').value;
+    if (!dbDir) {
+        alert('Пожалуйста, укажите путь к папке базы данных.');
         return;
     }
     
     // Show loading indicator
-    var saveBtn = document.querySelector('button[onclick="saveDatabasePath()"]');
+    var saveBtn = document.querySelector('button[onclick="saveDatabaseDir()"]');
     var originalText = saveBtn.innerHTML;
     saveBtn.innerHTML = '<span class="glyphicon glyphicon-refresh spinning"></span> Сохранение...';
     saveBtn.disabled = true;
     
     // Create form data
     var formData = new FormData();
-    formData.append('database_path', dbPath);
+    formData.append('database_dir', dbDir);
     formData.append('csrf_token', csrf_token);
     
     // Send POST request
-    fetch('<?php echo URL::site("dbsetting/save_database_path"); ?>', {
+    fetch('<?php echo URL::site("dbsetting/save_database_dir"); ?>', {
         method: 'POST',
         body: formData,
         headers: {
@@ -318,7 +352,7 @@ function saveDatabasePath() {
         if (result.ok) {
             var data = result.data;
             if (data.success) {
-                alert('Путь успешно сохранен в конфигурации.');
+                alert('Путь к папке успешно сохранен в конфигурации.');
             } else {
                 alert('Ошибка: ' + (data.message || 'Не удалось сохранить путь.'));
             }
@@ -335,46 +369,70 @@ function saveDatabasePath() {
     });
 }
 
-function updateFilenamePreview() {
-    var dbPath = document.getElementById('database_path').value;
-    if (!dbPath) return;
-    
-    // Extract filename without extension
-    var filename = dbPath.split('\\').pop().split('/').pop();
-    var dbName = filename.replace(/\.[^/.]+$/, ""); // Remove extension
-    
-    // Generate timestamp
-    var now = new Date();
-    var year = now.getFullYear();
-    var month = String(now.getMonth() + 1).padStart(2, '0');
-    var day = String(now.getDate()).padStart(2, '0');
-    var hours = String(now.getHours()).padStart(2, '0');
-    var minutes = String(now.getMinutes()).padStart(2, '0');
-    var seconds = String(now.getSeconds()).padStart(2, '0');
-    
-    var timestamp = year + '-' + month + '-' + day + '_' + hours + minutes + seconds;
-    var preview = dbName + '_' + timestamp + '.fbk';
-    
-    // Update preview (we'll need to add an element for this)
-    var previewElement = document.getElementById('filename_preview');
-    if (previewElement) {
-        previewElement.textContent = preview;
+function saveDatabaseFilename() {
+    console.log('saveDatabaseFilename called');
+    var dbFilename = document.getElementById('database_filename').value;
+    console.log('dbFilename:', dbFilename);
+    if (!dbFilename) {
+        alert('Пожалуйста, укажите имя файла базы данных.');
+        return;
     }
+    
+    // Show loading indicator
+    var saveBtn = document.querySelector('button[onclick="saveDatabaseFilename()"]');
+    var originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<span class="glyphicon glyphicon-refresh spinning"></span> Сохранение...';
+    saveBtn.disabled = true;
+    
+    // Create form data
+    var formData = new FormData();
+    formData.append('database_filename', dbFilename);
+    formData.append('csrf_token', csrf_token);
+    
+    // Send POST request
+    fetch('<?php echo URL::site("dbsetting/save_database_filename"); ?>', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return response.json().then(data => ({ ok: true, data }));
+        } else {
+            return response.text().then(text => ({ ok: false, text }));
+        }
+    })
+    .then(result => {
+        // Restore button
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+        
+        if (result.ok) {
+            var data = result.data;
+            if (data.success) {
+                alert('Имя файла базы данных успешно сохранено в конфигурации.');
+            } else {
+                alert('Ошибка: ' + (data.message || 'Не удалось сохранить имя файла.'));
+            }
+        } else {
+            // Non-JSON response, likely HTML error page
+            console.error('Non-JSON response:', result.text.substring(0, 200));
+            alert('Сервер вернул некорректный ответ. Возможно, произошла ошибка на сервере. Проверьте консоль для деталей.');
+        }
+    })
+    .catch(error => {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+        alert('Ошибка сети: ' + error.message);
+    });
 }
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Add preview element if it doesn't exist
-    var previewWell = document.querySelector('.well.well-sm');
-    if (previewWell && !document.getElementById('filename_preview')) {
-        previewWell.id = 'filename_preview';
-    }
-    
-    // Add event listener to database path input
-    var dbInput = document.getElementById('database_path');
-    if (dbInput) {
-        dbInput.addEventListener('input', updateFilenamePreview);
-        dbInput.addEventListener('change', updateFilenamePreview);
-    }
+    // No special initialization needed
 });
 </script>

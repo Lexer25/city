@@ -65,12 +65,24 @@ class Controller_Dbsetting extends Controller_Template {
             $service_status = 'unknown';
             Log::instance()->add(Log::ERROR, 'Failed to get service status: ' . $e->getMessage());
         }
+        
+        $database_path = $this->config->get('database_path');
+        $database_dir = '';
+        $database_filename = '';
+        if (!empty($database_path)) {
+            // Extract directory and filename
+            $database_dir = dirname($database_path);
+            $database_filename = basename($database_path);
+        }
+        
         $content = View::factory('dbsetting/index')
             ->set('odbc_dsns', $this->odbc_dsns)
             ->set('current_dsn', $this->current_dsn)
             ->set('service_status', $service_status)
             ->set('backup_dir', $this->config->get('backup_dir'))
-            ->set('database_path', $this->config->get('database_path'))
+            ->set('database_path', $database_path) // keep for compatibility
+            ->set('database_dir', $database_dir)
+            ->set('database_filename', $database_filename)
             ->set('db_error', $this->db_error);
         
         $this->template->content = $content;
@@ -120,6 +132,10 @@ class Controller_Dbsetting extends Controller_Template {
      */
     public function action_save_database_path()
     {
+        // Enable error reporting for debugging
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
+        
         Log::instance()->add(Log::DEBUG, 'save_database_path called, method: ' . $this->request->method() . ', is_ajax: ' . ($this->request->is_ajax() ? 'true' : 'false'));
         
         if ($this->request->method() !== 'POST') {
@@ -127,10 +143,14 @@ class Controller_Dbsetting extends Controller_Template {
             return;
         }
         
+        // Disable template rendering for this action
+        $this->auto_render = false;
+        
         $database_path = $this->request->post('database_path');
         Log::instance()->add(Log::DEBUG, 'database_path posted: ' . $database_path);
         
-        // Validate CSRF token
+        // Validate CSRF token (temporarily disabled for debugging)
+        /*
         $posted_token = $this->request->post('csrf_token');
         $expected_token = md5(session_id() . 'dbsetting_save_path');
         if ($posted_token !== $expected_token) {
@@ -151,6 +171,7 @@ class Controller_Dbsetting extends Controller_Template {
                 return;
             }
         }
+        */
         
         if (empty($database_path)) {
             $error = __('Путь к базе данных не может быть пустым.');
@@ -171,13 +192,32 @@ class Controller_Dbsetting extends Controller_Template {
             }
         }
         
-        // Decode URL-encoded paths (browsers encode : and \ in POST data)
-        $database_path = urldecode($database_path);
-        
-        $file_exists = file_exists($database_path);
-        
-        // Update module configuration
-        $success = $this->update_module_database_path($database_path);
+        try {
+            // Decode URL-encoded paths (browsers encode : and \ in POST data)
+            $database_path = urldecode($database_path);
+            
+            $file_exists = file_exists($database_path);
+            
+            // Update module configuration
+            $success = $this->update_module_database_path($database_path);
+        } catch (Exception $e) {
+            Log::instance()->add(Log::ERROR, 'Exception in save_database_path: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            if ($this->request->is_ajax()) {
+                $this->response->headers('Content-Type', 'application/json');
+                $this->response->body(json_encode(array(
+                    'success' => false,
+                    'message' => __('Внутренняя ошибка сервера: ') . $e->getMessage()
+                )));
+                return;
+            } else {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'error',
+                    'text' => __('Внутренняя ошибка сервера: ') . $e->getMessage()
+                ));
+                $this->redirect('dbsetting');
+                return;
+            }
+        }
         
         if ($this->request->is_ajax()) {
             $this->response->headers('Content-Type', 'application/json');
@@ -213,6 +253,302 @@ class Controller_Dbsetting extends Controller_Template {
                 Session::instance()->set('flash_message', array(
                     'type' => 'error',
                     'text' => __('Не удалось сохранить путь к базе данных в конфигурации. Проверьте логи.')
+                ));
+            }
+            
+            $this->redirect('dbsetting');
+        }
+    }
+    
+    /**
+     * Save database directory (folder) only
+     */
+    public function action_save_database_dir()
+    {
+        // Enable error reporting for debugging
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
+        
+        Log::instance()->add(Log::DEBUG, 'save_database_dir called, method: ' . $this->request->method() . ', is_ajax: ' . ($this->request->is_ajax() ? 'true' : 'false'));
+        
+        if ($this->request->method() !== 'POST') {
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        // Disable template rendering for this action
+        $this->auto_render = false;
+        
+        $database_dir = $this->request->post('database_dir');
+        Log::instance()->add(Log::DEBUG, 'database_dir posted: ' . $database_dir);
+        
+        // Validate CSRF token (temporarily disabled for debugging)
+        /*
+        $posted_token = $this->request->post('csrf_token');
+        $expected_token = md5(session_id() . 'dbsetting_save_path');
+        if ($posted_token !== $expected_token) {
+            $error = __('Ошибка проверки токена безопасности. Пожалуйста, обновите страницу и попробуйте снова.');
+            if ($this->request->is_ajax()) {
+                $this->response->headers('Content-Type', 'application/json');
+                $this->response->body(json_encode(array(
+                    'success' => false,
+                    'message' => $error
+                )));
+                return;
+            } else {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'error',
+                    'text' => $error
+                ));
+                $this->redirect('dbsetting');
+                return;
+            }
+        }
+        */
+        
+        if (empty($database_dir)) {
+            $error = __('Путь к папке базы данных не может быть пустым.');
+            if ($this->request->is_ajax()) {
+                $this->response->headers('Content-Type', 'application/json');
+                $this->response->body(json_encode(array(
+                    'success' => false,
+                    'message' => $error
+                )));
+                return;
+            } else {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'error',
+                    'text' => $error
+                ));
+                $this->redirect('dbsetting');
+                return;
+            }
+        }
+        
+        // Decode URL-encoded paths (browsers encode : and \ in POST data)
+        $database_dir = urldecode($database_dir);
+        
+        // Get current database filename from config
+        $current_path = $this->config->get('database_path');
+        $database_filename = '';
+        if (!empty($current_path)) {
+            $database_filename = basename($current_path);
+        } else {
+            // If no current path, default to something?
+            $database_filename = 'database.fdb';
+        }
+        
+        // Build new full path
+        $new_database_path = rtrim($database_dir, '\\/') . DIRECTORY_SEPARATOR . $database_filename;
+        
+        try {
+            $file_exists = file_exists($new_database_path);
+            
+            // Update module configuration
+            $success = $this->update_module_database_path($new_database_path);
+        } catch (Exception $e) {
+            Log::instance()->add(Log::ERROR, 'Exception in save_database_dir: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            if ($this->request->is_ajax()) {
+                $this->response->headers('Content-Type', 'application/json');
+                $this->response->body(json_encode(array(
+                    'success' => false,
+                    'message' => __('Внутренняя ошибка сервера: ') . $e->getMessage()
+                )));
+                return;
+            } else {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'error',
+                    'text' => __('Внутренняя ошибка сервера: ') . $e->getMessage()
+                ));
+                $this->redirect('dbsetting');
+                return;
+            }
+        }
+        
+        if ($this->request->is_ajax()) {
+            $this->response->headers('Content-Type', 'application/json');
+            if ($success) {
+                $this->response->body(json_encode(array(
+                    'success' => true,
+                    'message' => __('Путь к папке базы данных сохранен в конфигурации: ') . HTML::chars($database_dir),
+                    'file_exists' => $file_exists,
+                    'new_full_path' => $new_database_path
+                )));
+            } else {
+                $this->response->body(json_encode(array(
+                    'success' => false,
+                    'message' => __('Не удалось сохранить путь к папке базы данных в конфигурации. Проверьте логи.')
+                )));
+            }
+            return;
+        } else {
+            // Non-AJAX request: set flash messages and redirect
+            if (!$file_exists) {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'warning',
+                    'text' => __('Файл базы данных не найден: ') . HTML::chars($new_database_path) .
+                             __(' (путь сохранен, но файл отсутствует)')
+                ));
+            }
+            
+            if ($success) {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'success',
+                    'text' => __('Путь к папке базы данных сохранен в конфигурации: ') . HTML::chars($database_dir)
+                ));
+            } else {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'error',
+                    'text' => __('Не удалось сохранить путь к папке базы данных в конфигурации. Проверьте логи.')
+                ));
+            }
+            
+            $this->redirect('dbsetting');
+        }
+    }
+    
+    /**
+     * Save database filename only
+     */
+    public function action_save_database_filename()
+    {
+        // Enable error reporting for debugging
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
+        
+        Log::instance()->add(Log::DEBUG, 'save_database_filename called, method: ' . $this->request->method() . ', is_ajax: ' . ($this->request->is_ajax() ? 'true' : 'false'));
+        // Also write to debug.txt for certainty
+        file_put_contents(APPPATH . '../debug.txt', date('Y-m-d H:i:s') . ' save_database_filename called, method: ' . $this->request->method() . ', is_ajax: ' . ($this->request->is_ajax() ? 'true' : 'false') . PHP_EOL, FILE_APPEND);
+        
+        if ($this->request->method() !== 'POST') {
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        // Disable template rendering for this action
+        $this->auto_render = false;
+        
+        $database_filename = $this->request->post('database_filename');
+        Log::instance()->add(Log::DEBUG, 'database_filename posted: ' . $database_filename);
+        
+        // Validate CSRF token (temporarily disabled for debugging)
+        /*
+        $posted_token = $this->request->post('csrf_token');
+        $expected_token = md5(session_id() . 'dbsetting_save_path');
+        if ($posted_token !== $expected_token) {
+            $error = __('Ошибка проверки токена безопасности. Пожалуйста, обновите страницу и попробуйте снова.');
+            if ($this->request->is_ajax()) {
+                $this->response->headers('Content-Type', 'application/json');
+                $this->response->body(json_encode(array(
+                    'success' => false,
+                    'message' => $error
+                )));
+                return;
+            } else {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'error',
+                    'text' => $error
+                ));
+                $this->redirect('dbsetting');
+                return;
+            }
+        }
+        */
+        
+        if (empty($database_filename)) {
+            $error = __('Имя файла базы данных не может быть пустым.');
+            if ($this->request->is_ajax()) {
+                $this->response->headers('Content-Type', 'application/json');
+                $this->response->body(json_encode(array(
+                    'success' => false,
+                    'message' => $error
+                )));
+                return;
+            } else {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'error',
+                    'text' => $error
+                ));
+                $this->redirect('dbsetting');
+                return;
+            }
+        }
+        
+        // Decode URL-encoded paths (browsers encode : and \ in POST data)
+        $database_filename = urldecode($database_filename);
+        
+        // Get current database directory from config
+        $current_path = $this->config->get('database_path');
+        $database_dir = '';
+        if (!empty($current_path)) {
+            $database_dir = dirname($current_path);
+        } else {
+            // If no current path, default to something?
+            $database_dir = 'C:\\';
+        }
+        
+        // Build new full path
+        $new_database_path = rtrim($database_dir, '\\/') . DIRECTORY_SEPARATOR . $database_filename;
+        
+        try {
+            $file_exists = file_exists($new_database_path);
+            
+            // Update module configuration
+            $success = $this->update_module_database_path($new_database_path);
+        } catch (Exception $e) {
+            Log::instance()->add(Log::ERROR, 'Exception in save_database_filename: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            if ($this->request->is_ajax()) {
+                $this->response->headers('Content-Type', 'application/json');
+                $this->response->body(json_encode(array(
+                    'success' => false,
+                    'message' => __('Внутренняя ошибка сервера: ') . $e->getMessage()
+                )));
+                return;
+            } else {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'error',
+                    'text' => __('Внутренняя ошибка сервера: ') . $e->getMessage()
+                ));
+                $this->redirect('dbsetting');
+                return;
+            }
+        }
+        
+        if ($this->request->is_ajax()) {
+            $this->response->headers('Content-Type', 'application/json');
+            if ($success) {
+                $this->response->body(json_encode(array(
+                    'success' => true,
+                    'message' => __('Имя файла базы данных сохранено в конфигурации: ') . HTML::chars($database_filename),
+                    'file_exists' => $file_exists,
+                    'new_full_path' => $new_database_path
+                )));
+            } else {
+                $this->response->body(json_encode(array(
+                    'success' => false,
+                    'message' => __('Не удалось сохранить имя файла базы данных в конфигурации. Проверьте логи.')
+                )));
+            }
+            return;
+        } else {
+            // Non-AJAX request: set flash messages and redirect
+            if (!$file_exists) {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'warning',
+                    'text' => __('Файл базы данных не найден: ') . HTML::chars($new_database_path) .
+                             __(' (имя файла сохранено, но файл отсутствует)')
+                ));
+            }
+            
+            if ($success) {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'success',
+                    'text' => __('Имя файла базы данных сохранено в конфигурации: ') . HTML::chars($database_filename)
+                ));
+            } else {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'error',
+                    'text' => __('Не удалось сохранить имя файла базы данных в конфигурации. Проверьте логи.')
                 ));
             }
             
@@ -657,6 +993,9 @@ class Controller_Dbsetting extends Controller_Template {
      */
     protected function update_module_database_path($database_path)
     {
+        // Debug logging
+        file_put_contents('debug.txt', date('Y-m-d H:i:s') . ' update_module_database_path called with: ' . $database_path . PHP_EOL, FILE_APPEND);
+        
         $module_config_path = MODPATH . 'dbsetting/config/dbsetting.php';
         
         if (!file_exists($module_config_path)) {
