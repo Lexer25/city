@@ -102,9 +102,10 @@ Session::instance()->delete('e_mess');
 
         <?php if (!empty($raw_data)): ?>
 
-        <!-- Таблица -->
+        <!-- Таблица с фильтрами (исправленная структура) -->
         <div class="table-responsive">
             <table class="table table-striped table-hover table-condensed tablesorter" id="parsec-table">
+                <!-- Заголовки (только одна строка) -->
                 <thead>
                     <tr class="active">
                         <th>ID</th>
@@ -117,8 +118,11 @@ Session::instance()->delete('e_mess');
                         <th>Дата</th>
                         <th>Действия</th>
                     </tr>
-                    <!-- Строка фильтров -->
-                    <tr class="filters-row">
+                </thead>
+
+                <!-- Строка фильтров – в отдельном tbody, чтобы tablesorter её игнорировал -->
+                <tbody class="filters-row">
+                    <tr>
                         <th><input type="text" class="form-control input-sm column-filter" data-column="0" placeholder="ID"></th>
                         <th><input type="text" class="form-control input-sm column-filter" data-column="1" placeholder="GUID"></th>
                         <th><input type="text" class="form-control input-sm column-filter" data-column="2" placeholder="ID_PEP"></th>
@@ -136,24 +140,33 @@ Session::instance()->delete('e_mess');
                         <th><input type="text" class="form-control input-sm column-filter" data-column="7" placeholder="ГГГГ-ММ-ДД"></th>
                         <th></th>
                     </tr>
-                </thead>
+                </tbody>
+
+                <!-- Основные данные -->
                 <tbody>
-                    <?php foreach ($raw_data as $row): ?>
-                    <tr>
-                        <td><?php echo Form::hidden('id_cardindev[' . $row['id'] . ']', $row['id']); ?><?php echo $row['id']; ?></td>
-                        <td><?php echo $row['id_card'] . $row['hex']; ?></td>
-                        <td><?php echo $row['id_pep']; ?></td>
-                        <td><?php echo $row['operation_name'] . ' (' . $row['operation'] . ')'; ?></td>
-                        <td><?php echo htmlspecialchars($row['org_name'], ENT_QUOTES, 'UTF-8'); ?></td>
-                        <td><?php echo $row['attempts']; ?></td>
-                        <td><?php echo htmlspecialchars($row['dest'], ENT_QUOTES, 'UTF-8'); ?></td>
-                        <td><?php echo $row['timestamp']; ?></td>
-                        <td>
-                            <a href="parsec/repeat/<?php echo $row['id']; ?>" class="btn btn-xs btn-success">Repeat</a>
-                            <a href="parsec/delete/<?php echo $row['id']; ?>" class="btn btn-xs btn-danger" onclick="return confirm('<?php echo __('Вы уверены?'); ?>') ? true : false;">delete</a>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
+                    <?php foreach ($raw_data as $row)
+					{					
+						
+						?>
+						
+						<tr>
+							<td><?php echo Form::hidden('id_cardindev[' . $row['id'] . ']', $row['id']); ?><?php echo $row['id']; ?></td>
+							<td><?php echo $row['id_card'] . $row['hex']; ?></td>
+							<td><?php echo $row['id_pep']; ?></td>
+							<td><?php echo $row['operation_name'] . ' (' . $row['operation'] . ')'; ?></td>
+							<td><?php echo htmlspecialchars($row['org_name'], ENT_QUOTES, 'UTF-8'); ?></td>
+							<td><?php echo $row['attempts']; ?></td>
+							<td><?php echo htmlspecialchars($row['dest'], ENT_QUOTES, 'UTF-8'); ?></td>
+							<td><?php echo $row['timestamp']; ?></td>
+							<td>
+								<a href="parsec/repeat/<?php echo $row['id']; ?>" class="btn btn-xs btn-success">Repeat</a>
+								<a href="parsec/delete/<?php echo $row['id']; ?>" class="btn btn-xs btn-danger" onclick="return confirm('<?php echo __('Вы уверены?'); ?>') ? true : false;">delete</a>
+							</td>
+						</tr>
+						<?php 
+						
+					
+					}; ?>
                 </tbody>
             </table>
         </div>
@@ -184,12 +197,34 @@ Session::instance()->delete('e_mess');
 
 <?php echo Form::close(); ?>
 
+<!-- Дополнительные стили для гарантии работоспособности фильтров -->
+<style>
+    /* Убедимся, что поля фильтров кликабельны и не перекрываются */
+    .filters-row input,
+    .filters-row select {
+        pointer-events: auto !important;
+        background-color: #ffffff !important;
+        z-index: 10;
+    }
+    /* Небольшой отступ для строки фильтров */
+    .filters-row th {
+        vertical-align: middle;
+        padding: 8px;
+    }
+</style>
+
 <script>
 $(document).ready(function() {
-    // Инициализация tablesorter
-    $('#parsec-table').tablesorter();
-    
-    // Фильтрация таблицы
+    // Инициализация tablesorter – сортируются только заголовки из первой строки <thead>
+    $('#parsec-table').tablesorter({
+        // Сортировка только по ячейкам th внутри первого <thead>
+        selectorHeaders: 'thead tr:first-child th',
+        // Отключаем автоматическую сортировку при клике на поля ввода
+        cancelSelection: false,
+        widgets: ['zebra']
+    });
+
+    // Функция фильтрации строк по значениям из полей
     function filterTable() {
         var filters = [];
         $('.column-filter').each(function() {
@@ -197,15 +232,16 @@ $(document).ready(function() {
             var column = $(this).data('column');
             filters[column] = value;
         });
-        
-        $('#parsec-table tbody tr').each(function() {
+
+        // Проходим по строкам данных (последний <tbody>)
+        $('#parsec-table > tbody:last-child tr').each(function() {
             var show = true;
             $(this).find('td').each(function(index) {
                 var filterValue = filters[index];
                 if (filterValue && filterValue !== '') {
                     var cellText = $(this).text().toLowerCase();
                     
-                    // Для колонки операции (индекс 3) проверяем по коду операции
+                    // Для колонки "Операция" (индекс 3) ищем код в скобках
                     if (index == 3) {
                         var opMatch = cellText.match(/\((\d+)\)/);
                         var opCode = opMatch ? opMatch[1] : '';
@@ -224,8 +260,8 @@ $(document).ready(function() {
             $(this).toggle(show);
         });
     }
-    
-    // Обработчики событий для фильтров
+
+    // Вешаем обработчики на все поля фильтров
     $('.column-filter').on('keyup change', function() {
         filterTable();
     });

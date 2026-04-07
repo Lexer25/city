@@ -7,6 +7,7 @@
         $type = Arr::get($flash, 'type', 'info');
         $text = Arr::get($flash, 'text', '');
         $alert_class = 'alert-' . ($type === 'error' ? 'danger' : $type);
+        Session::instance()->delete('flash_message');
         ?>
         <div class="alert <?php echo $alert_class; ?> alert-dismissible fade in" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -36,6 +37,7 @@
                 </div>
                 <div class="panel-body">
                     <form action="<?php echo URL::site('dbsetting/select_dsn'); ?>" method="post" class="form-inline">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token_path; ?>">
                         <div class="form-group">
                             <label>Текущий: <strong><?php echo HTML::chars($current_dsn); ?></strong></label>
                             <small class="text-muted">(сохранено в config/database.php)</small>
@@ -65,7 +67,10 @@
                     <h3 class="panel-title">Резервное копирование</h3>
                 </div>
                 <div class="panel-body">
-                    <form action="<?php echo URL::site('dbsetting/backup'); ?>" method="post">
+                    <form action="<?php echo URL::site('dbsetting/backup'); ?>" method="post" id="backup-form">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token_path; ?>">
+                        <input type="hidden" name="database_path" id="backup_database_path" value="<?php echo HTML::chars($database_path); ?>">
+                        
                         <div class="form-group">
                             <label>Путь к папке с базой данных:</label>
                             <div class="input-group">
@@ -123,7 +128,7 @@
                             <small class="text-muted">Формат: имя_базы_данных_год-месяц-день_время.fbk</small>
                         </div>
                         
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-success" onclick="return confirmBackup();">
                             <span class="glyphicon glyphicon-floppy-disk"></span> Создать резервную копию
                         </button>
                     </form>
@@ -137,7 +142,8 @@
                     <h3 class="panel-title">Восстановление</h3>
                 </div>
                 <div class="panel-body">
-                    <form action="<?php echo URL::site('dbsetting/restore'); ?>" method="post" class="form-inline">
+                    <form action="<?php echo URL::site('dbsetting/restore'); ?>" method="post" class="form-inline" onsubmit="return confirmRestore();">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token_path; ?>">
                         <div class="form-group" style="width: 70%;">
                             <input type="text" name="backup_file" class="form-control input-sm" placeholder="C:\backup\backup.fbk" required style="width: 100%;">
                         </div>
@@ -178,10 +184,10 @@
                             </span>
                         </div>
                         <div class="form-group" style="margin-left: 20px;">
-                            <a href="<?php echo URL::site('dbsetting/start_service'); ?>" class="btn btn-success btn-sm">
+                            <a href="<?php echo URL::site('dbsetting/start_service?csrf_token=' . $csrf_token_path); ?>" class="btn btn-success btn-sm" onclick="return confirmService('start');">
                                 <span class="glyphicon glyphicon-play"></span> Запустить
                             </a>
-                            <a href="<?php echo URL::site('dbsetting/stop_service'); ?>" class="btn btn-danger btn-sm">
+                            <a href="<?php echo URL::site('dbsetting/stop_service?csrf_token=' . $csrf_token_path); ?>" class="btn btn-danger btn-sm" onclick="return confirmService('stop');">
                                 <span class="glyphicon glyphicon-stop"></span> Остановить
                             </a>
                         </div>
@@ -250,8 +256,33 @@
 
 <script>
 // CSRF token for AJAX requests
-var csrf_token = '<?php echo md5(session_id() . "dbsetting_save_path"); ?>';
-console.log('dbsetting script loaded, csrf_token:', csrf_token);
+var csrf_token = '<?php echo $csrf_token_path; ?>';
+console.log('dbsetting script loaded');
+
+// Confirm backup
+function confirmBackup() {
+    var backupDir = document.getElementById('backup_dir').value;
+    if (!backupDir) {
+        alert('Пожалуйста, укажите папку для сохранения резервной копии.');
+        return false;
+    }
+    return confirm('Внимание! Создание резервной копии может занять несколько минут.\n\nПродолжить?');
+}
+
+// Confirm restore
+function confirmRestore() {
+    return confirm('ВНИМАНИЕ! Восстановление базы данных заменит текущую базу данных.\n\n' +
+                   'Рекомендуется сначала создать резервную копию.\n\n' +
+                   'Сервис Firebird будет временно остановлен.\n\n' +
+                   'Вы уверены, что хотите продолжить?');
+}
+
+// Confirm service action
+function confirmService(action) {
+    var actionText = (action === 'start') ? 'запустить' : 'остановить';
+    return confirm('Вы уверены, что хотите ' + actionText + ' сервис Firebird?\n\n' +
+                   'Это может повлиять на работу приложения.');
+}
 
 function browseDatabaseFile() {
     // Create a file input element
@@ -264,22 +295,21 @@ function browseDatabaseFile() {
     fileInput.addEventListener('change', function(e) {
         if (this.files && this.files[0]) {
             console.log('File selected:', this.files[0]);
-            console.log('File path property:', this.files[0].path);
-            console.log('Input value:', this.value);
             var filePath = '';
+            
             // Try to get full path from various properties
             if (this.files[0].path) {
-                filePath = this.files[0].path; // Full path in some environments (Electron, older Chrome)
+                filePath = this.files[0].path;
             } else if (this.value) {
-                // In some browsers, input.value contains the full path (though may be fakepath)
                 filePath = this.value;
                 // Remove fakepath prefix if present
                 if (filePath.indexOf('C:\\fakepath\\') === 0) {
                     filePath = filePath.substring(12);
                 }
             } else {
-                filePath = this.files[0].name; // Fallback to filename only
+                filePath = this.files[0].name;
             }
+            
             console.log('Selected filePath:', filePath);
             
             // Split into directory and filename
@@ -292,13 +322,15 @@ function browseDatabaseFile() {
             } else {
                 // No separator, treat as filename only
                 document.getElementById('database_filename').value = filePath;
-                // Keep directory unchanged
             }
             
-            // Check if the path looks like a filename only (no directory separators)
+            // Check if the path looks like a filename only
             if (filePath && !filePath.includes('\\') && !filePath.includes('/') && !filePath.includes(':')) {
-                console.warn('Браузер предоставил только имя файла, а не полный путь.');
-                alert('Внимание: Браузер не предоставляет полный путь к файлу.\n\nВыбран только файл: ' + filePath + '\n\nПожалуйста, скопируйте полный путь к файлу из проводника Windows и вставьте его в поле вручную.');
+                console.warn('Browser provided only filename, not full path.');
+                alert('Внимание: Браузер не предоставляет полный путь к файлу.\n\n' +
+                      'Выбран только файл: ' + filePath + '\n\n' +
+                      'Пожалуйста, скопируйте полный путь к файлу из проводника Windows и вставьте его в поле вручную.\n\n' +
+                      'Или введите путь к папке и имя файла отдельно.');
             }
         }
     });
@@ -314,6 +346,13 @@ function saveDatabaseDir() {
     if (!dbDir) {
         alert('Пожалуйста, укажите путь к папке базы данных.');
         return;
+    }
+    
+    // Validate directory path format
+    if (!dbDir.match(/^[a-zA-Z]:\\/)) {
+        if (!confirm('Путь "' + dbDir + '" не похож на полный путь к папке Windows (например, D:\\rrr\\hl).\n\nПродолжить?')) {
+            return;
+        }
     }
     
     // Show loading indicator
@@ -336,12 +375,11 @@ function saveDatabaseDir() {
         }
     })
     .then(response => {
-        // Check if response is JSON
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
             return response.json().then(data => ({ ok: true, data }));
         } else {
-            return response.text().then(text => ({ ok: false, text }));
+            return response.text().then(text => ({ ok: false, text: text.substring(0, 500) }));
         }
     })
     .then(result => {
@@ -349,23 +387,33 @@ function saveDatabaseDir() {
         saveBtn.innerHTML = originalText;
         saveBtn.disabled = false;
         
-        if (result.ok) {
+        if (result.ok && result.data) {
             var data = result.data;
             if (data.success) {
-                alert('Путь к папке успешно сохранен в конфигурации.');
+                var message = 'Путь к папке успешно сохранен в конфигурации.';
+                if (data.file_exists === false) {
+                    message += '\n\nВнимание: Файл базы данных не найден по новому пути.\n' +
+                               'Пожалуйста, проверьте правильность пути и имени файла.';
+                }
+                alert(message);
+                // Update backup form hidden field
+                if (data.new_full_path) {
+                    document.getElementById('backup_database_path').value = data.new_full_path;
+                }
             } else {
                 alert('Ошибка: ' + (data.message || 'Не удалось сохранить путь.'));
             }
         } else {
-            // Non-JSON response, likely HTML error page
-            console.error('Non-JSON response:', result.text.substring(0, 200));
-            alert('Сервер вернул некорректный ответ. Возможно, произошла ошибка на сервере. Проверьте консоль для деталей.');
+            console.error('Non-JSON response:', result.text);
+            alert('Сервер вернул некорректный ответ. Проверьте консоль для деталей.\n\n' +
+                  'Возможно, проблема с правами доступа или синтаксисом PHP.');
         }
     })
     .catch(error => {
         saveBtn.innerHTML = originalText;
         saveBtn.disabled = false;
         alert('Ошибка сети: ' + error.message);
+        console.error('Fetch error:', error);
     });
 }
 
@@ -373,8 +421,17 @@ function saveDatabaseFilename() {
     console.log('saveDatabaseFilename called');
     var dbFilename = document.getElementById('database_filename').value;
     console.log('dbFilename:', dbFilename);
+    
     if (!dbFilename) {
         alert('Пожалуйста, укажите имя файла базы данных.');
+        return;
+    }
+    
+    // Validate filename (no path separators or special characters)
+    if (dbFilename.match(/[\\\/\:\*\?\"\<\>\|]/)) {
+        alert('Имя файла содержит недопустимые символы.\n\n' +
+              'Разрешенные символы: буквы, цифры, пробелы, точка, дефис, подчеркивание.\n' +
+              'Запрещены: \\ / : * ? " < > |');
         return;
     }
     
@@ -398,12 +455,11 @@ function saveDatabaseFilename() {
         }
     })
     .then(response => {
-        // Check if response is JSON
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
             return response.json().then(data => ({ ok: true, data }));
         } else {
-            return response.text().then(text => ({ ok: false, text }));
+            return response.text().then(text => ({ ok: false, text: text.substring(0, 500) }));
         }
     })
     .then(result => {
@@ -411,28 +467,77 @@ function saveDatabaseFilename() {
         saveBtn.innerHTML = originalText;
         saveBtn.disabled = false;
         
-        if (result.ok) {
+        if (result.ok && result.data) {
             var data = result.data;
             if (data.success) {
-                alert('Имя файла базы данных успешно сохранено в конфигурации.');
+                var message = 'Имя файла базы данных успешно сохранено в конфигурации.';
+                if (data.file_exists === false) {
+                    message += '\n\nВнимание: Файл базы данных не найден по новому пути.\n' +
+                               'Пожалуйста, проверьте правильность пути и имени файла.';
+                }
+                alert(message);
+                // Update backup form hidden field
+                if (data.new_full_path) {
+                    document.getElementById('backup_database_path').value = data.new_full_path;
+                }
             } else {
                 alert('Ошибка: ' + (data.message || 'Не удалось сохранить имя файла.'));
             }
         } else {
-            // Non-JSON response, likely HTML error page
-            console.error('Non-JSON response:', result.text.substring(0, 200));
-            alert('Сервер вернул некорректный ответ. Возможно, произошла ошибка на сервере. Проверьте консоль для деталей.');
+            console.error('Non-JSON response:', result.text);
+            alert('Сервер вернул некорректный ответ. Проверьте консоль для деталей.\n\n' +
+                  'Возможно, проблема с правами доступа или синтаксисом PHP.');
         }
     })
     .catch(error => {
         saveBtn.innerHTML = originalText;
         saveBtn.disabled = false;
         alert('Ошибка сети: ' + error.message);
+        console.error('Fetch error:', error);
     });
 }
 
-// Initialize on page load
+// Update backup database path when directory or filename changes
+function updateBackupDatabasePath() {
+    var dir = document.getElementById('database_dir').value;
+    var filename = document.getElementById('database_filename').value;
+    if (dir && filename) {
+        var fullPath = dir.replace(/[\\\/]$/, '') + '\\' + filename;
+        document.getElementById('backup_database_path').value = fullPath;
+    }
+}
+
+// Monitor changes to directory and filename fields
 document.addEventListener('DOMContentLoaded', function() {
-    // No special initialization needed
+    var dirField = document.getElementById('database_dir');
+    var filenameField = document.getElementById('database_filename');
+    
+    if (dirField) {
+        dirField.addEventListener('change', updateBackupDatabasePath);
+        dirField.addEventListener('keyup', updateBackupDatabasePath);
+    }
+    if (filenameField) {
+        filenameField.addEventListener('change', updateBackupDatabasePath);
+        filenameField.addEventListener('keyup', updateBackupDatabasePath);
+    }
+    
+    // Initial update
+    updateBackupDatabasePath();
+    
+    // Auto-refresh preview filename every second for timestamp
+    function updatePreviewFilename() {
+        var dbFilename = document.getElementById('database_filename').value;
+        if (dbFilename) {
+            var baseName = dbFilename.replace(/\.[^/.]+$/, '');
+            var timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '').replace('T', '_');
+            var previewSpan = document.querySelector('.well.well-sm');
+            if (previewSpan) {
+                previewSpan.textContent = baseName + '_' + timestamp + '.fbk';
+            }
+        }
+    }
+    
+    // Update preview every second (for timestamp)
+    setInterval(updatePreviewFilename, 1000);
 });
 </script>

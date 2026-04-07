@@ -19,29 +19,34 @@ class Controller_Dbsetting extends Controller_Template {
     // Database error message if connection fails
     protected $db_error = null;
     
+    // Allowed base paths for security
+    protected $allowed_base_paths = array();
+    
     public function before()
     {
-        
-		try {
+        try {
             parent::before();
         } catch (Exception $e) {
-            // Check if this is a database connection error
             if (strpos($e->getMessage(), 'unavailable database') !== false ||
                 strpos($e->getMessage(), 'SQLConnect') !== false ||
                 strpos($e->getMessage(), 'Database_Exception') !== false) {
-                // This is a database connection error - we can continue since this module
-                // is specifically for fixing database connections
                 Log::instance()->add(Log::WARNING, 'Database connection failed in dbsetting module: ' . $e->getMessage());
-                // Store the error to display to user
                 $this->db_error = $e->getMessage();
             } else {
-                // Re-throw non-database exceptions
                 throw $e;
             }
         }
     
         // Load module configuration
         $this->config = Kohana::$config->load('dbsetting');
+        
+        // Define allowed paths for security
+        $this->allowed_base_paths = array(
+            'C:\\Program Files\\Firebird\\',
+            'C:\\Program Files (x86)\\Firebird\\',
+            'D:\\rrr\\',
+            'C:\\service_skud\\'
+        );
         
         // Get ODBC DSNs from Windows Registry
         $this->odbc_dsns = $this->get_odbc_dsns_from_registry();
@@ -54,6 +59,81 @@ class Controller_Dbsetting extends Controller_Template {
     }
     
     /**
+     * Validate and sanitize file path for security
+     * @param string $path Path to validate
+     * @param bool $check_exists Check if file/directory exists
+     * @return string Validated path or throws exception
+     * @throws Exception
+     */
+    protected function validate_path($path, $check_exists = false) {
+        // Remove null bytes and dangerous characters
+        $path = str_replace(chr(0), '', $path);
+        
+        // Decode URL encoding
+        $path = rawurldecode($path);
+        
+        // Normalize directory separators
+        $path = str_replace('/', DIRECTORY_SEPARATOR, $path);
+        
+        // Get real path (resolves .. and .)
+        $real_path = realpath($path);
+        
+        if ($real_path === false) {
+            if ($check_exists) {
+                throw new Exception('Path does not exist: ' . $path);
+            }
+            // For paths that don't exist yet, validate the parent directory
+            $dir = dirname($path);
+            $real_dir = realpath($dir);
+            if ($real_dir === false) {
+                throw new Exception('Parent directory does not exist: ' . $dir);
+            }
+            $real_path = $real_dir . DIRECTORY_SEPARATOR . basename($path);
+        }
+        
+        // Check if path is within allowed base directories
+        $is_allowed = false;
+        foreach ($this->allowed_base_paths as $allowed) {
+            $allowed_real = realpath($allowed);
+            if ($allowed_real !== false && strpos($real_path, $allowed_real) === 0) {
+                $is_allowed = true;
+                break;
+            }
+        }
+        
+        if (!$is_allowed) {
+            throw new Exception('Access denied: Path outside allowed directories');
+        }
+        
+        return $real_path;
+    }
+    
+    /**
+     * Validate CSRF token
+     * @param string $action Action identifier for token
+     * @return bool
+     */
+    protected function validate_csrf($action) {
+        $posted_token = $this->request->post('csrf_token');
+        $expected_token = md5(session_id() . 'dbsetting_' . $action);
+        
+        if ($posted_token !== $expected_token) {
+            Log::instance()->add(Log::WARNING, 'CSRF validation failed for action: ' . $action);
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Generate CSRF token
+     * @param string $action Action identifier for token
+     * @return string
+     */
+    protected function get_csrf_token($action) {
+        return md5(session_id() . 'dbsetting_' . $action);
+    }
+    
+    /**
      * Main page with controls
      */
     public function action_index()
@@ -61,7 +141,6 @@ class Controller_Dbsetting extends Controller_Template {
         try {
             $service_status = $this->get_service_status();
         } catch (Exception $e) {
-            // If we can't get service status, set it to unknown
             $service_status = 'unknown';
             Log::instance()->add(Log::ERROR, 'Failed to get service status: ' . $e->getMessage());
         }
@@ -70,7 +149,6 @@ class Controller_Dbsetting extends Controller_Template {
         $database_dir = '';
         $database_filename = '';
         if (!empty($database_path)) {
-            // Extract directory and filename
             $database_dir = dirname($database_path);
             $database_filename = basename($database_path);
         }
@@ -80,10 +158,12 @@ class Controller_Dbsetting extends Controller_Template {
             ->set('current_dsn', $this->current_dsn)
             ->set('service_status', $service_status)
             ->set('backup_dir', $this->config->get('backup_dir'))
-            ->set('database_path', $database_path) // keep for compatibility
+            ->set('database_path', $database_path)
             ->set('database_dir', $database_dir)
             ->set('database_filename', $database_filename)
-            ->set('db_error', $this->db_error);
+            ->set('db_error', $this->db_error)
+            ->set('csrf_token_path', $this->get_csrf_token('save_path'))
+            ->set('csrf_token_config', $this->get_csrf_token('config_edit'));
         
         $this->template->content = $content;
     }
@@ -94,23 +174,29 @@ class Controller_Dbsetting extends Controller_Template {
     public function action_select_dsn()
     {
         if ($this->request->method() === 'POST') {
+            // Validate CSRF
+            if (!$this->validate_csrf('select_dsn')) {
+                Session::instance()->set('flash_message', array(
+                    'type' => 'error',
+                    'text' => __('Security token validation failed. Please refresh the page and try again.')
+                ));
+                $this->redirect('dbsetting');
+                return;
+            }
+            
             $selected = $this->request->post('dsn');
             
             if (array_key_exists($selected, $this->odbc_dsns)) {
                 $dsn_value = $this->odbc_dsns[$selected];
                 
-                // Store in session
                 Session::instance()->set('current_dsn', $dsn_value);
                 
-                // Update database configuration file
                 if ($this->update_database_config($dsn_value)) {
-                    // Set success message
                     Session::instance()->set('flash_message', array(
                         'type' => 'success',
                         'text' => __('Database DSN changed to ') . $selected . ' and saved to config file'
                     ));
                 } else {
-                    // Set error message if config update failed
                     Session::instance()->set('flash_message', array(
                         'type' => 'error',
                         'text' => __('Failed to update database configuration file. Check logs for details.')
@@ -132,29 +218,16 @@ class Controller_Dbsetting extends Controller_Template {
      */
     public function action_save_database_path()
     {
-        // Enable error reporting for debugging
-        error_reporting(E_ALL);
-        ini_set('display_errors', 1);
-        
-        Log::instance()->add(Log::DEBUG, 'save_database_path called, method: ' . $this->request->method() . ', is_ajax: ' . ($this->request->is_ajax() ? 'true' : 'false'));
-        
         if ($this->request->method() !== 'POST') {
             $this->redirect('dbsetting');
             return;
         }
         
-        // Disable template rendering for this action
         $this->auto_render = false;
         
-        $database_path = $this->request->post('database_path');
-        Log::instance()->add(Log::DEBUG, 'database_path posted: ' . $database_path);
-        
-        // Validate CSRF token (temporarily disabled for debugging)
-        /*
-        $posted_token = $this->request->post('csrf_token');
-        $expected_token = md5(session_id() . 'dbsetting_save_path');
-        if ($posted_token !== $expected_token) {
-            $error = __('Ошибка проверки токена безопасности. Пожалуйста, обновите страницу и попробуйте снова.');
+        // Validate CSRF
+        if (!$this->validate_csrf('save_path')) {
+            $error = __('Security token validation failed. Please refresh the page and try again.');
             if ($this->request->is_ajax()) {
                 $this->response->headers('Content-Type', 'application/json');
                 $this->response->body(json_encode(array(
@@ -171,92 +244,36 @@ class Controller_Dbsetting extends Controller_Template {
                 return;
             }
         }
-        */
+        
+        $database_path = $this->request->post('database_path');
         
         if (empty($database_path)) {
-            $error = __('Путь к базе данных не может быть пустым.');
-            if ($this->request->is_ajax()) {
-                $this->response->headers('Content-Type', 'application/json');
-                $this->response->body(json_encode(array(
-                    'success' => false,
-                    'message' => $error
-                )));
-                return;
-            } else {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'error',
-                    'text' => $error
-                ));
-                $this->redirect('dbsetting');
-                return;
-            }
+            $error = __('Database path cannot be empty.');
+            $this->send_json_response(false, $error);
+            return;
         }
         
         try {
-            // Decode URL-encoded paths (browsers encode : and \ in POST data)
-            $database_path = urldecode($database_path);
-            
+            // Validate path
+            $database_path = $this->validate_path($database_path, false);
             $file_exists = file_exists($database_path);
             
             // Update module configuration
             $success = $this->update_module_database_path($database_path);
+            
+            if ($success) {
+                $this->send_json_response(true, 
+                    __('Database path saved: ') . HTML::chars($database_path),
+                    array('file_exists' => $file_exists)
+                );
+            } else {
+                $this->send_json_response(false, 
+                    __('Failed to save database path. Check logs.')
+                );
+            }
         } catch (Exception $e) {
-            Log::instance()->add(Log::ERROR, 'Exception in save_database_path: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-            if ($this->request->is_ajax()) {
-                $this->response->headers('Content-Type', 'application/json');
-                $this->response->body(json_encode(array(
-                    'success' => false,
-                    'message' => __('Внутренняя ошибка сервера: ') . $e->getMessage()
-                )));
-                return;
-            } else {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'error',
-                    'text' => __('Внутренняя ошибка сервера: ') . $e->getMessage()
-                ));
-                $this->redirect('dbsetting');
-                return;
-            }
-        }
-        
-        if ($this->request->is_ajax()) {
-            $this->response->headers('Content-Type', 'application/json');
-            if ($success) {
-                $this->response->body(json_encode(array(
-                    'success' => true,
-                    'message' => __('Путь к базе данных сохранен в конфигурации: ') . HTML::chars($database_path),
-                    'file_exists' => $file_exists
-                )));
-            } else {
-                $this->response->body(json_encode(array(
-                    'success' => false,
-                    'message' => __('Не удалось сохранить путь к базе данных в конфигурации. Проверьте логи.')
-                )));
-            }
-            return;
-        } else {
-            // Non-AJAX request: set flash messages and redirect
-            if (!$file_exists) {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'warning',
-                    'text' => __('Файл базы данных не найден: ') . HTML::chars($database_path) .
-                             __(' (путь сохранен, но файл отсутствует)')
-                ));
-            }
-            
-            if ($success) {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'success',
-                    'text' => __('Путь к базе данных сохранен в конфигурации: ') . HTML::chars($database_path)
-                ));
-            } else {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'error',
-                    'text' => __('Не удалось сохранить путь к базе данных в конфигурации. Проверьте логи.')
-                ));
-            }
-            
-            $this->redirect('dbsetting');
+            Log::instance()->add(Log::ERROR, 'Exception in save_database_path: ' . $e->getMessage());
+            $this->send_json_response(false, __('Error: ') . $e->getMessage());
         }
     }
     
@@ -265,145 +282,53 @@ class Controller_Dbsetting extends Controller_Template {
      */
     public function action_save_database_dir()
     {
-        // Enable error reporting for debugging
-        error_reporting(E_ALL);
-        ini_set('display_errors', 1);
-        
-        Log::instance()->add(Log::DEBUG, 'save_database_dir called, method: ' . $this->request->method() . ', is_ajax: ' . ($this->request->is_ajax() ? 'true' : 'false'));
-        
         if ($this->request->method() !== 'POST') {
             $this->redirect('dbsetting');
             return;
         }
         
-        // Disable template rendering for this action
         $this->auto_render = false;
         
-        $database_dir = $this->request->post('database_dir');
-        Log::instance()->add(Log::DEBUG, 'database_dir posted: ' . $database_dir);
-        
-        // Validate CSRF token (temporarily disabled for debugging)
-        /*
-        $posted_token = $this->request->post('csrf_token');
-        $expected_token = md5(session_id() . 'dbsetting_save_path');
-        if ($posted_token !== $expected_token) {
-            $error = __('Ошибка проверки токена безопасности. Пожалуйста, обновите страницу и попробуйте снова.');
-            if ($this->request->is_ajax()) {
-                $this->response->headers('Content-Type', 'application/json');
-                $this->response->body(json_encode(array(
-                    'success' => false,
-                    'message' => $error
-                )));
-                return;
-            } else {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'error',
-                    'text' => $error
-                ));
-                $this->redirect('dbsetting');
-                return;
-            }
+        // Validate CSRF
+        if (!$this->validate_csrf('save_path')) {
+            $this->send_json_response(false, __('Security token validation failed.'));
+            return;
         }
-        */
+        
+        $database_dir = $this->request->post('database_dir');
         
         if (empty($database_dir)) {
-            $error = __('Путь к папке базы данных не может быть пустым.');
-            if ($this->request->is_ajax()) {
-                $this->response->headers('Content-Type', 'application/json');
-                $this->response->body(json_encode(array(
-                    'success' => false,
-                    'message' => $error
-                )));
-                return;
-            } else {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'error',
-                    'text' => $error
-                ));
-                $this->redirect('dbsetting');
-                return;
-            }
+            $this->send_json_response(false, __('Database directory cannot be empty.'));
+            return;
         }
-        
-        // Decode URL-encoded paths (browsers encode : and \ in POST data)
-        $database_dir = urldecode($database_dir);
-        
-        // Get current database filename from config
-        $current_path = $this->config->get('database_path');
-        $database_filename = '';
-        if (!empty($current_path)) {
-            $database_filename = basename($current_path);
-        } else {
-            // If no current path, default to something?
-            $database_filename = 'database.fdb';
-        }
-        
-        // Build new full path
-        $new_database_path = rtrim($database_dir, '\\/') . DIRECTORY_SEPARATOR . $database_filename;
         
         try {
+            // Validate directory path
+            $database_dir = $this->validate_path($database_dir, true);
+            
+            // Get current database filename from config
+            $current_path = $this->config->get('database_path');
+            $database_filename = !empty($current_path) ? basename($current_path) : 'database.fdb';
+            
+            // Build new full path
+            $new_database_path = rtrim($database_dir, '\\/') . DIRECTORY_SEPARATOR . $database_filename;
+            
             $file_exists = file_exists($new_database_path);
             
             // Update module configuration
             $success = $this->update_module_database_path($new_database_path);
+            
+            if ($success) {
+                $this->send_json_response(true,
+                    __('Database directory saved: ') . HTML::chars($database_dir),
+                    array('file_exists' => $file_exists, 'new_full_path' => $new_database_path)
+                );
+            } else {
+                $this->send_json_response(false, __('Failed to save database directory.'));
+            }
         } catch (Exception $e) {
-            Log::instance()->add(Log::ERROR, 'Exception in save_database_dir: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-            if ($this->request->is_ajax()) {
-                $this->response->headers('Content-Type', 'application/json');
-                $this->response->body(json_encode(array(
-                    'success' => false,
-                    'message' => __('Внутренняя ошибка сервера: ') . $e->getMessage()
-                )));
-                return;
-            } else {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'error',
-                    'text' => __('Внутренняя ошибка сервера: ') . $e->getMessage()
-                ));
-                $this->redirect('dbsetting');
-                return;
-            }
-        }
-        
-        if ($this->request->is_ajax()) {
-            $this->response->headers('Content-Type', 'application/json');
-            if ($success) {
-                $this->response->body(json_encode(array(
-                    'success' => true,
-                    'message' => __('Путь к папке базы данных сохранен в конфигурации: ') . HTML::chars($database_dir),
-                    'file_exists' => $file_exists,
-                    'new_full_path' => $new_database_path
-                )));
-            } else {
-                $this->response->body(json_encode(array(
-                    'success' => false,
-                    'message' => __('Не удалось сохранить путь к папке базы данных в конфигурации. Проверьте логи.')
-                )));
-            }
-            return;
-        } else {
-            // Non-AJAX request: set flash messages and redirect
-            if (!$file_exists) {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'warning',
-                    'text' => __('Файл базы данных не найден: ') . HTML::chars($new_database_path) .
-                             __(' (путь сохранен, но файл отсутствует)')
-                ));
-            }
-            
-            if ($success) {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'success',
-                    'text' => __('Путь к папке базы данных сохранен в конфигурации: ') . HTML::chars($database_dir)
-                ));
-            } else {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'error',
-                    'text' => __('Не удалось сохранить путь к папке базы данных в конфигурации. Проверьте логи.')
-                ));
-            }
-            
-            $this->redirect('dbsetting');
+            Log::instance()->add(Log::ERROR, 'Exception in save_database_dir: ' . $e->getMessage());
+            $this->send_json_response(false, __('Error: ') . $e->getMessage());
         }
     }
     
@@ -412,148 +337,77 @@ class Controller_Dbsetting extends Controller_Template {
      */
     public function action_save_database_filename()
     {
-        // Enable error reporting for debugging
-        error_reporting(E_ALL);
-        ini_set('display_errors', 1);
-        
-        Log::instance()->add(Log::DEBUG, 'save_database_filename called, method: ' . $this->request->method() . ', is_ajax: ' . ($this->request->is_ajax() ? 'true' : 'false'));
-        // Also write to debug.txt for certainty
-        file_put_contents(APPPATH . '../debug.txt', date('Y-m-d H:i:s') . ' save_database_filename called, method: ' . $this->request->method() . ', is_ajax: ' . ($this->request->is_ajax() ? 'true' : 'false') . PHP_EOL, FILE_APPEND);
-        
         if ($this->request->method() !== 'POST') {
             $this->redirect('dbsetting');
             return;
         }
         
-        // Disable template rendering for this action
         $this->auto_render = false;
         
-        $database_filename = $this->request->post('database_filename');
-        Log::instance()->add(Log::DEBUG, 'database_filename posted: ' . $database_filename);
-        
-        // Validate CSRF token (temporarily disabled for debugging)
-        /*
-        $posted_token = $this->request->post('csrf_token');
-        $expected_token = md5(session_id() . 'dbsetting_save_path');
-        if ($posted_token !== $expected_token) {
-            $error = __('Ошибка проверки токена безопасности. Пожалуйста, обновите страницу и попробуйте снова.');
-            if ($this->request->is_ajax()) {
-                $this->response->headers('Content-Type', 'application/json');
-                $this->response->body(json_encode(array(
-                    'success' => false,
-                    'message' => $error
-                )));
-                return;
-            } else {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'error',
-                    'text' => $error
-                ));
-                $this->redirect('dbsetting');
-                return;
-            }
+        // Validate CSRF
+        if (!$this->validate_csrf('save_path')) {
+            $this->send_json_response(false, __('Security token validation failed.'));
+            return;
         }
-        */
+        
+        $database_filename = $this->request->post('database_filename');
         
         if (empty($database_filename)) {
-            $error = __('Имя файла базы данных не может быть пустым.');
-            if ($this->request->is_ajax()) {
-                $this->response->headers('Content-Type', 'application/json');
-                $this->response->body(json_encode(array(
-                    'success' => false,
-                    'message' => $error
-                )));
-                return;
-            } else {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'error',
-                    'text' => $error
-                ));
-                $this->redirect('dbsetting');
-                return;
-            }
+            $this->send_json_response(false, __('Database filename cannot be empty.'));
+            return;
         }
         
-        // Decode URL-encoded paths (browsers encode : and \ in POST data)
-        $database_filename = urldecode($database_filename);
-        
-        // Get current database directory from config
-        $current_path = $this->config->get('database_path');
-        $database_dir = '';
-        if (!empty($current_path)) {
-            $database_dir = dirname($current_path);
-        } else {
-            // If no current path, default to something?
-            $database_dir = 'C:\\';
+        // Validate filename (no path separators, only safe characters)
+        if (preg_match('/[\\\\\\/\\:\\*\\?\\"\\<\\>\\|]/', $database_filename)) {
+            $this->send_json_response(false, __('Invalid filename contains illegal characters.'));
+            return;
         }
-        
-        // Build new full path
-        $new_database_path = rtrim($database_dir, '\\/') . DIRECTORY_SEPARATOR . $database_filename;
         
         try {
+            $database_filename = rawurldecode($database_filename);
+            
+            // Get current database directory from config
+            $current_path = $this->config->get('database_path');
+            $database_dir = !empty($current_path) ? dirname($current_path) : 'C:\\';
+            
+            // Validate directory exists
+            $real_dir = realpath($database_dir);
+            if ($real_dir === false) {
+                throw new Exception('Database directory does not exist: ' . $database_dir);
+            }
+            
+            // Build new full path
+            $new_database_path = rtrim($real_dir, '\\/') . DIRECTORY_SEPARATOR . $database_filename;
+            
             $file_exists = file_exists($new_database_path);
             
             // Update module configuration
             $success = $this->update_module_database_path($new_database_path);
+            
+            if ($success) {
+                $this->send_json_response(true,
+                    __('Database filename saved: ') . HTML::chars($database_filename),
+                    array('file_exists' => $file_exists, 'new_full_path' => $new_database_path)
+                );
+            } else {
+                $this->send_json_response(false, __('Failed to save database filename.'));
+            }
         } catch (Exception $e) {
-            Log::instance()->add(Log::ERROR, 'Exception in save_database_filename: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-            if ($this->request->is_ajax()) {
-                $this->response->headers('Content-Type', 'application/json');
-                $this->response->body(json_encode(array(
-                    'success' => false,
-                    'message' => __('Внутренняя ошибка сервера: ') . $e->getMessage()
-                )));
-                return;
-            } else {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'error',
-                    'text' => __('Внутренняя ошибка сервера: ') . $e->getMessage()
-                ));
-                $this->redirect('dbsetting');
-                return;
-            }
+            Log::instance()->add(Log::ERROR, 'Exception in save_database_filename: ' . $e->getMessage());
+            $this->send_json_response(false, __('Error: ') . $e->getMessage());
         }
-        
-        if ($this->request->is_ajax()) {
-            $this->response->headers('Content-Type', 'application/json');
-            if ($success) {
-                $this->response->body(json_encode(array(
-                    'success' => true,
-                    'message' => __('Имя файла базы данных сохранено в конфигурации: ') . HTML::chars($database_filename),
-                    'file_exists' => $file_exists,
-                    'new_full_path' => $new_database_path
-                )));
-            } else {
-                $this->response->body(json_encode(array(
-                    'success' => false,
-                    'message' => __('Не удалось сохранить имя файла базы данных в конфигурации. Проверьте логи.')
-                )));
-            }
-            return;
-        } else {
-            // Non-AJAX request: set flash messages and redirect
-            if (!$file_exists) {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'warning',
-                    'text' => __('Файл базы данных не найден: ') . HTML::chars($new_database_path) .
-                             __(' (имя файла сохранено, но файл отсутствует)')
-                ));
-            }
-            
-            if ($success) {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'success',
-                    'text' => __('Имя файла базы данных сохранено в конфигурации: ') . HTML::chars($database_filename)
-                ));
-            } else {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'error',
-                    'text' => __('Не удалось сохранить имя файла базы данных в конфигурации. Проверьте логи.')
-                ));
-            }
-            
-            $this->redirect('dbsetting');
-        }
+    }
+    
+    /**
+     * Send JSON response helper
+     */
+    protected function send_json_response($success, $message, $extra = array()) {
+        $this->response->headers('Content-Type', 'application/json');
+        $response = array_merge(array(
+            'success' => $success,
+            'message' => $message
+        ), $extra);
+        $this->response->body(json_encode($response));
     }
     
     /**
@@ -561,40 +415,45 @@ class Controller_Dbsetting extends Controller_Template {
      */
     public function action_backup()
     {
-        // Get parameters from POST or use defaults from config
-        //$database_path = $this->request->post('database_path', $this->config->get('database_path'));
-        //$backup_dir = $this->request->post('backup_dir', $this->config->get('backup_dir'));
-        $firebird_bin = $this->config->get('firebird_bin');
-
-        $database_path = Arr::get($_POST, 'database_path');
-        $backup_dir = Arr::get($_POST, 'backup_dir');
-        //$firebird_bin = Arr::get($_POST, 'firebird_bin');
-
-    //echo Debug::vars('128', $database_path);//exit;   
-     //echo Debug::vars('131', $firebird_bin);//exit;   
-        // Decode URL-encoded paths (browsers encode : and \ in POST data)
-        $database_path = urldecode($database_path);
-        $backup_dir = urldecode($backup_dir);
-        // Log for debugging
-        Log::instance()->add(Log::DEBUG, 'Backup attempt - Database path: ' . $database_path);
-        Log::instance()->add(Log::DEBUG, 'Backup attempt - Backup dir: ' . $backup_dir);
+        if ($this->request->method() !== 'POST') {
+            $this->redirect('dbsetting');
+            return;
+        }
         
-        // Validate database path
-        if (empty($database_path)) {
+        // Validate CSRF
+        if (!$this->validate_csrf('backup')) {
             Session::instance()->set('flash_message', array(
                 'type' => 'error',
-                'text' => 'Путь к базе данных пуст.'
+                'text' => __('Security token validation failed.')
             ));
             $this->redirect('dbsetting');
             return;
         }
         
-        // Check if file exists
-        if (!file_exists($database_path)) {
+        $firebird_bin = $this->config->get('firebird_bin');
+        $firebird_password = $this->config->get('firebird_password', '');
+        
+        // Validate password is set
+        if (empty($firebird_password)) {
             Session::instance()->set('flash_message', array(
                 'type' => 'error',
-                'text' => 'Файл базы данных не найден: ' . HTML::chars($database_path) .
-                         '. Пожалуйста, проверьте путь и убедитесь, что файл существует.'
+                'text' => __('Firebird password not configured. Please set firebird_password in config.')
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        $database_path = Arr::get($_POST, 'database_path');
+        $backup_dir = Arr::get($_POST, 'backup_dir');
+        
+        try {
+            // Validate paths
+            $database_path = $this->validate_path($database_path, true);
+            $backup_dir = $this->validate_path($backup_dir, false);
+        } catch (Exception $e) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => __('Path validation failed: ') . $e->getMessage()
             ));
             $this->redirect('dbsetting');
             return;
@@ -605,40 +464,51 @@ class Controller_Dbsetting extends Controller_Template {
             if (!mkdir($backup_dir, 0777, true)) {
                 Session::instance()->set('flash_message', array(
                     'type' => 'error',
-                    'text' => 'Не удалось создать папку для резервных копий: ' . HTML::chars($backup_dir)
+                    'text' => __('Failed to create backup directory: ') . HTML::chars($backup_dir)
                 ));
                 $this->redirect('dbsetting');
                 return;
             }
         }
         
-        // Generate filename: database filename + year-month-day-time
-        $db_filename = pathinfo($database_path, PATHINFO_FILENAME); // e.g., "CITY"
-        $timestamp = date('Y-m-d_His'); // e.g., "2026-04-03_083138"
-        $backup_file = $backup_dir . $db_filename . '_' . $timestamp . '.fbk';
-  
-        $gbak = escapeshellarg($firebird_bin . 'gbak.exe');
-        $db = '127.0.0.1:'.escapeshellarg($database_path);
+        // Generate backup filename
+        $db_filename = pathinfo($database_path, PATHINFO_FILENAME);
+        $timestamp = date('Y-m-d_His');
+        $backup_file = $backup_dir . DIRECTORY_SEPARATOR . $db_filename . '_' . $timestamp . '.fbk';
+        
+        // Validate gbak.exe exists
+        $gbak_path = rtrim($firebird_bin, '\\/') . DIRECTORY_SEPARATOR . 'gbak.exe';
+        if (!file_exists($gbak_path)) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => __('gbak.exe not found at: ') . HTML::chars($gbak_path)
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        $gbak = escapeshellarg($gbak_path);
+        $db = '127.0.0.1:' . escapeshellarg($database_path);
         $backup = escapeshellarg($backup_file);
         
-        // Build command
-        $command = $gbak . ' -b -v -ig -g -user SYSDBA -PASSWORD temp ' . $db . ' ' . $backup;
-   
-        Log::instance()->add(Log::DEBUG, 'Executing backup command: ' . $command);
+        // Use password from config, never hardcoded
+        $command = $gbak . ' -b -v -ig -g -user SYSDBA -password ' . escapeshellarg($firebird_password) . ' ' . $db . ' ' . $backup;
+        
+        Log::instance()->add(Log::DEBUG, 'Executing backup command (password hidden)');
         exec($command, $output, $return_var);
         
         if ($return_var === 0) {
             Session::instance()->set('flash_message', array(
                 'type' => 'success',
-                'text' => 'Резервная копия успешно создана: ' . $backup_file
+                'text' => __('Backup created successfully: ') . $backup_file
             ));
             Log::instance()->add(Log::INFO, 'Backup created: ' . $backup_file);
         } else {
             Session::instance()->set('flash_message', array(
                 'type' => 'error',
-                'text' => 'Ошибка создания резервной копии. Код ошибки: ' . $return_var . '. Проверьте логи приложения для деталей.'
+                'text' => __('Backup failed. Error code: ') . $return_var . '. Check logs.'
             ));
-            Log::instance()->add(Log::ERROR, 'Backup failed. Command: ' . $command . ', Output: ' . implode("\n", $output));
+            Log::instance()->add(Log::ERROR, 'Backup failed. Return code: ' . $return_var . ', Output: ' . implode("\n", $output));
         }
         
         $this->redirect('dbsetting');
@@ -649,45 +519,73 @@ class Controller_Dbsetting extends Controller_Template {
      */
     public function action_restore()
     {
-        if ($this->request->method() === 'POST') {
-            $backup_file = $this->request->post('backup_file');
-            $restore_path = $this->config->get('database_path');
-            $firebird_bin = $this->config->get('firebird_bin');
-            
-            if (!file_exists($backup_file)) {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'error',
-                    'text' => __('Backup file not found.')
-                ));
-                $this->redirect('dbsetting');
-                return;
-            }
-            
-            // Stop service before restore
-            $this->stop_service();
-            
-            $gbak = escapeshellarg($firebird_bin . 'gbak.exe');
-            $backup = escapeshellarg($backup_file);
-            $restore = escapeshellarg($restore_path);
-            
-            $command = $gbak . ' -c -user SYSDBA -masterkey ' . $backup . ' ' . $restore;
-            
-            exec($command, $output, $return_var);
-            
-            // Start service after restore
-            $this->start_service();
-            
-            if ($return_var === 0) {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'success',
-                    'text' => __('Database restored successfully from ') . $backup_file
-                ));
-            } else {
-                Session::instance()->set('flash_message', array(
-                    'type' => 'error',
-                    'text' => __('Restore failed. Error code: ') . $return_var
-                ));
-            }
+        if ($this->request->method() !== 'POST') {
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        // Validate CSRF
+        if (!$this->validate_csrf('restore')) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => __('Security token validation failed.')
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        $backup_file = $this->request->post('backup_file');
+        $firebird_bin = $this->config->get('firebird_bin');
+        $firebird_password = $this->config->get('firebird_password', '');
+        $restore_path = $this->config->get('database_path');
+        
+        // Validate password
+        if (empty($firebird_password)) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => __('Firebird password not configured.')
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        try {
+            $backup_file = $this->validate_path($backup_file, true);
+            $restore_path = $this->validate_path($restore_path, false);
+        } catch (Exception $e) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => __('Path validation failed: ') . $e->getMessage()
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        // Stop service before restore
+        $this->stop_service();
+        
+        $gbak = escapeshellarg(rtrim($firebird_bin, '\\/') . DIRECTORY_SEPARATOR . 'gbak.exe');
+        $backup = escapeshellarg($backup_file);
+        $restore = escapeshellarg($restore_path);
+        
+        $command = $gbak . ' -c -user SYSDBA -password ' . escapeshellarg($firebird_password) . ' ' . $backup . ' ' . $restore;
+        
+        exec($command, $output, $return_var);
+        
+        // Start service after restore
+        $this->start_service();
+        
+        if ($return_var === 0) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'success',
+                'text' => __('Database restored successfully from ') . basename($backup_file)
+            ));
+        } else {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => __('Restore failed. Error code: ') . $return_var
+            ));
+            Log::instance()->add(Log::ERROR, 'Restore failed. Command: ' . $command);
         }
         
         $this->redirect('dbsetting');
@@ -699,7 +597,6 @@ class Controller_Dbsetting extends Controller_Template {
      */
     protected function find_firebird_service()
     {
-        // Try multiple possible service names
         $possible_services = array(
             $this->config->get('service_name', 'FirebirdServerDefault'),
             'FirebirdServerDefaultInstance',
@@ -708,7 +605,6 @@ class Controller_Dbsetting extends Controller_Template {
             'Firebird'
         );
         
-        // Remove duplicates while preserving order
         $possible_services = array_unique($possible_services);
         
         foreach ($possible_services as $service) {
@@ -716,7 +612,6 @@ class Controller_Dbsetting extends Controller_Template {
             exec($command, $output, $return_var);
             
             if ($return_var === 0) {
-                // Service exists
                 return $service;
             }
         }
@@ -732,17 +627,11 @@ class Controller_Dbsetting extends Controller_Template {
         $service = $this->find_firebird_service();
      
         if ($service) {
-            // Get full service output without filtering
             $command = 'sc query ' . escapeshellarg($service) . ' 2>nul';
             exec($command, $output, $return_var);
             
             if ($return_var === 0 && !empty($output)) {
-                // Parse the output for state codes (language-independent)
-                // State codes: 4 = RUNNING, 1 = STOPPED
                 foreach ($output as $line) {
-                    // Check for state code 4 (RUNNING)
-                  
-                    // check for text patterns as fallback
                     if (strpos($line, 'RUNNING') !== false) {
                         return 'running';
                     }
@@ -753,13 +642,12 @@ class Controller_Dbsetting extends Controller_Template {
             }
         }
         
-        // If we couldn't determine status, try alternative method
-        // Check if any Firebird process is running
+        // Alternative check via process
         $command = 'tasklist /FI "IMAGENAME eq fbserver.exe" /FI "STATUS eq running" 2>nul | find "fbserver.exe"';
         exec($command, $output, $return_var);
         
         if ($return_var === 0) {
-            return 'running (detected via process)';
+            return 'running';
         }
         
         return 'unknown';
@@ -770,6 +658,16 @@ class Controller_Dbsetting extends Controller_Template {
      */
     public function action_stop_service()
     {
+        // Validate CSRF
+        if (!$this->validate_csrf('service')) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => __('Security token validation failed.')
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
+        
         $service = $this->find_firebird_service();
         
         if (!$service) {
@@ -805,6 +703,16 @@ class Controller_Dbsetting extends Controller_Template {
      */
     public function action_start_service()
     {
+        // Validate CSRF
+        if (!$this->validate_csrf('service')) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => __('Security token validation failed.')
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
+        
         $service = $this->find_firebird_service();
         
         if (!$service) {
@@ -842,7 +750,7 @@ class Controller_Dbsetting extends Controller_Template {
     {
         $service = $this->find_firebird_service();
         if ($service) {
-            exec('net stop ' . escapeshellarg($service));
+            exec('net stop ' . escapeshellarg($service) . ' 2>nul >nul');
         }
     }
     
@@ -853,7 +761,7 @@ class Controller_Dbsetting extends Controller_Template {
     {
         $service = $this->find_firebird_service();
         if ($service) {
-            exec('net start ' . escapeshellarg($service));
+            exec('net start ' . escapeshellarg($service) . ' 2>nul >nul');
         }
     }
     
@@ -864,7 +772,6 @@ class Controller_Dbsetting extends Controller_Template {
     {
         $dsns = array();
         
-        // Registry paths to check
         $registry_paths = array(
             'HKEY_CURRENT_USER\Software\ODBC\ODBC.INI\ODBC Data Sources',
             'HKEY_LOCAL_MACHINE\SOFTWARE\ODBC\ODBC.INI\ODBC Data Sources'
@@ -876,10 +783,8 @@ class Controller_Dbsetting extends Controller_Template {
             
             if ($return_var === 0 && !empty($output)) {
                 foreach ($output as $line) {
-                    // Improved regex to handle DSN names with spaces and special characters
                     if (preg_match('/^\s*([^\s].*?)\s+REG_SZ\s+(.*)$/', $line, $matches)) {
                         $dsn_name = trim($matches[1]);
-                        // Skip empty lines and default entries
                         if (!empty($dsn_name) && $dsn_name !== '(Default)') {
                             $dsns[$dsn_name] = 'odbc:' . $dsn_name;
                         }
@@ -888,7 +793,7 @@ class Controller_Dbsetting extends Controller_Template {
             }
         }
         
-        // If no DSNs found, return default ones
+        // Default fallback if no DSNs found
         if (empty($dsns)) {
             $dsns = array(
                 'SDUO' => 'odbc:SDUO',
@@ -898,7 +803,6 @@ class Controller_Dbsetting extends Controller_Template {
             );
         }
         
-        // Sort DSNs alphabetically for better UX
         ksort($dsns);
         
         return $dsns;
@@ -913,13 +817,12 @@ class Controller_Dbsetting extends Controller_Template {
         
         if (file_exists($config_path)) {
             $content = file_get_contents($config_path);
-            // Extract dsn value from config
             if (preg_match("/'dsn'\s*=>\s*'([^']*)'/", $content, $matches)) {
                 return $matches[1];
             }
         }
         
-        return 'odbc:HL'; // Default fallback
+        return 'odbc:HL';
     }
     
     /**
@@ -934,31 +837,33 @@ class Controller_Dbsetting extends Controller_Template {
             return false;
         }
         
-        $content = file_get_contents($config_path);
-        if ($content === false) {
-            Log::instance()->add(Log::ERROR, 'Failed to read database config file: ' . $config_path);
-            return false;
-        }
-        
         // Validate DSN format
         if (!preg_match('/^odbc:[a-zA-Z0-9_\-\.\s]+$/', $dsn)) {
             Log::instance()->add(Log::ERROR, 'Invalid DSN format: ' . $dsn);
             return false;
         }
         
-        // Escape single quotes in DSN for replacement
+        $content = file_get_contents($config_path);
+        if ($content === false) {
+            Log::instance()->add(Log::ERROR, 'Failed to read database config file');
+            return false;
+        }
+        
         $escaped_dsn = str_replace("'", "\\'", $dsn);
         
-        // Replace dsn line with new value - more robust pattern
+        // Check if file is writable
+        if (!is_writable($config_path)) {
+            Log::instance()->add(Log::ERROR, 'Database config file is not writable: ' . $config_path);
+            return false;
+        }
+        
         $new_content = preg_replace(
             "/('dsn'\\s*=>\\s*')[^']*(')/",
             "\$1$escaped_dsn\$2",
             $content
         );
         
-        // Check if replacement was successful
         if ($new_content === $content) {
-            // Try alternative pattern with double quotes
             $new_content = preg_replace(
                 '/("dsn"\\s*=>\\s*")[^"]*(")/',
                 "\$1$dsn\$2",
@@ -971,15 +876,13 @@ class Controller_Dbsetting extends Controller_Template {
             return false;
         }
         
-        // Create backup before writing
+        // Create backup
         $backup_path = $config_path . '.backup_' . date('Y-m-d_His');
-        if (!copy($config_path, $backup_path)) {
-            Log::instance()->add(Log::WARNING, 'Failed to create backup of config file');
-        }
+        @copy($config_path, $backup_path);
         
-        $result = file_put_contents($config_path, $new_content);
+        $result = file_put_contents($config_path, $new_content, LOCK_EX);
         if ($result === false) {
-            Log::instance()->add(Log::ERROR, 'Failed to write database config file: ' . $config_path);
+            Log::instance()->add(Log::ERROR, 'Failed to write database config file');
             return false;
         }
         
@@ -993,9 +896,6 @@ class Controller_Dbsetting extends Controller_Template {
      */
     protected function update_module_database_path($database_path)
     {
-        // Debug logging
-        file_put_contents('debug.txt', date('Y-m-d H:i:s') . ' update_module_database_path called with: ' . $database_path . PHP_EOL, FILE_APPEND);
-        
         $module_config_path = MODPATH . 'dbsetting/config/dbsetting.php';
         
         if (!file_exists($module_config_path)) {
@@ -1003,32 +903,32 @@ class Controller_Dbsetting extends Controller_Template {
             return false;
         }
         
-        $content = file_get_contents($module_config_path);
-        if ($content === false) {
-            Log::instance()->add(Log::ERROR, 'Failed to read module config file: ' . $module_config_path);
+        // Check if file is writable
+        if (!is_writable($module_config_path)) {
+            Log::instance()->add(Log::ERROR, 'Module config file is not writable: ' . $module_config_path);
             return false;
         }
         
-        // Validate path contains at least something
+        $content = file_get_contents($module_config_path);
+        if ($content === false) {
+            Log::instance()->add(Log::ERROR, 'Failed to read module config file');
+            return false;
+        }
+        
         if (empty($database_path)) {
             Log::instance()->add(Log::ERROR, 'Empty database path provided');
             return false;
         }
         
-        // Escape single quotes in path for replacement
         $escaped_path = str_replace("'", "\\'", $database_path);
         
-        // Replace database_path line with new value - pattern matches 'database_path' =>'...'
-        // Uses multiline mode (m) to match start of line, and negative lookahead to skip commented lines
         $new_content = preg_replace(
             "/^(?!\\s*\\/\\/)(\\s*'database_path'\\s*=>\\s*')[^']*(')/m",
             "\$1$escaped_path\$2",
             $content
         );
         
-        // Check if replacement was successful
         if ($new_content === $content) {
-            // Try alternative pattern with double quotes
             $new_content = preg_replace(
                 '/^(?!\\s*\\/\\/)(\\s*"database_path"\\s*=>\\s*")[^"]*(")/m',
                 "\$1$database_path\$2",
@@ -1037,23 +937,21 @@ class Controller_Dbsetting extends Controller_Template {
         }
         
         if ($new_content === $content) {
-            Log::instance()->add(Log::ERROR, 'Failed to find database_path configuration in module config file');
+            Log::instance()->add(Log::ERROR, 'Failed to find database_path in config');
             return false;
         }
         
-        // Create backup before writing
+        // Create backup
         $backup_path = $module_config_path . '.backup_' . date('Y-m-d_His');
-        if (!copy($module_config_path, $backup_path)) {
-            Log::instance()->add(Log::WARNING, 'Failed to create backup of module config file');
-        }
+        @copy($module_config_path, $backup_path);
         
-        $result = file_put_contents($module_config_path, $new_content);
+        $result = file_put_contents($module_config_path, $new_content, LOCK_EX);
         if ($result === false) {
-            Log::instance()->add(Log::ERROR, 'Failed to write module config file: ' . $module_config_path);
+            Log::instance()->add(Log::ERROR, 'Failed to write module config file');
             return false;
         }
         
-        // Clear config cache to reload new values
+        // Clear config cache
         Kohana::$config->load('dbsetting', true);
         
         return true;
@@ -1064,18 +962,17 @@ class Controller_Dbsetting extends Controller_Template {
      */
     public function action_edit_config()
     {
-        $config_path = $this->config->get('database_config_path');
         $module_config_path = MODPATH . 'dbsetting/config/dbsetting.php';
         
-        // Read current config file
         $config_content = '';
-        if (file_exists($module_config_path)) {
+        if (file_exists($module_config_path) && is_readable($module_config_path)) {
             $config_content = file_get_contents($module_config_path);
         }
         
         $content = View::factory('dbsetting/config_editor')
             ->set('config_content', $config_content)
-            ->set('config_path', $module_config_path);
+            ->set('config_path', $module_config_path)
+            ->set('csrf_token', $this->get_csrf_token('config_edit'));
         
         $this->template->title = 'Редактирование конфигурации';
         $this->template->content = $content;
@@ -1091,10 +988,8 @@ class Controller_Dbsetting extends Controller_Template {
             return;
         }
         
-        // Validate CSRF token
-        $posted_token = $this->request->post('csrf_token');
-        $expected_token = md5(session_id() . 'dbsetting_config_edit');
-        if ($posted_token !== $expected_token) {
+        // Validate CSRF
+        if (!$this->validate_csrf('config_edit')) {
             Session::instance()->set('flash_message', array(
                 'type' => 'error',
                 'text' => 'Ошибка проверки токена безопасности. Пожалуйста, попробуйте снова.'
@@ -1106,7 +1001,6 @@ class Controller_Dbsetting extends Controller_Template {
         $config_content = $this->request->post('config_content');
         $module_config_path = MODPATH . 'dbsetting/config/dbsetting.php';
         
-        // Validate that we're editing the correct file
         if (empty($config_content) || !file_exists($module_config_path)) {
             Session::instance()->set('flash_message', array(
                 'type' => 'error',
@@ -1116,39 +1010,62 @@ class Controller_Dbsetting extends Controller_Template {
             return;
         }
         
-        // Basic PHP syntax validation - check if it contains valid PHP opening tag
+        // Validate PHP syntax before saving
         if (strpos($config_content, '<?php') === false) {
             Session::instance()->set('flash_message', array(
                 'type' => 'error',
-                'text' => 'Конфигурация должна начинаться с PHP открывающего тега <?php'
+                'text' => 'Конфигурация должна начинаться с PHP открывающего тега &lt;?php'
             ));
             $this->redirect('dbsetting');
             return;
         }
         
-        // Create backup before editing
-        $backup_path = $module_config_path . '.backup_' . date('Y-m-d_His');
-        if (!copy($module_config_path, $backup_path)) {
-            Log::instance()->add(Log::WARNING, 'Failed to create backup of module config file');
+        // Check PHP syntax by evaluating in a temporary file
+        $temp_file = tempnam(sys_get_temp_dir(), 'cfg_');
+        file_put_contents($temp_file, $config_content);
+        $syntax_check = shell_exec('php -l ' . escapeshellarg($temp_file) . ' 2>&1');
+        unlink($temp_file);
+        
+        if (strpos($syntax_check, 'No syntax errors') === false) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => 'Синтаксическая ошибка PHP в конфигурации: ' . nl2br(HTML::chars($syntax_check))
+            ));
+            $this->redirect('dbsetting');
+            return;
         }
         
-        // Write new content
-        $result = file_put_contents($module_config_path, $config_content);
+        // Check if writable
+        if (!is_writable($module_config_path)) {
+            Session::instance()->set('flash_message', array(
+                'type' => 'error',
+                'text' => 'Файл конфигурации недоступен для записи. Проверьте права доступа.'
+            ));
+            $this->redirect('dbsetting');
+            return;
+        }
+        
+        // Create backup
+        $backup_path = $module_config_path . '.backup_' . date('Y-m-d_His');
+        @copy($module_config_path, $backup_path);
+        
+        // Write new content with file locking
+        $result = file_put_contents($module_config_path, $config_content, LOCK_EX);
         
         if ($result === false) {
             Session::instance()->set('flash_message', array(
                 'type' => 'error',
-                'text' => 'Не удалось сохранить файл конфигурации. Проверьте права доступа.'
+                'text' => 'Не удалось сохранить файл конфигурации.'
             ));
             Log::instance()->add(Log::ERROR, 'Failed to write module config file: ' . $module_config_path);
         } else {
             Session::instance()->set('flash_message', array(
                 'type' => 'success',
-                'text' => 'Конфигурация успешно сохранена. Создана резервная копия: ' . basename($backup_path)
+                'text' => 'Конфигурация успешно сохранена. Резервная копия: ' . basename($backup_path)
             ));
-            Log::instance()->add(Log::INFO, 'Module configuration updated: ' . $module_config_path);
+            Log::instance()->add(Log::INFO, 'Module configuration updated');
             
-            // Clear config cache to reload new values
+            // Clear config cache
             Kohana::$config->load('dbsetting', true);
         }
         
