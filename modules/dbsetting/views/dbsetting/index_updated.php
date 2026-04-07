@@ -31,7 +31,7 @@
                 </div>
                 <div class="panel-body">
                     <form action="<?php echo URL::site('dbsetting/select_dsn'); ?>" method="post" class="form-inline">
-                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token_select_dsn; ?>">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token_path; ?>">
                         <div class="form-group">
                             <label>Текущий: <strong><?php echo HTML::chars($current_dsn); ?></strong></label>
                             <small class="text-muted">(сохранено в config/database.php)</small>

@@ -1,5 +1,3 @@
-// страница отображения данных по парковочной системе
-
 <!-- ФОРМА ДЛЯ ОТОБРАЖЕНИЯ СОДЕРЖИМОГО STATE.TXT -->
 <div class="panel panel-info" style="margin-bottom: 20px;">
     <div class="panel-heading">
@@ -73,21 +71,48 @@ Session::instance()->delete('e_mess');
             '1' => 'add_card',
             '2' => 'del_card',
             '3' => 'add_people',
-            '4' => 'del_card',
+            '4' => 'del_people',
             '5' => 'add_org',
             '6' => 'del_org',
             '7' => 'add_access',
             '8' => 'del_access',
         );
-
+		
+		$operatiion_name = array(
+            '1' => 'Добавить идентификатор',
+            '2' => 'Удалить идентификатора',
+            '3' => 'Добавить контакта',
+            '4' => 'Удалить контакт',
+            '5' => 'Добавить организацию',
+            '6' => 'Удалить организацию',
+            '7' => 'Добавить категорию доступа',
+            '8' => 'Удалить категорию доступа',
+        );
+		
+		
+        
         // Подготовка данных
         $raw_data = array();
+        $unique_dests = array();
+        
         if (isset($task_list) && is_array($task_list)) {
+            
+            // Сбор уникальных значений dest
+            foreach ($task_list as $item) {
+                $dest = iconv('windows-1251', 'UTF-8', Arr::get($item, 'DEST', ''));
+                if (!empty($dest)) {
+                    $unique_dests[$dest] = true;
+                }
+            }
+            
+            $unique_dests = array_keys($unique_dests);
+            sort($unique_dests); // Сортировка для удобства
+            
             foreach ($task_list as $item) {
                 $raw_data[] = array(
                     'id'          => Arr::get($item, 'ID', ''),
-                    'id_card'     => Arr::get($item, 'ID_CARD', ''),
-                    'id_pep'      => Arr::get($item, 'ID_PEP', ''),
+                    'id_card'     => iconv('windows-1251', 'UTF-8', Arr::get($item, 'ID_CARD', '')),
+                    'id_pep'      => iconv('windows-1251', 'UTF-8', Arr::get($item, 'ID_PEP', '')),
                     'operation'   => Arr::get($item, 'OPERATION', ''),
                     'operation_name' => Arr::get($operatiion_name, Arr::get($item, 'OPERATION', ''), 'unknown'),
                     'org_name'    => iconv('windows-1251', 'UTF-8', Arr::get($item, 'ORG_NAME', '')),
@@ -102,21 +127,34 @@ Session::instance()->delete('e_mess');
 
         <?php if (!empty($raw_data)): ?>
 
-        <!-- Таблица с фильтрами (исправленная структура) -->
+        <!-- Таблица с фильтрами -->
         <div class="table-responsive">
             <table class="table table-striped table-hover table-condensed tablesorter" id="parsec-table">
-                <!-- Заголовки (только одна строка) -->
+                <!-- Заголовки с двумя строками -->
                 <thead>
+                    <!-- Первая строка - названия колонок -->
                     <tr class="active">
-                        <th>ID</th>
-                        <th>GUID</th>
-                        <th>ID_PEP</th>
-                        <th>Операция</th>
-                        <th>Организация</th>
-                        <th>Попытки</th>
-                        <th>Для кого</th>
-                        <th>Дата</th>
-                        <th>Действия</th>
+                        <th class="text-center">ID</th>
+                        <th class="text-center">Что</th>
+                        <th class="text-center">Кому</th>
+                        <th class="text-center">Операция</th>
+                        <th class="text-center">Организация</th>
+                        <th class="text-center">Попытки</th>
+                        <th class="text-center">Для кого</th>
+                        <th class="text-center">Дата</th>
+                        <th class="text-center">Действия</th>
+                    </tr>
+                    <!-- Вторая строка - номера колонок -->
+                    <tr class="info" style="font-size: 10px">
+                        <th  class="text-center">1</th>
+                        <th class="text-center">2</th>
+                        <th class="text-center">3</th>
+                        <th class="text-center">4</th>
+                        <th class="text-center">5</th>
+                        <th class="text-center">6</th>
+                        <th class="text-center">7</th>
+                        <th class="text-center">8</th>
+                        <th class="text-center">9</th>
                     </tr>
                 </thead>
 
@@ -136,7 +174,16 @@ Session::instance()->delete('e_mess');
                         </th>
                         <th><input type="text" class="form-control input-sm column-filter" data-column="4" placeholder="Организация"></th>
                         <th><input type="text" class="form-control input-sm column-filter" data-column="5" placeholder="Попытки"></th>
-                        <th><input type="text" class="form-control input-sm column-filter" data-column="6" placeholder="Получатель"></th>
+                        <th>
+                            <select class="form-control input-sm column-filter" data-column="6" data-type="select">
+                                <option value="">Все получатели</option>
+                                <?php foreach ($unique_dests as $dest_value): ?>
+                                    <option value="<?php echo htmlspecialchars($dest_value, ENT_QUOTES, 'UTF-8'); ?>">
+                                        <?php echo htmlspecialchars($dest_value, ENT_QUOTES, 'UTF-8'); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </th>
                         <th><input type="text" class="form-control input-sm column-filter" data-column="7" placeholder="ГГГГ-ММ-ДД"></th>
                         <th></th>
                     </tr>
@@ -144,29 +191,22 @@ Session::instance()->delete('e_mess');
 
                 <!-- Основные данные -->
                 <tbody>
-                    <?php foreach ($raw_data as $row)
-					{					
-						
-						?>
-						
-						<tr>
-							<td><?php echo Form::hidden('id_cardindev[' . $row['id'] . ']', $row['id']); ?><?php echo $row['id']; ?></td>
-							<td><?php echo $row['id_card'] . $row['hex']; ?></td>
-							<td><?php echo $row['id_pep']; ?></td>
-							<td><?php echo $row['operation_name'] . ' (' . $row['operation'] . ')'; ?></td>
-							<td><?php echo htmlspecialchars($row['org_name'], ENT_QUOTES, 'UTF-8'); ?></td>
-							<td><?php echo $row['attempts']; ?></td>
-							<td><?php echo htmlspecialchars($row['dest'], ENT_QUOTES, 'UTF-8'); ?></td>
-							<td><?php echo $row['timestamp']; ?></td>
-							<td>
-								<a href="parsec/repeat/<?php echo $row['id']; ?>" class="btn btn-xs btn-success">Repeat</a>
-								<a href="parsec/delete/<?php echo $row['id']; ?>" class="btn btn-xs btn-danger" onclick="return confirm('<?php echo __('Вы уверены?'); ?>') ? true : false;">delete</a>
-							</td>
-						</tr>
-						<?php 
-						
-					
-					}; ?>
+                    <?php foreach ($raw_data as $row): ?>
+                    <tr>
+                        <td><?php echo Form::hidden('id_cardindev[' . $row['id'] . ']', $row['id']); ?><?php echo $row['id']; ?></td>
+                        <td><?php echo $row['id_card']; ?></td>
+                        <td><?php echo $row['id_pep']; ?></td>
+                        <td><?php echo $row['operation_name'] . ' (' . $row['operation'] . ')'; ?></td>
+                        <td><?php echo htmlspecialchars($row['org_name'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo $row['attempts']; ?></td>
+                        <td><?php echo htmlspecialchars($row['dest'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo $row['timestamp']; ?></td>
+                        <td>
+                            <a href="parsec/repeat/<?php echo $row['id']; ?>" class="btn btn-xs btn-success">Repeat</a>
+                            <a href="parsec/delete/<?php echo $row['id']; ?>" class="btn btn-xs btn-danger" onclick="return confirm('<?php echo __('Вы уверены?'); ?>') ? true : false;">delete</a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
@@ -249,7 +289,15 @@ $(document).ready(function() {
                             show = false;
                             return false;
                         }
-                    } else {
+                    } 
+                    // Для колонки "Для кого" (индекс 6) прямое сравнение
+                    else if (index == 6) {
+                        if (cellText !== filterValue) {
+                            show = false;
+                            return false;
+                        }
+                    }
+                    else {
                         if (cellText.indexOf(filterValue) === -1) {
                             show = false;
                             return false;

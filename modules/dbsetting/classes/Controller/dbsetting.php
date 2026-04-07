@@ -163,7 +163,8 @@ class Controller_Dbsetting extends Controller_Template {
             ->set('database_filename', $database_filename)
             ->set('db_error', $this->db_error)
             ->set('csrf_token_path', $this->get_csrf_token('save_path'))
-            ->set('csrf_token_config', $this->get_csrf_token('config_edit'));
+            ->set('csrf_token_config', $this->get_csrf_token('config_edit'))
+            ->set('csrf_token_select_dsn', $this->get_csrf_token('select_dsn'));
         
         $this->template->content = $content;
     }

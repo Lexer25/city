@@ -18,56 +18,45 @@
         <div class="alert alert-warning">
             <h4><i class="glyphicon glyphicon-warning-sign"></i> Ошибка подключения к базе данных</h4>
             <p>Текущее подключение к базе данных не работает с ошибкой: <code><?php echo HTML::chars($db_error); ?></code></p>
-            <p>Этот модуль позволяет исправить подключение к базе данных. Пожалуйста, выберите рабочий DSN из списка ниже.</p>
         </div>
     <?php endif; ?>
     
     <div class="row">
         <div class="col-md-12">
-            <!-- ODBC Selection -->
+            <!-- ODBC Configuration -->
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">ODBC База данных <small>DSN из реестра Windows</small></h3>
+                    <h3 class="panel-title">ODBC База данных</h3>
                 </div>
                 <div class="panel-body">
-                    <form action="<?php echo URL::site('dbsetting/select_dsn'); ?>" method="post" class="form-inline">
-                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token_select_dsn; ?>">
-                        <div class="form-group">
-                            <label>Текущий: <strong><?php echo HTML::chars($current_dsn); ?></strong></label>
-                            <small class="text-muted">(сохранено в config/database.php)</small>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>Текущий DSN</h4>
+                            <div class="well">
+                                <code><?php echo HTML::chars($current_dsn); ?></code>
+                                <div class="text-muted small">config/database.php</div>
+                            </div>
                         </div>
-                        <div class="form-group" style="margin-left: 20px;">
-                            <label for="dsn">Переключиться на:</label>
-                            <select name="dsn" id="dsn" class="form-control input-sm">
-                                <?php foreach ($odbc_dsns as $name => $dsn): ?>
-                                    <option value="<?php echo HTML::chars($name); ?>" <?php echo ($dsn === $current_dsn) ? 'selected' : ''; ?>>
-                                        <?php echo HTML::chars($name); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-sm">Переключить</button>
-                    </form>
-                    
-                    <div style="margin-top: 20px;">
-                        <h5>Все доступные DSN:</h5>
-                        <div class="well" style="max-height: 200px; overflow-y: auto;">
-                            <table class="table table-condensed">
-                                <thead>
-                                    <tr>
-                                        <th>Имя</th>
-                                        <th>DSN</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($odbc_dsns as $name => $dsn): ?>
-                                        <tr class="<?php echo ($dsn === $current_dsn) ? 'success' : ''; ?>">
-                                            <td><strong><?php echo HTML::chars($name); ?></strong></td>
-                                            <td><code><?php echo HTML::chars($dsn); ?></code></td>
+                        <div class="col-md-6">
+                            <h4>Доступные DSN</h4>
+                            <div class="well" style="max-height: 200px; overflow-y: auto;">
+                                <table class="table table-condensed">
+                                    <thead>
+                                        <tr>
+                                            <th>Имя</th>
+                                            <th>DSN</th>
                                         </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($odbc_dsns as $name => $dsn): ?>
+                                            <tr class="<?php echo ($dsn === $current_dsn) ? 'success' : ''; ?>">
+                                                <td><strong><?php echo HTML::chars($name); ?></strong></td>
+                                                <td><code><?php echo HTML::chars($dsn); ?></code></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -188,8 +177,8 @@
                     </div>
                     
                     <div class="alert alert-success" style="margin-top: 20px;">
-                        <h4><i class="glyphicon glyphicon-eye-open"></i> Режим просмотра с возможностью выбора DSN</h4>
-                        <p>Вы можете выбрать DSN для подключения к базе данных. Остальные настройки отображаются в режиме просмотра.</p>
+                        <h4><i class="glyphicon glyphicon-eye-open"></i> Режим только для чтения</h4>
+                        <p>Все настройки отображаются в режиме просмотра. Редактирование конфигурации отключено.</p>
                     </div>
                 </div>
             </div>

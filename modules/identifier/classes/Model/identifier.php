@@ -13,7 +13,8 @@ class Model_identifier extends Model
 	
 	public function cardsWithEvents()
 	{
-		$listIdentifier=array();//начальные значения пустой массив	
+		set_time_limit(600); // 600 секунд
+		$listIdentifier=array();//начальные значения пустой массив
 		//получаю массив: идентификатор - дата последнего прохода
 		$sql='select  e.id_card, max(e.datetime) from events e
 		where e.id_eventtype in (46, 50, 65, 70, 71, 145)
@@ -21,7 +22,6 @@ class Model_identifier extends Model
 		return array_column(DB::query(Database::SELECT, iconv('UTF-8', 'CP1251',$sql))
 					->execute(Database::instance('fb'))
 					->as_array(), null, 'ID_CARD');
-		set_time_limit(600); // 600 секунд
 		
 	}
 	
