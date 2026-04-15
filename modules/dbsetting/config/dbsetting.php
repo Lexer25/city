@@ -9,7 +9,10 @@ return array(
     'firebird_password' => 'temp',  // <-- Установите ваш пароль здесь!
     
     // Default database file path (used for backup/restore)
-    'database_path' => 'D:\rrr\hl\ShieldPro_rest.GDB',
+    'database_path' => 'D:\rrr\hl\restore\ShieldPro_rest_2026-04-07_204129.GDB',
+    
+    // Restore directory (where restored database files will be placed)
+    'restore_path' => 'D:\\rrr\hl\\restore\\',
     
     // Backup directory
     'backup_dir' => 'C:\\service_skud\\',

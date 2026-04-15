@@ -153,19 +153,45 @@ class Controller_Dbsetting extends Controller_Template {
             $database_filename = basename($database_path);
         }
         
+        $backup_dir = $this->config->get('backup_dir');
+        
+        // Get list of backup files
+        $backup_files = array();
+        if (!empty($backup_dir) && is_dir($backup_dir)) {
+            $files = scandir($backup_dir);
+            if ($files !== false) {
+                foreach ($files as $file) {
+                    if ($file === '.' || $file === '..') continue;
+                    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                    if (in_array($ext, array('fbk', 'bak', 'backup', 'gdb'))) {
+                        $backup_files[] = $file;
+                    }
+                }
+                // Sort by modification time (newest first)
+                usort($backup_files, function($a, $b) use ($backup_dir) {
+                    $timeA = filemtime($backup_dir . DIRECTORY_SEPARATOR . $a);
+                    $timeB = filemtime($backup_dir . DIRECTORY_SEPARATOR . $b);
+                    return $timeB - $timeA;
+                });
+            }
+        }
+        
         $content = View::factory('dbsetting/index')
             ->set('odbc_dsns', $this->odbc_dsns)
             ->set('current_dsn', $this->current_dsn)
             ->set('service_status', $service_status)
-            ->set('backup_dir', $this->config->get('backup_dir'))
+            ->set('backup_dir', $backup_dir)
             ->set('database_path', $database_path)
             ->set('database_dir', $database_dir)
             ->set('database_filename', $database_filename)
             ->set('db_error', $this->db_error)
+            ->set('backup_files', $backup_files)
             ->set('csrf_token_path', $this->get_csrf_token('save_path'))
             ->set('csrf_token_config', $this->get_csrf_token('config_edit'))
             ->set('csrf_token_select_dsn', $this->get_csrf_token('select_dsn'))
-            ->set('csrf_token_backup', $this->get_csrf_token('backup'));
+            ->set('csrf_token_backup', $this->get_csrf_token('backup'))
+            ->set('csrf_token_restore', $this->get_csrf_token('restore'))
+            ->set('csrf_token_service', $this->get_csrf_token('service'));
         
         $this->template->content = $content;
     }
@@ -539,7 +565,8 @@ class Controller_Dbsetting extends Controller_Template {
         $backup_file = $this->request->post('backup_file');
         $firebird_bin = $this->config->get('firebird_bin');
         $firebird_password = $this->config->get('firebird_password', '');
-        $restore_path = $this->config->get('database_path');
+        $restore_dir = $this->config->get('restore_path');
+        $database_path = $this->config->get('database_path');
         
         // Validate password
         if (empty($firebird_password)) {
@@ -553,7 +580,7 @@ class Controller_Dbsetting extends Controller_Template {
         
         try {
             $backup_file = $this->validate_path($backup_file, true);
-            $restore_path = $this->validate_path($restore_path, false);
+            $restore_dir = $this->validate_path($restore_dir, false);
         } catch (Exception $e) {
             Session::instance()->set('flash_message', array(
                 'type' => 'error',
@@ -563,24 +590,44 @@ class Controller_Dbsetting extends Controller_Template {
             return;
         }
         
+        // Determine extension from database_path (if it's a file) or default to GDB
+        $extension = 'GDB';
+        if (!empty($database_path)) {
+            $db_info = pathinfo($database_path);
+            if (isset($db_info['extension']) && !empty($db_info['extension'])) {
+                $extension = $db_info['extension'];
+            }
+        }
+        
+        // Generate new restore path based on backup filename
+        $backup_info = pathinfo($backup_file);
+        $new_filename = $backup_info['filename'] . '.' . $extension;
+        $new_restore_path = rtrim($restore_dir, '\\/') . DIRECTORY_SEPARATOR . $new_filename;
+        
         // Stop service before restore
-        $this->stop_service();
+        //$this->stop_service();
         
         $gbak = escapeshellarg(rtrim($firebird_bin, '\\/') . DIRECTORY_SEPARATOR . 'gbak.exe');
         $backup = escapeshellarg($backup_file);
-        $restore = escapeshellarg($restore_path);
+        $restore = '127.0.0.1:' . escapeshellarg($new_restore_path);
         
-        $command = $gbak . ' -c -user SYSDBA -password ' . escapeshellarg($firebird_password) . ' ' . $backup . ' ' . $restore;
+        $command = $gbak . ' -c -o -v -r -user SYSDBA -password ' . escapeshellarg($firebird_password) . ' ' . $backup . ' ' . $restore;
         
         exec($command, $output, $return_var);
         
         // Start service after restore
-        $this->start_service();
+        //$this->start_service();
         
         if ($return_var === 0) {
+            // Update configuration to new database path
+            $this->update_module_database_path($new_restore_path);
+            
+            $backup_basename = basename($backup_file);
+            $restored_basename = basename($new_restore_path);
+            
             Session::instance()->set('flash_message', array(
                 'type' => 'success',
-                'text' => __('Database restored successfully from ') . basename($backup_file)
+                'text' => __('Database restored successfully from ') . $backup_basename . __(' to ') . $restored_basename
             ));
         } else {
             Session::instance()->set('flash_message', array(

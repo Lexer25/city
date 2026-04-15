@@ -178,10 +178,10 @@
                             </span>
                         </div>
                         <div class="form-group" style="margin-left: 20px;">
-                            <a href="<?php echo URL::site('dbsetting/start_service?csrf_token=' . $csrf_token_path); ?>" class="btn btn-success btn-sm" onclick="return confirmService('start');">
+                            <a href="<?php echo URL::site('dbsetting/start_service?csrf_token=' . (isset($csrf_token_service) ? $csrf_token_service : $csrf_token_path)); ?>" class="btn btn-success btn-sm" onclick="return confirmService('start');">
                                 <span class="glyphicon glyphicon-play"></span> Запустить
                             </a>
-                            <a href="<?php echo URL::site('dbsetting/stop_service?csrf_token=' . $csrf_token_path); ?>" class="btn btn-danger btn-sm" onclick="return confirmService('stop');">
+                            <a href="<?php echo URL::site('dbsetting/stop_service?csrf_token=' . (isset($csrf_token_service) ? $csrf_token_service : $csrf_token_path)); ?>" class="btn btn-danger btn-sm" onclick="return confirmService('stop');">
                                 <span class="glyphicon glyphicon-stop"></span> Остановить
                             </a>
                         </div>
@@ -192,9 +192,27 @@
                     <!-- Restore -->
                     <h5>Восстановление базы данных</h5>
                     <form action="<?php echo URL::site('dbsetting/restore'); ?>" method="post" class="form-inline" onsubmit="return confirmRestore();">
-                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token_path; ?>">
+                        <input type="hidden" name="csrf_token" value="<?php echo isset($csrf_token_restore) ? $csrf_token_restore : $csrf_token_path; ?>">
                         <div class="form-group" style="width: 70%;">
-                            <input type="text" name="backup_file" class="form-control input-sm" placeholder="C:\backup\backup.fbk" required style="width: 100%;">
+                            <?php if (!empty($backup_files)): ?>
+                                <select name="backup_file" class="form-control input-sm" required style="width: 100%;">
+                                    <option value="">-- выберите файл для восстановления --</option>
+                                    <?php foreach ($backup_files as $file): ?>
+                                        <?php $full_path = $backup_dir . DIRECTORY_SEPARATOR . $file; ?>
+                                        <option value="<?php echo HTML::chars($full_path); ?>">
+                                            <?php echo HTML::chars($file); ?>
+                                            (<?php echo date('Y-m-d H:i:s', filemtime($full_path)); ?>)
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <small class="text-muted">Файлы из папки: <?php echo HTML::chars($backup_dir); ?></small>
+                            <?php else: ?>
+                                <div class="alert alert-warning" style="margin-bottom: 0;">
+                                    <p>В папке <code><?php echo HTML::chars($backup_dir); ?></code> нет файлов резервных копий.</p>
+                                    <p>Пожалуйста, укажите полный путь к файлу .fbk вручную:</p>
+                                    <input type="text" name="backup_file" class="form-control input-sm" placeholder="C:\backup\backup.fbk" required style="width: 100%;">
+                                </div>
+                            <?php endif; ?>
                         </div>
                         <button type="submit" class="btn btn-warning btn-sm">
                             <span class="glyphicon glyphicon-import"></span> Восстановить
