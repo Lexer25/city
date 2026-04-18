@@ -94,57 +94,32 @@ class Controller_About extends Controller_Template {
         return ABOUT_VERSION; // Используем константу модуля
     }
     
-    /**
-     * Получение списка всех модулей с их версиями
-     * @return array Массив с информацией о модулях
-     */
-    private function get_all_modules_with_versions()
-    {
-        $modules = array();
+   /**
+ * Получение списка всех модулей с их версиями
+ */
+private function get_all_modules_with_versions()
+{
+    $modules = array();
+    $active_modules = Kohana::modules();
+    
+    foreach ($active_modules as $module_name => $module_path) {
+        $const_name = strtoupper($module_name) . '_VERSION';
         
-        // Получаем список активных модулей из конфигурации Kohana
-        $active_modules = Kohana::modules();
+        // Получаем версию
+        $version = defined($const_name) ? constant($const_name) : 'не указана';
         
-        foreach ($active_modules as $module_name => $module_path) {
-            // Формируем имя константы для модуля
-            $const_name = strtoupper($module_name) . '_VERSION';
-            
-            // Проверяем наличие init.php файла
-            $init_file = $module_path . 'init.php';
-            $has_init = file_exists($init_file);
-            
-            // Получаем версию модуля
-            $version = 'Не определена';
-            if (defined($const_name)) {
-                $version = constant($const_name);
-            } else {
-                // Пробуем найти альтернативные способы получения версии
-                $version = $this->get_module_version_alternative($module_path);
-            }
-            
-            // Получаем дополнительную информацию о модуле
-            $modules[$module_name] = array(
-                'name' => $module_name,
-                'name_display' => $this->format_module_name($module_name),
-                'version' => $version,
-                'path' => $module_path,
-                'has_init' => $has_init,
-                'const_defined' => defined($const_name),
-                'is_core' => $this->is_core_module($module_name),
-                'status' => $this->get_module_status($module_name, $version)
-            );
-        }
-        
-        // Сортируем модули: сначала системные, потом пользовательские
-        uasort($modules, function($a, $b) {
-            if ($a['is_core'] == $b['is_core']) {
-                return strcasecmp($a['name'], $b['name']);
-            }
-            return $a['is_core'] ? -1 : 1;
-        });
-        
-        return $modules;
+        $modules[$module_name] = array(
+            'name' => $module_name,
+            'name_display' => $this->format_module_name($module_name),
+            'version' => $version,
+            'path' => $module_path,
+            'is_active' => true, // Все модули из Kohana::modules() активны
+            'version_defined' => defined($const_name)
+        );
     }
+    
+    return $modules;
+}
     
     /**
      * Альтернативные способы получения версии модуля
