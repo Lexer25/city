@@ -113,8 +113,13 @@
                         'title' => __('База данных'),
                         'url' => 'dbsetting',
                         'condition' => true
-                    )
-					
+                    ),
+					'eventConfig' => array(
+						'title' => __('Настройка событий'),
+						'url' => 'eventConfig',
+						'condition' => true
+					)
+										
                 );
                 
                 // Проверяем, есть ли видимые пункты в сервисах

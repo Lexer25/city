@@ -23,8 +23,10 @@
             </tr>
         </table>
 
-        <h4>Текущая версия</h4>
+        <h4>Текущая версия системы</h4>
         <p class="lead">Версия: <strong><?php echo htmlspecialchars($current_version); ?></strong></p>
+
+       
 
         <h4>История версий</h4>
         <?php if (empty($version_history)): ?>
@@ -44,5 +46,86 @@
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
+		 <!-- Список модулей -->
+        <h4>Установленные модули</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover modules-table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Модуль</th>
+                        <th>Версия</th>
+                        <th>Статус</th>
+                        <th>Путь</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($modules_list)): ?>
+                        <tr>
+                            <td colspan="5" class="text-center">Нет информации о модулях</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php $counter = 1; ?>
+                        <?php foreach ($modules_list as $module): ?>
+                            <tr>
+                                <td><?php echo $counter++; ?></td>
+                                <td>
+                                    <strong><?php echo htmlspecialchars($module['name_display']); ?></strong>
+                                    <br>
+                                    <small class="text-muted"><?php echo htmlspecialchars($module['name']); ?></small>
+                                    <?php if ($module['is_core']): ?>
+                                        <span class="label label-info">Core</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <span class="label label-<?php echo $module['version'] === 'Не определена' ? 'default' : 'primary'; ?>">
+                                        <?php echo htmlspecialchars($module['version']); ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="label label-<?php echo $module['status']['class']; ?>">
+                                        <?php echo htmlspecialchars($module['status']['text']); ?>
+                                    </span>
+                                    <?php if (!$module['const_defined'] && $module['version'] !== 'Не определена'): ?>
+                                        <br>
+                                        <small class="text-warning">(определена альтернативно)</small>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        <?php echo htmlspecialchars(str_replace(DOCROOT, '', $module['path'])); ?>
+                                    </small>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+                <tfoot>
+                    <tr class="active">
+                        <td colspan="5">
+                            <strong>Всего модулей: <?php echo count($modules_list); ?></strong>
+                            <br>
+                            <small class="text-muted">
+                                * Версии модулей определяются через константу {ИМЯ_МОДУЛЯ}_VERSION в init.php
+                            </small>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
     </div>
 </div>
+
+<!-- Добавим немного CSS для улучшения внешнего вида -->
+<style>
+.modules-table pre {
+    margin: 0;
+    padding: 5px;
+    background: #f5f5f5;
+    border: none;
+}
+.modules-table .label {
+    font-size: 90%;
+    padding: 3px 8px;
+}
+</style>

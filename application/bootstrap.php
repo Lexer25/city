@@ -147,6 +147,7 @@ Kohana::modules(array(
 	 'setting' => MODPATH . 'setting',//настройка Сити через веб-форму
 	 'about' => MODPATH.'about', // About module
 	 'dbsetting' => MODPATH.'dbsetting', // Database management module
+	 'eventConfig' => MODPATH.'eventConfig', // Конфигурация типов событий
 	));
 
 /**
