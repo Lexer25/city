@@ -114,7 +114,8 @@ $container_class = (isset($full_width) && $full_width) ? 'container-fluid' : 'co
         <button onclick="topFunction()" id="myBtn" title="<?php echo __('top'); ?>">
             <?php echo __('top'); ?>
         </button>
-    </div>
+
+   </div>
 </div>
 
 <!-- Остальная часть шаблона (таймеры и скрипты) остаётся без изменений -->
@@ -143,5 +144,6 @@ $container_class = (isset($full_width) && $full_width) ? 'container-fluid' : 'co
         }
     });
     </script>
+
 </body>
 </html>

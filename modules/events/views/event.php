@@ -1,4 +1,4 @@
-Версия 1.0<div class="panel panel-primary">
+123<div class="panel panel-primary">
   <div class="panel-heading">
     <h3 class="panel-title"><?
     $count_event= isset($list)? count($list) : '0'; 
