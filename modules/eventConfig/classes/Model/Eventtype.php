@@ -14,8 +14,18 @@ class Model_Eventtype extends Model
             ->from($this->_table_name)
             ->order_by('ID_EVENTTYPE', 'ASC')
             ->execute(Database::instance('fb'));
- 
-        return $query->as_array();
+
+        $results = $query->as_array();
+        // Конвертируем текстовые поля из win1251 в UTF-8
+        foreach ($results as &$row) {
+            if (isset($row['NAME']) && is_string($row['NAME'])) {
+                $row['NAME'] = iconv('windows-1251', 'UTF-8', $row['NAME']);
+            }
+            if (isset($row['SOUND']) && is_string($row['SOUND'])) {
+                $row['SOUND'] = iconv('windows-1251', 'UTF-8', $row['SOUND']);
+            }
+        }
+        return $results;
     }
     
     /**
@@ -33,6 +43,15 @@ class Model_Eventtype extends Model
             ->execute(Database::instance('fb'));
         
         $result = $query->current();
+        if ($result) {
+            // Конвертируем текстовые поля из win1251 в UTF-8
+            if (isset($result['NAME']) && is_string($result['NAME'])) {
+                $result['NAME'] = iconv('windows-1251', 'UTF-8', $result['NAME']);
+            }
+            if (isset($result['SOUND']) && is_string($result['SOUND'])) {
+                $result['SOUND'] = iconv('windows-1251', 'UTF-8', $result['SOUND']);
+            }
+        }
         return $result ? $result : FALSE;
     }
     
@@ -41,6 +60,14 @@ class Model_Eventtype extends Model
      */
     public function update_eventtype($id, $data)
     {
+        // Конвертируем текстовые поля из UTF-8 в win1251 перед сохранением
+        if (isset($data['NAME']) && is_string($data['NAME'])) {
+            $data['NAME'] = iconv('UTF-8', 'windows-1251', $data['NAME']);
+        }
+        if (isset($data['SOUND']) && is_string($data['SOUND'])) {
+            $data['SOUND'] = iconv('UTF-8', 'windows-1251', $data['SOUND']);
+        }
+        
         $result = DB::update($this->_table_name)
             ->set($data)
             ->where('ID_EVENTTYPE', '=', $id)
@@ -54,6 +81,14 @@ class Model_Eventtype extends Model
      */
     public function insert_eventtype($data)
     {
+        // Конвертируем текстовые поля из UTF-8 в win1251 перед сохранением
+        if (isset($data['NAME']) && is_string($data['NAME'])) {
+            $data['NAME'] = iconv('UTF-8', 'windows-1251', $data['NAME']);
+        }
+        if (isset($data['SOUND']) && is_string($data['SOUND'])) {
+            $data['SOUND'] = iconv('UTF-8', 'windows-1251', $data['SOUND']);
+        }
+        
         // Если ID_EVENTTYPE не указан, генерируем следующий
         if (!isset($data['ID_EVENTTYPE']) || empty($data['ID_EVENTTYPE'])) {
             $max_id = DB::select(DB::expr('MAX(ID_EVENTTYPE) as max_id'))
@@ -100,6 +135,13 @@ class Model_Eventtype extends Model
             ->order_by('NAME', 'ASC')
             ->execute(Database::instance('fb'));
         
-        return $query->as_array();
+        $results = $query->as_array();
+        // Конвертируем текстовые поля из win1251 в UTF-8
+        foreach ($results as &$row) {
+            if (isset($row['NAME']) && is_string($row['NAME'])) {
+                $row['NAME'] = iconv('windows-1251', 'UTF-8', $row['NAME']);
+            }
+        }
+        return $results;
     }
 }

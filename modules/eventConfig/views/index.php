@@ -43,7 +43,7 @@
 			?>
             <tr>
                 <td><?php echo $event['ID_EVENTTYPE']; ?></td>
-                <td><?php echo iconv('windows-1251','UTF-8', HTML::chars($event['NAME'])).'---'.HTML::chars($event['NAME']); ?></td>
+                <td><?php echo HTML::chars($event['NAME']); ?></td>
                 <td><?php echo $event['FLAG']; ?></td>
                 <td>
                     <div class="color-box" style="background-color: #<?php echo dechex($event['COLOR']); ?>;"></div>
