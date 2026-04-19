@@ -6,5 +6,5 @@
 
 // Bump this value when you change the order module.
 //define('IDENTIFIER_MODULE_VERSION', '4.6.1');
-define('IDENTIFIER_MODULE_VERSION', '4.6.2');//29/03/2026
+define('IDENTIFIER_VERSION', '4.6.2');//29/03/2026
 

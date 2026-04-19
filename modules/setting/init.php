@@ -1,7 +1,7 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
 // Определяем константы модуля
-define('MODULE_SETTING_VERSION', '1.0.0');
+define('SETTING_VERSION', '1.0.0');
 
 // Подключаем маршруты - используем префикс 'setting'
 Route::set('setting', 'setting(/<action>(/<id>))')
