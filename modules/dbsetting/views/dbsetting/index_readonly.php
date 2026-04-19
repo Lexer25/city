@@ -188,7 +188,7 @@
                             <strong>ОС:</strong> <?php echo PHP_OS; ?>
                         </div>
                         <div class="col-md-3">
-                            <strong>Модуль:</strong> <?php echo DBSETTING_MODULE_VERSION; ?>
+                            <strong>Модуль:</strong> <?php echo DBSETTING_VERSION; ?>
                         </div>
                     </div>
                     <div class="row" style="margin-top: 15px;">

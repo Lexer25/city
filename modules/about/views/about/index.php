@@ -71,13 +71,20 @@
                 <?php else: ?>
                     <span class="label label-default"><?= htmlspecialchars($module['version']) ?></span>
                     <br>
-                    <small class="text-muted">(добавьте константу <?= strtoupper($module['name']) ?>_VERSION в init.php)</small>
+                    <?php if ($module['version'] !== 'Kohana'): ?>
+                        <small class="text-muted">(добавьте константу <?= strtoupper($module['name']) ?>_VERSION в init.php)</small>
+                    <?php endif; ?>
                 <?php endif; ?>
             </td>
             <td><small><?= htmlspecialchars(str_replace(DOCROOT, '', $module['path'])) ?></small></td>
         </tr>
         <?php endforeach; ?>
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3" class="text-center"><strong>Всего модулей: <?php echo count($modules_list); ?></strong></td>
+        </tr>
+    </tfoot>
 </table>
     </div>
 </div>

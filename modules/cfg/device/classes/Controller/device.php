@@ -19,7 +19,7 @@ class Controller_cfg_device extends Controller_Template {
 	{
 			
 			parent::before();
-			//echo Debug::vars('22', Kohana::$environment);exit;
+			echo Debug::vars('22', Kohana::$environment);exit;
 			$session = Session::instance();
 			if (!empty($_POST)) {
              	$username = Arr::get($_POST, 'username');
@@ -34,7 +34,7 @@ class Controller_cfg_device extends Controller_Template {
 	}
 	
 	
-	public function action_index()// главная страница при входе. Показывает все парковочные площадки
+	public function action_index()// 
 	{
 		$id = $this->request->param('id');
 			

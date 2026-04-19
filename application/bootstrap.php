@@ -148,6 +148,8 @@ Kohana::modules(array(
 	 'about' => MODPATH.'about', // About module
 	 'dbsetting' => MODPATH.'dbsetting', // Database management module
 	 'eventConfig' => MODPATH.'eventConfig', // Конфигурация типов событий
+	 'ts' => MODPATH.'cfg/ts', // 
+	 'device' => MODPATH.'cfg/device', // 
 	));
 
 /**

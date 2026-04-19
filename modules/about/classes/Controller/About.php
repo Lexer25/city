@@ -102,21 +102,56 @@ private function get_all_modules_with_versions()
     $modules = array();
     $active_modules = Kohana::modules();
     
-    foreach ($active_modules as $module_name => $module_path) {
-        $const_name = strtoupper($module_name) . '_VERSION';
-        
-        // Получаем версию
-        $version = defined($const_name) ? constant($const_name) : 'не указана';
-        
-        $modules[$module_name] = array(
-            'name' => $module_name,
-            'name_display' => $this->format_module_name($module_name),
-            'version' => $version,
-            'path' => $module_path,
-            'is_active' => true, // Все модули из Kohana::modules() активны
-            'version_defined' => defined($const_name)
-        );
+    // Сканируем MODPATH на наличие папок первого уровня
+    $modpath = rtrim(MODPATH, DIRECTORY_SEPARATOR);
+    if (is_dir($modpath)) {
+        $items = scandir($modpath);
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+            $item_path = $modpath . DIRECTORY_SEPARATOR . $item;
+            if (is_dir($item_path)) {
+                $module_name = $item;
+                $module_path = $item_path . DIRECTORY_SEPARATOR;
+                
+                // Проверяем наличие init.php
+                $init_file = $module_path . 'init.php';
+                $has_init = file_exists($init_file);
+                
+                // Определяем константу версии
+                $const_name = strtoupper($module_name) . '_VERSION';
+                $version = defined($const_name) ? constant($const_name) : 'не указана';
+                
+                // Если модуль принадлежит фреймворку Kohana и версия не указана, заменяем на "Kohana"
+                $kohana_core_modules = array('auth', 'cache', 'codebench', 'database', 'image', 'minion', 'orm', 'unittest', 'userguide');
+                if (in_array($module_name, $kohana_core_modules) && $version === 'не указана') {
+                    $version = 'Kohana';
+                }
+                
+                // Если init.php есть, но константа не определена, можно попробовать альтернативные методы
+                if ($has_init && $version === 'не указана') {
+                    $version = $this->get_module_version_alternative($module_path);
+                }
+                
+                // Проверяем, активен ли модуль
+                $is_active = array_key_exists($module_name, $active_modules);
+                
+                $modules[$module_name] = array(
+                    'name' => $module_name,
+                    'name_display' => $this->format_module_name($module_name),
+                    'version' => $version,
+                    'path' => $module_path,
+                    'is_active' => $is_active,
+                    'version_defined' => defined($const_name),
+                    'has_init' => $has_init
+                );
+            }
+        }
     }
+    
+    // Сортируем модули по имени
+    ksort($modules);
     
     return $modules;
 }

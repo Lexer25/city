@@ -182,7 +182,7 @@
                         <div class="col-md-3 text-center">
                             <div class="well well-sm">
                                 <h5>Модуль</h5>
-                                <h4><?php echo DBSETTING_MODULE_VERSION; ?></h4>
+                                <h4><?php echo DBSETTING_VERSION; ?></h4>
                             </div>
                         </div>
                     </div>

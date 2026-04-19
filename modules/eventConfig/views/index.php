@@ -40,14 +40,16 @@
             <?php foreach ($eventtypes as $event): 
 			//echo Debug::vars('41', $event);exit;
 			// Kohana::$log->add(Log::ERROR, Debug::vars('41', $event));
+			$color= str_pad(dechex($event['COLOR']), 6, '0', STR_PAD_LEFT);
 			?>
             <tr>
                 <td><?php echo $event['ID_EVENTTYPE']; ?></td>
                 <td><?php echo HTML::chars($event['NAME']); ?></td>
                 <td><?php echo $event['FLAG']; ?></td>
                 <td>
-                    <div class="color-box" style="background-color: #<?php echo dechex($event['COLOR']); ?>;"></div>
-                    #<?php echo str_pad(dechex($event['COLOR']), 6, '0', STR_PAD_LEFT); ?>
+                    <div class="color-box" style="background-color: #<?php echo $color; ?>;" title="COLOR=<?php echo $event['COLOR']; ?> hex=#<?php echo $color; ?>"></div>
+                    #<?php echo $color; ?>
+                    <small class="text-muted">(<?php echo $event['COLOR']; ?>)</small>
                 </td>
                 <td><?php echo HTML::chars($event['SOUND']); ?></td>
                 <td class="<?php echo $event['ACTIVE'] ? 'active-yes' : 'active-no'; ?>">
