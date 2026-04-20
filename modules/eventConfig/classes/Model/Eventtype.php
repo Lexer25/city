@@ -34,7 +34,7 @@ class Model_Eventtype extends Model
     public function get_one($id)
     {
         $id = (int) $id;
-        if ($id <= 0) {
+        if ($id < 0) {
             return FALSE;
         }
         $query = DB::select()
@@ -57,23 +57,41 @@ class Model_Eventtype extends Model
     
     /**
      * Обновить тип события
+	 	 UPDATE EVENTTYPE SET NAME = ' 50', FLAG = 0, COLOR = 65535, SOUND = '', ACTIVE = 1, ID_PARENT = NULL WHERE ID_EVENTTYPE = '50' 
+	 
      */
     public function update_eventtype($id, $data)
     {
-        // Конвертируем текстовые поля из UTF-8 в win1251 перед сохранением
-        if (isset($data['NAME']) && is_string($data['NAME'])) {
+        echo Debug::vars('65', $data);//exit;
+		// Конвертируем текстовые поля из UTF-8 в win1251 перед сохранением
+       /*  if (isset($data['NAME']) && is_string($data['NAME'])) {
             $data['NAME'] = iconv('UTF-8', 'windows-1251', $data['NAME']);
         }
         if (isset($data['SOUND']) && is_string($data['SOUND'])) {
             $data['SOUND'] = iconv('UTF-8', 'windows-1251', $data['SOUND']);
-        }
-        
-        $result = DB::update($this->_table_name)
-            ->set($data)
-            ->where('ID_EVENTTYPE', '=', $id)
-            ->execute(Database::instance('fb'));
-        
-        return $result;
+        } */
+        $sql= strtr('UPDATE EVENTTYPE SET 
+			NAME = \':name\', 
+			FLAG = :flag, 
+			COLOR = :color, 
+			SOUND = \'\', 
+			"ACTIVE" = :is_active, 
+			ID_PARENT = NULL 
+			WHERE ID_EVENTTYPE = :id_eventtype', array(
+				':name' => Arr::get($data, 'NAME'), 
+				':flag' => Arr::get($data, 'FLAG'), 
+				':color' => Arr::get($data, 'COLOR'), 
+				':sound' => Arr::get($data, 'SOUND'), 
+				':is_active' => Arr::get($data, 'ACTIVE', 1), 
+				':id_parent' => Arr::get($data, 'ID_PARENT'), 
+				':id_eventtype' => $id, 
+			));
+			
+		echo Debug::vars('83', $sql);//exit;	
+       $query = DB::query(Database::UPDATE, iconv('UTF-8', 'windows-1251', $sql))
+			->execute(Database::instance('fb'));
+  
+        return $query;
     }
     
     /**
