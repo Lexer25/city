@@ -1,51 +1,54 @@
-<?php if (!empty($flash_success)): ?>
-<div class="alert alert-success">
-    <?php echo HTML::chars($flash_success); ?>
+<?php
+echo '<div class="alert alert-info alert-dismissible fade in" role="alert" style="margin-bottom: 20px;">';
+echo '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+echo '<strong>Версия модуля:</strong> ' . EVENTCONFIG_VERSION;
+echo '</div>';
+
+$tab = isset($_GET['tab']) ? $_GET['tab'] : 'tab1';
+?>
+
+<!-- Закладки Bootstrap 3 -->
+<ul class="nav nav-tabs" role="tablist" style="margin-bottom: 25px;">
+    <li role="presentation" class="<?php echo $tab == 'tab1' ? 'active' : ''; ?>">
+        <a href="?tab=tab1">
+            <span class="glyphicon glyphicon-list"></span> Список событий
+        </a>
+    </li>
+    <li role="presentation" class="<?php echo $tab == 'tab2' ? 'active' : ''; ?>">
+        <a href="?tab=tab2">
+            <span class="glyphicon glyphicon-plus"></span> Добавить событие
+        </a>
+    </li>
+</ul>
+
+<div class="content-wrapper">
+    <?php
+    // Подключаем соответствующий файл
+    switch($tab) {
+        case 'tab1':
+            include 'eventList.php';
+            break;
+        case 'tab2':
+            include 'add.php';
+            break;
+        default:
+            include 'tab1.php';
+    }
+    ?>
 </div>
-<?php endif; ?>
-<?php if (!empty($flash_error)): ?>
-<div class="alert alert-danger">
-    <?php echo HTML::chars($flash_error); ?>
-</div>
-<?php endif; ?>
-<h1>Типы событий</h1>
 
-<a href="<?php echo URL::site('eventConfig/add'); ?>" class="btn btn-success">Добавить новый тип</a>
-
-<table class="table table-bordered table-striped table-hover">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Название</th>
-            <th>Флаг</th>
-            <th>Цвет</th>
-            <th>Записывать в базу данных</th>
-            <th>Действия</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($eventtypes as $event): 
-        $color = str_pad(dechex($event['COLOR']), 6, '0', STR_PAD_LEFT);
-        ?>
-        <tr>
-            <td><?php echo $event['ID_EVENTTYPE']; ?></td>
-            <td><?php echo HTML::chars($event['NAME']); ?></td>
-            <td><?php echo $event['FLAG']; ?></td>
-            <td>
-                <div class="color-box" style="display: inline-block; width: 20px; height: 20px; border: 1px solid #000; background-color: #<?php echo $color; ?>;" title="COLOR=<?php echo $event['COLOR']; ?> hex=#<?php echo $color; ?>"></div>
-                #<?php echo $color; ?>
-                <small class="text-muted">(<?php echo $event['COLOR']; ?>)</small>
-            </td>
-            <td class="<?php echo $event['ACTIVE'] ? 'text-success' : 'text-danger'; ?>">
-                <?php echo $event['ACTIVE'] ? 'Да' : 'Нет'; ?>
-            </td>
-            <td>
-                <a href="<?php echo URL::site('eventConfig/edit/'.$event['ID_EVENTTYPE']); ?>" class="btn btn-primary btn-xs">Редактировать</a>
-                <!-- Удаление запрещено по ТЗ -->
-            </td>
-        </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
-
-<p><small>Всего записей: <?php echo count($eventtypes); ?></small></p>
+<script>
+// Сохраняем активную закладку в localStorage
+$(document).ready(function() {
+    $('.nav-tabs a').on('click', function(e) {
+        var activeTab = $(this).attr('href').split('=')[1];
+        localStorage.setItem('activeEventConfigTab', activeTab);
+    });
+    
+    // Восстанавливаем последнюю активную закладку
+    var savedTab = localStorage.getItem('activeEventConfigTab');
+    if (savedTab && savedTab !== '<?php echo $tab; ?>') {
+        window.location.href = '?tab=' + savedTab;
+    }
+});
+</script>
