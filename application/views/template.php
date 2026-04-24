@@ -25,9 +25,8 @@
  <!-- CSS -->
     <link rel="stylesheet" href="/city/static/css/bootstrap.min.css">
     <link rel="stylesheet" href="/city/static/css/bootstrap-datetimepicker.min.css">
-   
+    <link rel="stylesheet" href="/city/static/css/modal.css">
     <link rel="stylesheet" href="/city/static/css/city.css">
-
    
     <link rel="stylesheet" href="/city/static/css/2.31.3/theme.blue.min.css">
     
@@ -36,7 +35,6 @@
     <script src="/city/static/js/moment-with-locales.min.js"></script>
     <script src="/city/static/js/bootstrap.min.js"></script>
     <script src="/city/static/js/bootstrap-datetimepicker.min.js"></script>
-
    
 
 <!-- В head или перед закрывающим body -->
