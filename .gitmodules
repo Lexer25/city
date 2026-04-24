@@ -18,3 +18,31 @@
 	path = city/modules/dev
 	url = https://github.com/Lexer25/city_dev.git
 	branch = main
+[submodule "city/modules/door"]
+	path = city/modules/door
+	url = https://github.com/Lexer25/city_door.git
+	branch = main
+[submodule "city/modules/eventConfig"]
+	path = city/modules/eventConfig
+	url = https://github.com/Lexer25/city_eventConfig.git
+	branch = main
+[submodule "city/modules/eximdata"]
+	path = city/modules/eximdata
+	url = https://github.com/Lexer25/city_eximdata.git
+	branch = main
+[submodule "city/modules/identifier"]
+	path = city/modules/identifier
+	url = https://github.com/Lexer25/city_identifier.git
+	branch = main
+[submodule "city/modules/parsec"]
+	path = city/modules/parsec
+	url = https://github.com/Lexer25/city_parsec.git
+	branch = main
+[submodule "city/modules/people"]
+	path = city/modules/people
+	url = https://github.com/Lexer25/city_people.git
+	branch = main
+[submodule "city/modules/setting"]
+	path = city/modules/setting
+	url = https://github.com/Lexer25/city_setting.git
+	branch = main
