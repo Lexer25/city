@@ -1,0 +1,20 @@
+[submodule "city/modules/events"]
+	path = city/modules/events
+	url = https://github.com/Lexer25/city_events.git
+	branch = main
+[submodule "city/modules/about"]
+	path = city/modules/about
+	url = https://github.com/Lexer25/city_about.git
+	branch = main
+[submodule "city/modules/apb"]
+	path = city/modules/apb
+	url = https://github.com/Lexer25/city_apb.git
+	branch = main
+[submodule "city/modules/dbsetting"]
+	path = city/modules/dbsetting
+	url = https://github.com/Lexer25/city_dbsetting.git
+	branch = main
+[submodule "city/modules/dev"]
+	path = city/modules/dev
+	url = https://github.com/Lexer25/city_dev.git
+	branch = main

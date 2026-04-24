@@ -3,6 +3,50 @@
 class Model_People extends Model
 {
 	
+	public function Get_unActiveCard()
+	{
+		$sql='SELECT DISTINCT 
+			p.id_pep, p.name, p.surname, p.patronymic, p.note,  
+			o.name AS org_name, o2.name AS parent2, o3.name AS parent3, o4.name AS parent4, 
+			o.id_org, c.id_card, c.timeend, c."ACTIVE" AS isactive,
+			CASE WHEN c.timeend < CURRENT_TIMESTAMP THEN 1 ELSE 0 END AS is_expired
+		FROM people p
+		JOIN card c ON c.id_pep = p.id_pep
+		JOIN organization o ON o.id_org = p.id_org
+		LEFT JOIN organization o2 ON o.id_parent = o2.id_org
+		LEFT JOIN organization o3 ON o2.id_parent = o3.id_org
+		LEFT JOIN organization o4 ON o3.id_parent = o4.id_org
+		WHERE c."ACTIVE" < 1
+		ORDER BY c.timeend
+		';
+				$query = DB::query(Database::SELECT, $sql)
+		->execute(Database::instance('fb'));
+		
+		
+		$res=array();
+		foreach ($query as $key=>$value)
+		{
+			$res[$key]=$value;
+			$res[$key]['NAME']=iconv('windows-1251','UTF-8',$value['NAME']);
+			$res[$key]['PATRONYMIC']=iconv('windows-1251','UTF-8',$value['PATRONYMIC']);
+			$res[$key]['SURNAME']=iconv('windows-1251','UTF-8',$value['SURNAME']);
+			$res[$key]['ORG_NAME']=iconv('windows-1251','UTF-8',$value['ORG_NAME']);
+			$res[$key]['NOTE']=iconv('windows-1251','UTF-8',$value['NOTE']);
+			$res[$key]['MAX']=Arr::get($value, 'MAX');
+			$res[$key]['IS_EXPIRED']=Arr::get($value, 'IS_EXPIRED');
+			//$res[$key]['ORG_PARENT']= $this->get_org_parent(Arr::get($value, 'ID_ORG')).' '.iconv('windows-1251','UTF-8',$value['ORG_NAME']);
+			$res[$key]['ORG_PARENT']= '..\\'
+					.iconv('windows-1251','UTF-8', Arr::get($value, 'PARENT4', '..')).'\\'
+							.iconv('windows-1251','UTF-8', Arr::get($value, 'PARENT3', '..')).'\\'
+									.iconv('windows-1251','UTF-8', Arr::get($value, 'PARENT2', '..')).'\\'
+											.iconv('windows-1251','UTF-8', Arr::get($value, 'ORG_NAME', '..'));
+											
+		}
+		
+		return $res;
+		
+	}
+	
 	public function people_unactive($id_pep)// Изменение активности карты
 	{
 		if(count($id_pep)>0) {

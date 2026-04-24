@@ -10,4 +10,4 @@
    Kohana::modules(array(
        'config' => MODPATH . 'config',
        // другие модули
-   ));
+   ));# city_setting

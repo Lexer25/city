@@ -173,7 +173,13 @@ if (!isset($total_row_count) && isset($list) && is_array($list)) {
 				echo '<td>'.Arr::get($contact, 'ORG_PARENT', __('No_card')).'</td>';
 				echo '<td>'.Arr::get($contact, 'ID_CARD', __('No_card')).'</td>';
 				echo '<td>'.$date_end_display.'</td>';
-				echo '<td>'.$months.' мес. '.$days.' дн.</td>';
+				echo '<td>';
+					if(Arr::get($contact,'IS_EXPIRED') == 1){
+							echo $months.' мес. '.$days.' дн.';
+					} else {
+						echo '---';
+					}
+					echo '</td>';
 				echo '<td>'.Arr::get($contact, 'ISACTIVE', 0).'</td>';
 				echo '</tr>';
 			}

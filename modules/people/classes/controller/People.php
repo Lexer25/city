@@ -261,7 +261,7 @@ class Controller_People extends Controller_Template {
 		public function action_find_unActiveCard()
 	{
 		$t1=microtime(1);
-		$result=Model::Factory('stat')->Get_unActiveCard();
+		$result=Model::Factory('people')->Get_unActiveCard();
 		$t2=microtime(1);
 		$content=View::Factory('people/card_late', array(
 			'list' => $result,
