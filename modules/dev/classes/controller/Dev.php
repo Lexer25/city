@@ -33,7 +33,6 @@ class Controller_Dev extends Controller_Template {
 		
 		$dataList=Model::Factory('dev')->getDataList(); // 
 		$date_stat=Model::Factory('dev')->date_stat();//получение даты и времени выбора статистики
-		//echo Debug::vars('41', $dataList);exit;
 		$dataListView = View::factory('load_table_new2', array(
 			'list' => $dataList,
 			'date_stat' => $date_stat,
