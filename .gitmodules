@@ -1,48 +1,48 @@
-[submodule "city/modules/events"]
-	path = city/modules/events
+[submodule "events"]
+	path = modules/events
 	url = https://github.com/Lexer25/city_events.git
 	branch = main
-[submodule "city/modules/about"]
-	path = city/modules/about
+[submodule "about"]
+	path = modules/about
 	url = https://github.com/Lexer25/city_about.git
 	branch = main
-[submodule "city/modules/apb"]
-	path = city/modules/apb
+[submodule "apb"]
+	path = modules/apb
 	url = https://github.com/Lexer25/city_apb.git
 	branch = main
-[submodule "city/modules/dbsetting"]
-	path = city/modules/dbsetting
+[submodule "dbsetting"]
+	path = modules/dbsetting
 	url = https://github.com/Lexer25/city_dbsetting.git
 	branch = main
-[submodule "city/modules/dev"]
-	path = city/modules/dev
+[submodule "dev"]
+	path = modules/dev
 	url = https://github.com/Lexer25/city_dev.git
 	branch = main
-[submodule "city/modules/door"]
-	path = city/modules/door
+[submodule "door"]
+	path = modules/door
 	url = https://github.com/Lexer25/city_door.git
 	branch = main
-[submodule "city/modules/eventConfig"]
-	path = city/modules/eventConfig
+[submodule "eventConfig"]
+	path = modules/eventConfig
 	url = https://github.com/Lexer25/city_eventConfig.git
 	branch = main
-[submodule "city/modules/eximdata"]
-	path = city/modules/eximdata
+[submodule "eximdata"]
+	path = modules/eximdata
 	url = https://github.com/Lexer25/city_eximdata.git
 	branch = main
-[submodule "city/modules/identifier"]
-	path = city/modules/identifier
+[submodule "identifier"]
+	path = modules/identifier
 	url = https://github.com/Lexer25/city_identifier.git
 	branch = main
-[submodule "city/modules/parsec"]
-	path = city/modules/parsec
+[submodule "parsec"]
+	path = modules/parsec
 	url = https://github.com/Lexer25/city_parsec.git
 	branch = main
-[submodule "city/modules/people"]
-	path = city/modules/people
+[submodule "people"]
+	path = modules/people
 	url = https://github.com/Lexer25/city_people.git
 	branch = main
-[submodule "city/modules/setting"]
-	path = city/modules/setting
+[submodule "setting"]
+	path = modules/setting
 	url = https://github.com/Lexer25/city_setting.git
 	branch = main
