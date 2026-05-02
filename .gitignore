@@ -9,18 +9,3 @@ application/config/backup
 *.backup
 *.backup.*
 
-/nbproject/private/
-/modules/about/
-/modules/apb/
-/modules/cfg/
-/modules/dbsetting/
-/modules/dev/
-/modules/door/
-/modules/email/
-/modules/eventConfig/
-/modules/events/
-/modules/eximdata/
-/modules/identifier/
-/modules/parsec/
-/modules/people/
-/modules/setting/
