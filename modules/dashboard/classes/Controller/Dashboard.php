@@ -28,7 +28,7 @@ class Controller_Dashboard extends Controller_Template {
 	{
 		
 		$serverList=Model::factory('Check')->getServerList();// получили список транспортных серверов
-		$content = View::factory('services', array(
+		$content = View::factory('dashboard/services', array(
 			'serverList'=>$serverList,
 			));
 		$this->template->content = $content;
@@ -63,9 +63,7 @@ class Controller_Dashboard extends Controller_Template {
 		$list_windows2=array();
 		$list_windows3=array();
 		$t1=microtime(true);
-		//if(Arr::get($config_windows, 'windows1', FALSE)) $list=Model::Factory('Stat')->stat();
 		
-		//if(Arr::get($config_windows, 'windows1', FALSE)) $list_windows1=Model::Factory('Stat')->getStatPeopleAndCard();//статистика для окна 1
 		
 		if(Arr::get($config_windows, 'windows1', FALSE)) 
 		{
@@ -85,7 +83,7 @@ class Controller_Dashboard extends Controller_Template {
 		//echo Debug::vars('57',$analyt_result, $list ); exit;
 		$_connectName='fb';
 		$about=Model::factory('Parkdb')->aboutDB($_connectName);
-		$content = View::factory('dashboard', array(
+		$content = View::factory('dashboard/dashboard', array(
 			'list_windows1' => $list_windows1,
 			'list_windowsGuest' => $list_windowsGuest,
 			'list_windows2' => $list_windows2,
@@ -184,7 +182,7 @@ class Controller_Dashboard extends Controller_Template {
 		
 		throw new Exception ('Неправильный формат карт '. $mess);
 		
-		$content = View::factory('result', array(
+		$content = View::factory('dashboard/result', array(
 			'content' => $mess,
 		));
 		$this->template->content = $content;
@@ -201,7 +199,7 @@ class Controller_Dashboard extends Controller_Template {
 		$res1=Model::Factory('Log')->getList();
 		$res2=Model::Factory('Log')->getListCompare();
 		
-		$content=View::factory('Log', array(
+		$content=View::factory('dashboard/Log', array(
 			'list1'=> $res1,
 			'list2'=> $res2,
 			));
@@ -227,19 +225,19 @@ class Controller_Dashboard extends Controller_Template {
     
 	public function ErrMess ($err=false)
 	{
-		$content = View::factory('errorpage');
+		$content = View::factory('dashboard/errorpage');
 		$this->template->content = $content;
 	}
 	
-	public function action_opendoor()// обработка команды открывания дверей
+	/* public function action_opendoor()// обработка команды открывания дверей
 	{
 		Log::instance()->add(Log::NOTICE, 'Получил запрос opendoor');
 		$res=Model::Factory('Device')->sendCommand('127.0.0.1', 1967, '333', 'opendoor door=0');
-		$content = View::factory('result', array(
+		$content = View::factory('dashboard/result', array(
 			'content' => $res,
 		));
 	    $this->template->content = $content;
-	}
+	} */
 	
 	
 	/**31.08.2024  функция записи массива данных в файл
