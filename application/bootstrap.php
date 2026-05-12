@@ -112,10 +112,6 @@ Kohana::init(array(
 	'base_url'   => '/city/',
 ));
 
-/**
- * Attach the file write to logging. Multiple writers are supported.
- */
-Kohana::$log->attach(new Log_File(APPPATH.'logs'));
 
 /**
  * Attach a file reader to config. Multiple readers are supported.
@@ -150,7 +146,16 @@ Kohana::modules(array(
 	 'eventConfig' => MODPATH.'eventConfig', // Конфигурация типов событий
 	 'ts' => MODPATH.'cfg/ts', // 
 	 'device' => MODPATH.'cfg/device', // 
+	 'log' => MODPATH.'log', // 
 	));
+	
+	
+	
+/**
+ * Attach the file write to logging. Multiple writers are supported.
+ */
+Kohana::$log->attach(new Log_File(APPPATH.'logs'));
+
 
 /**
  * Cookie Salt
