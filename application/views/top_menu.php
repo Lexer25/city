@@ -104,6 +104,11 @@
                         'url' => 'parsec',
                         'condition' => true
                     ),
+                     'parsec' => array(
+                        'title' => __('bas-ip'),
+                        'url' => 'bas',
+                        'condition' => true
+                    ),
                     'setting' => array(
                         'title' => __('setting.menu_title'),
                         'url' => 'setting',

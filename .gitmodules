@@ -46,3 +46,7 @@
 	path = modules/setting
 	url = https://github.com/Lexer25/city_setting.git
 	branch = main
+[submodule "modules/bas"]
+	path = modules/bas
+	url = https://github.com/Lexer25/city_bas.git
+	branch = main

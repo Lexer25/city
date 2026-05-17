@@ -147,6 +147,7 @@ Kohana::modules(array(
 	 'ts' => MODPATH.'cfg/ts', // 
 	 'device' => MODPATH.'cfg/device', // 
 	 'log' => MODPATH.'log', // 
+	 'bas' => MODPATH.'bas', // модуль для работы с bas-ip
 	));
 	
 	
