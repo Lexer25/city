@@ -104,7 +104,7 @@
                         'url' => 'parsec',
                         'condition' => true
                     ),
-                     'parsec' => array(
+                     'bas-ip' => array(
                         'title' => __('bas-ip'),
                         'url' => 'bas',
                         'condition' => true
