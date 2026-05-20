@@ -96,7 +96,7 @@ $container_class = (isset($full_width) && $full_width) ? 'container-fluid' : 'co
 
 <div class="<?php echo $container_class; ?>">
     <span id="time-top"></span>
-    <div class="row">
+    
         <?php
         // Подготовка данных для меню (код не меняется)
         $menu_data = array(
@@ -108,14 +108,19 @@ $container_class = (isset($full_width) && $full_width) ? 'container-fluid' : 'co
         );
         
         echo View::factory('top_menu', $menu_data)->render();
-        echo $content;
-        ?>
-        
+		?>
+		
+
+		
+			<?php			
+				echo $content;
+			?>
+ 
         <button onclick="topFunction()" id="myBtn" title="<?php echo __('top'); ?>">
             <?php echo __('top'); ?>
         </button>
 
-   </div>
+   
 </div>
 
 <!-- Остальная часть шаблона (таймеры и скрипты) остаётся без изменений -->
