@@ -1,0 +1,32 @@
+<?php defined('SYSPATH') or die('No direct script access.');
+
+return array(
+    // Базовые пункты, которые всегда есть
+    'city' => array(
+        'title' => 'Артонит Сити Центр',
+        'url' => '/city',
+        'icon' => 'fa-home',
+        'order' => 0
+    ),
+	'log' => array(
+        'title' => 'Журналы',
+        'url' => 'dashboard/log',
+        'icon' => 'fa-home',
+        'order' => 50
+    ),
+	'result' => array(
+        'title' => 'Результат',
+        'url' => '/city',
+        'icon' => 'fa-home',
+        'order' => 15
+    ),
+	
+	'guide' => array(
+        'title' => 'Справка',
+        'url' => '/city',
+        'icon' => 'fa-home',
+        'order' => 80
+    ),
+	
+	
+);

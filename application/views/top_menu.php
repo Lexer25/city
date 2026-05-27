@@ -3,163 +3,13 @@
 <!-- Static navbar -->
 <nav class="navbar navbar-default navbar-fixed-top disable" role="navigation">
     <div class="container-fluid">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only"><?php echo HTML::chars(__('Toggle navigation')) ?></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <?php echo HTML::anchor('dashboard', HTML::chars(__('City')), array('class' => 'navbar-brand')) ?>
-        </div>
+
         
         <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <?php
-                // Массив основных пунктов меню (без сервисных)
-                $menu_items = array(
-                    'load' => array(
-                        'title' => __('Load'),
-                        'url' => 'dev/load',
-                        'condition' => (isset($view_without_auth['load']) && $view_without_auth['load']) ? true : $logged_in
-                    ),
-                    'load_order' => array(
-                        'title' => __('Load_order'),
-                        'url' => 'dev/load_order',
-                        'condition' => (isset($view_without_auth['load_order']) && $view_without_auth['load_order']) ? true : $logged_in
-                    ),
-                    'device_control' => array(
-                        'title' => __('device_control'),
-                        'url' => 'dev/device_control',
-                        'condition' => (isset($view_without_auth['device_control']) && $view_without_auth['device_control']) ? true : $logged_in
-                    ),
-                    'events' => array(
-                        'title' => __('events'),
-                        'url' => 'event',
-                        'condition' => (isset($view_without_auth['events']) && $view_without_auth['events']) ? true : $logged_in
-                    ),
-                    'people' => array(
-                        'title' => __('people'),
-                        'url' => 'people/peopleInfo',
-                        'condition' => (isset($view_without_auth['people']) && $view_without_auth['people']) ? true : $logged_in
-                    ),
-                    'door' => array(
-                        'title' => __('door'),
-                        'url' => 'door/doorInfo',
-                        'condition' => (isset($view_without_auth['door']) && $view_without_auth['door']) ? true : $logged_in
-                    ),
-                    'log' => array(
-                        'title' => __('log'),
-                        'url' => 'dashboard/log',
-                        'condition' => (isset($view_without_auth['log']) && $view_without_auth['log']) ? true : $logged_in
-                    ),
-                    'identifier' => array(
-                        'title' => __('identifier'),
-                        'url' => 'identifier',
-                        'condition' => $logged_in
-                    ),
-					'guide' => array(
-                        'title' => __('guide'),
-                        'url' => 'guide',
-                        'condition' => true
-                    ),
-					'about' => array(
-                        'title' => __('О программе'),
-                        'url' => 'about',
-                        'condition' => true
-                    )
-                );
-                
-                // Вывод основных пунктов меню
-                foreach ($menu_items as $key => $item) {
-                    $is_visible = isset($item['condition']) ? (bool)$item['condition'] : false;
-                    
-                    if ($is_visible) {
-                        $active_class = ($menu_active == $key) ? ' class="active"' : '';
-                        $url = $item['url'];
-                        $title = HTML::chars($item['title']);
-                        echo '<li' . $active_class . '>' . HTML::anchor($url, $title) . '</li>';
-                    }
-                }
-                
-                // Пункт "Сервисы" с выпадающим списком
-                $services_items = array(
-                    'skud' => array(
-                        'title' => __('сводная'),
-                        'url' => 'skud',
-                        'condition' => false
-                    ),
-                    'eximdata' => array(
-                        'title' => __('Экспорт/импорт'),
-                        'url' => 'eximdata',
-                        'condition' => true
-                    ),
-                    'apb' => array(
-                        'title' => __('АПБ'),
-                        'url' => 'apb',
-                        'condition' => true
-                    ),
-                    'parsec' => array(
-                        'title' => __('parsec'),
-                        'url' => 'parsec',
-                        'condition' => true
-                    ),
-                     'bas-ip' => array(
-                        'title' => __('bas-ip'),
-                        'url' => 'bas',
-                        'condition' => true
-                    ),
-                    'setting' => array(
-                        'title' => __('setting.menu_title'),
-                        'url' => 'setting',
-                        'condition' => true
-                    ),
-					'dbsetting' => array(
-                        'title' => __('База данных'),
-                        'url' => 'dbsetting',
-                        'condition' => true
-                    ),
-					'eventConfig' => array(
-						'title' => __('Настройка событий'),
-						'url' => 'eventConfig',
-						'condition' => true
-					)
-										
-                );
-                
-                // Проверяем, есть ли видимые пункты в сервисах
-                $has_visible_services = false;
-                foreach ($services_items as $item) {
-                    if (isset($item['condition']) && (bool)$item['condition']) {
-                        $has_visible_services = true;
-                        break;
-                    }
-                }
-                
-                // Выводим пункт "Сервисы" только если есть видимые подпункты
-                if ($has_visible_services):
-                ?>
-                <li class="dropdown <?php echo (in_array($menu_active, array_keys($services_items))) ? 'active' : ''; ?>">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <?php echo HTML::chars(__('services')) ?> <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <?php
-                        foreach ($services_items as $key => $item) {
-                            $is_visible = isset($item['condition']) ? (bool)$item['condition'] : false;
-                            
-                            if ($is_visible) {
-                                $active_class = ($menu_active == $key) ? ' class="active"' : '';
-                                $url = $item['url'];
-                                $title = HTML::chars($item['title']);
-                                echo '<li' . $active_class . '>' . HTML::anchor($url, $title) . '</li>';
-                            }
-                        }
-                        ?>
-                    </ul>
-                </li>
-                <?php endif; ?>
-            </ul>
+  
+			 <?php // В любом представлении (view)
+	echo Menu_Renderer::render();
+	?>
             
             <!-- Правая часть меню (авторизация) -->
             <ul class="nav navbar-nav navbar-right">
@@ -232,7 +82,7 @@
                 </li>
             </ul>
         </div>
- 
+
         <!-- Версия и время -->
         <div class="navbar-collapse collapse">
             <?php 
@@ -283,4 +133,58 @@
             ?>
         </div>
     </div>
+	
 </nav>
+
+
+<!-- Небольшой CSS для корректной работы вложенного меню Bootstrap 3 -->
+<style>
+.dropdown-submenu {
+    position: relative;
+}
+.dropdown-submenu > .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -1px;
+    margin-left: -1px;
+    border-radius: 0 4px 4px 4px;
+}
+.dropdown-submenu:hover > .dropdown-menu {
+    display: block;
+}
+.dropdown-submenu > a:after {
+    display: block;
+    content: " ";
+    float: right;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 4px 0 4px 4px;
+    border-left-color: #ccc;
+    margin-top: 5px;
+    margin-right: -10px;
+}
+.dropdown-submenu:hover > a:after {
+    border-left-color: #555;
+}
+.dropdown-submenu.pull-left {
+    float: none;
+}
+.dropdown-submenu.pull-left > .dropdown-menu {
+    left: -100%;
+    margin-left: 10px;
+    border-radius: 4px 0 4px 4px;
+}
+</style>
+
+<script>
+$(document).ready(function(){
+    // Для поддержки вложенных меню на клик (не только на hover)
+    $('.dropdown-submenu a.dropdown-toggle').on("click", function(e){
+        e.stopPropagation();
+        e.preventDefault();
+        $(this).next('ul').toggle();
+    });
+});
+</script>

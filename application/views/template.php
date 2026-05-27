@@ -111,7 +111,6 @@ $container_class = (isset($full_width) && $full_width) ? 'container-fluid' : 'co
 		?>
 		
 
-		
 			<?php			
 				echo $content;
 			?>
@@ -150,5 +149,37 @@ $container_class = (isset($full_width) && $full_width) ? 'container-fluid' : 'co
     });
     </script>
 
+<script>
+$(document).ready(function() {
+    $('.dropdown-toggle').dropdown();
+});
+</script>
+
+<style>
+/* В вашем CSS файле */
+.nav {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;  /* Горизонтальное расположение */
+    gap: 20px;      /* Расстояние между пунктами */
+}
+
+.nav li {
+    display: inline-block;  /* Альтернатива для старых браузеров */
+}
+
+/* Или используйте float (старый способ) */
+.nav li {
+    float: left;
+    margin-right: 20px;
+}
+
+.nav:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+</style>
 </body>
 </html>
