@@ -7,5 +7,5 @@ application/config/backup
 *.xls
 *.xlsx
 *.backup
-*.backup.*
+*.backup*
 
