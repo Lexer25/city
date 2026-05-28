@@ -5,7 +5,7 @@
     <div class="container-fluid">
 
         
-        <div class="navbar-collapse collapse">
+       
   
 			 <?php // В любом представлении (view)
 	echo Menu_Renderer::render('nav nav-pills');
@@ -81,10 +81,9 @@
                     <?php endif; ?>
                 </li>
             </ul>
-        </div>
 
         <!-- Версия и время -->
-        <div class="navbar-collapse collapse">
+        <div >
             <?php 
             // подсветка версии в течении 3 суток после обновления.
             // если дата обновления отсутствует, то выводится только версия, без даты обновления
