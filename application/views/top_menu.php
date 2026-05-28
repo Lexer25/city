@@ -8,7 +8,7 @@
         <div class="navbar-collapse collapse">
   
 			 <?php // В любом представлении (view)
-	echo Menu_Renderer::render();
+	echo Menu_Renderer::render('nav nav-pills');
 	?>
             
             <!-- Правая часть меню (авторизация) -->
