@@ -148,6 +148,7 @@ Kohana::modules(array(
 	 'device' => MODPATH.'cfg/device', // 
 	 'log' => MODPATH.'log', // 
 	 'bas' => MODPATH.'bas', // модуль для работы с bas-ip
+	 'accessCategory' => MODPATH.'accessCategory', // модуль для работы с категориями доступа
 	));
 	
 	

@@ -50,3 +50,7 @@
 	path = modules/bas
 	url = https://github.com/Lexer25/city_bas.git
 	branch = main
+[submodule "modules/accessCategory"]
+	path = modules/accessCategory
+	url = https://github.com/Lexer25/city_accessCategory.git
+	branch = main
