@@ -4,13 +4,12 @@
 <nav class="navbar navbar-default navbar-fixed-top disable" role="navigation">
     <div class="container-fluid">
 
-        
-       
   
 			 <?php // В любом представлении (view)
 	echo Menu_Renderer::render('nav nav-pills');
 	?>
-            
+       <!-- В шаблоне -->
+  
             <!-- Правая часть меню (авторизация) -->
             <ul class="nav navbar-nav navbar-right">
                 <li>
@@ -136,54 +135,3 @@
 </nav>
 
 
-<!-- Небольшой CSS для корректной работы вложенного меню Bootstrap 3 -->
-<style>
-.dropdown-submenu {
-    position: relative;
-}
-.dropdown-submenu > .dropdown-menu {
-    top: 0;
-    left: 100%;
-    margin-top: -1px;
-    margin-left: -1px;
-    border-radius: 0 4px 4px 4px;
-}
-.dropdown-submenu:hover > .dropdown-menu {
-    display: block;
-}
-.dropdown-submenu > a:after {
-    display: block;
-    content: " ";
-    float: right;
-    width: 0;
-    height: 0;
-    border-color: transparent;
-    border-style: solid;
-    border-width: 4px 0 4px 4px;
-    border-left-color: #ccc;
-    margin-top: 5px;
-    margin-right: -10px;
-}
-.dropdown-submenu:hover > a:after {
-    border-left-color: #555;
-}
-.dropdown-submenu.pull-left {
-    float: none;
-}
-.dropdown-submenu.pull-left > .dropdown-menu {
-    left: -100%;
-    margin-left: 10px;
-    border-radius: 4px 0 4px 4px;
-}
-</style>
-
-<script>
-$(document).ready(function(){
-    // Для поддержки вложенных меню на клик (не только на hover)
-    $('.dropdown-submenu a.dropdown-toggle').on("click", function(e){
-        e.stopPropagation();
-        e.preventDefault();
-        $(this).next('ul').toggle();
-    });
-});
-</script>

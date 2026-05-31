@@ -2,59 +2,62 @@
 
 class Menu_Renderer {
     
-    /**
-     * Проверить, должен ли пункт меню отображаться
-     * @param array $item Пункт меню
-     * @return bool
-     */
-    private static function should_display($item)
-    {
-        // Если нет условий - всегда показываем
-        if (!isset($item['show'])) {
-            return true;
-        }
-        
-        $show_config = $item['show'];
-        
-        // Проверка авторизации
-        if (isset($show_config['logged_in'])) {
-            $logged_in = Auth::instance()->logged_in();
-            
-            if ($show_config['logged_in'] === true && !$logged_in) {
-                return false; // Требуется авторизация, но пользователь не авторизован
-            }
-            
-            if ($show_config['logged_in'] === false && $logged_in) {
-                return false; // Только для гостей, но пользователь авторизован
-            }
-        }
-        
-        // Проверка роли
-        if (isset($show_config['roles'])) {
-            $roles = (array) $show_config['roles'];
-            $has_role = false;
-            
-            foreach ($roles as $role) {
-                if (Auth::instance()->logged_in($role)) {
-                    $has_role = true;
-                    break;
-                }
-            }
-            
-            if (!$has_role) {
-                return false;
-            }
-        }
-        
-        // Проверка по callable функции
-        if (isset($show_config['callback']) && is_callable($show_config['callback'])) {
-            if (!call_user_func($show_config['callback'], $item)) {
-                return false;
-            }
-        }
-        
-        return true;
-    }
+	// application/classes/Menu/Renderer.php
+	// Заменяем метод should_display() на этот:
+
+	private static function should_display($item)
+	{
+		// ЯВНЫЙ ЗАПРЕТ (имеет высший приоритет)
+		if (isset($item['disabled']) && $item['disabled'] === true) {
+			return false;
+		}
+		
+		// Если нет условий - всегда показываем
+		if (!isset($item['show'])) {
+			return true;
+		}
+		
+		$show_config = $item['show'];
+		
+		// Проверка авторизации
+		if (isset($show_config['logged_in'])) {
+			$logged_in = Auth::instance()->logged_in();
+			
+			if ($show_config['logged_in'] === true && !$logged_in) {
+				return false;
+			}
+			
+			if ($show_config['logged_in'] === false && $logged_in) {
+				return false;
+			}
+		}
+		
+		// Проверка роли
+		if (isset($show_config['roles'])) {
+			$roles = (array) $show_config['roles'];
+			$has_role = false;
+			
+			foreach ($roles as $role) {
+				if (Auth::instance()->logged_in($role)) {
+					$has_role = true;
+					break;
+				}
+			}
+			
+			if (!$has_role) {
+				return false;
+			}
+		}
+		
+		// Проверка по callable функции
+		if (isset($show_config['callback']) && is_callable($show_config['callback'])) {
+			if (!call_user_func($show_config['callback'], $item)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
     
     /**
      * Получить все пункты меню с учетом условий отображения
@@ -97,19 +100,47 @@ class Menu_Renderer {
         return $visible_items;
     }
     
-    /**
-     * Получить URL пункта меню
-     */
-    private static function get_url($item)
-    {
-        if (isset($item['route'])) {
-            $params = isset($item['params']) ? $item['params'] : array();
-            return Route::get($item['route'])->uri($params);
-        } elseif (isset($item['url'])) {
-            return $item['url'];
+// application/classes/Menu/Renderer.php
+/**
+ * Получить URL пункта меню
+ */
+private static function get_url($item)
+{
+    if (isset($item['route'])) {
+        $params = isset($item['params']) ? $item['params'] : array();
+        // URL::site() добавит базовый путь
+        return URL::site(Route::get($item['route'])->uri($params));
+        
+    } elseif (isset($item['url'])) {
+        $url = $item['url'];
+        
+        // Обработка специальных ссылок
+        if (empty($url)) {
+            return '#';
         }
-        return '#';
+        
+        // Внешние ссылки не трогаем
+        if (strpos($url, 'http://') === 0 || 
+            strpos($url, 'https://') === 0 || 
+            strpos($url, '//') === 0) {
+            return $url;
+        }
+        
+        // Якоря и javascript
+        if (strpos($url, '#') === 0 || strpos($url, 'javascript:') === 0) {
+            return $url;
+        }
+        
+        // Нормализация: добавляем ведущий слеш если его нет
+        if ($url[0] !== '/') {
+            $url = '/' . $url;
+        }
+        
+        // КЛЮЧЕВОЙ МОМЕНТ: добавляем базовый путь Kohana
+        return URL::site($url);
     }
+    return '#';
+}
     
     /**
      * Проверить, активен ли пункт меню

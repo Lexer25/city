@@ -4,28 +4,34 @@ return array(
     // Базовые пункты, которые всегда есть
     'city' => array(
         'title' => 'Артонит Сити Центр',
-        'url' => '/city',
+        'url' => '/',
         'icon' => 'fa-home',
-        'order' => 0
+        'order' => 0,
+		
+
     ),
 	'log' => array(
         'title' => 'Журналы',
         'url' => 'dashboard/log',
         'icon' => 'fa-home',
-        'order' => 50
+        'order' => 50,
+		'disabled' => false, 
+		
     ),
 	'result' => array(
         'title' => 'Результат',
         'url' => '/city',
         'icon' => 'fa-home',
-        'order' => 15
+        'order' => 15,
+		'disabled' => false, 
     ),
 	
 	'guide' => array(
         'title' => 'Справка',
         'url' => '/city',
         'icon' => 'fa-home',
-        'order' => 80
+        'order' => 80,
+		'disabled' => false, 
     ),
 	
 	
