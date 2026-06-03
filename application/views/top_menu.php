@@ -3,11 +3,14 @@
 <!-- Static navbar -->
 <nav class="navbar navbar-default navbar-fixed-top disable" role="navigation">
     <div class="container-fluid">
+	<div class="navbar-collapse collapse">
 
   
 			 <?php // В любом представлении (view)
-	echo Menu_Renderer::render('nav nav-pills');
+			 
+	echo Menu_Renderer::render('nav navbar-nav');
 	?>
+	</div>
        <!-- В шаблоне -->
   
             <!-- Правая часть меню (авторизация) -->
@@ -133,5 +136,59 @@
     </div>
 	
 </nav>
+<style>
+/* В city.css добавьте в самый конец */
+
+/* Ограничиваем ширину меню и добавляем прокрутку */
+@media (max-width: 1400px) {
+    .navbar-collapse {
+        overflow-x: auto;
+        overflow-y: visible;
+        white-space: nowrap;
+    }
+    
+    .navbar-nav {
+        display: inline-block;
+        float: none;
+        white-space: nowrap;
+    }
+    
+    .navbar-nav > li {
+        display: inline-block;
+        float: none;
+    }
+    
+    /* Стили для скроллбара */
+    .navbar-collapse::-webkit-scrollbar {
+        height: 3px;
+    }
+    
+    .navbar-collapse::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    
+    .navbar-collapse::-webkit-scrollbar-thumb {
+        background: #888;
+    }
+}
+
+/* Компактный режим для всех экранов */
+.navbar-nav > li > a {
+    padding: 15px 10px !important;
+    font-size: 13px !important;
+}
+
+/* Скрываем иконки везде для экономии места */
+.navbar-nav > li > a > i,
+.navbar-nav > li > a > [class^="fa-"] {
+    display: none !important;
+}
+
+/* Убираем лишние отступы */
+.container-fluid {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+</style>
 
 

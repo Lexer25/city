@@ -100,11 +100,7 @@ $container_class = (isset($full_width) && $full_width) ? 'container-fluid' : 'co
         <?php
         // Подготовка данных для меню (код не меняется)
         $menu_data = array(
-            'menu_active' => Arr::get($_SESSION, 'menu_active', ''),
             'config' => $config,
-            'logged_in' => Auth::instance()->logged_in(),
-            'user' => Auth::instance()->get_user(),
-            'view_without_auth' => (array) $config->get('view_without_auth', array())
         );
         
         echo View::factory('top_menu', $menu_data)->render();
