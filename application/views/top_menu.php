@@ -134,7 +134,50 @@
             ?>
         </div>
     </div>
-	
+	<!-- Добавьте стили -->
+<style>
+/* Компенсация фиксированного меню */
+body {
+    padding-top: 70px; /* Значение по умолчанию */
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-top: 100px;
+    }
+}
+
+/* Если меню очень высокое (много пунктов) */
+@media (max-width: 1200px) {
+    .navbar-collapse.collapse.in {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+}
+</style>
+
+<script>
+// Динамическая компенсация высоты меню
+(function() {
+    function fixNavbarOverlap() {
+        var $navbar = $('.navbar-fixed-top');
+        if ($navbar.length && $navbar.css('position') === 'fixed') {
+            var navbarHeight = $navbar.outerHeight();
+            if (navbarHeight > 0) {
+                $('body').css('padding-top', navbarHeight + 'px');
+            }
+        }
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixNavbarOverlap);
+    } else {
+        fixNavbarOverlap();
+    }
+    
+    $(window).on('resize', fixNavbarOverlap);
+})();
+</script>
 </nav>
 <style>
 /* В city.css добавьте в самый конец */

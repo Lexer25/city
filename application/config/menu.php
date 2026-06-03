@@ -20,7 +20,7 @@ return array(
     ),
 	'result' => array(
         'title' => 'Результат',
-        'url' => '/city',
+        'url' => '/',
         'icon' => 'fa-home',
         'order' => 15,
 		'disabled' => false, 
@@ -28,7 +28,7 @@ return array(
 	
 	'guide' => array(
         'title' => 'Справка',
-        'url' => '/city',
+        'url' => '/',
         'icon' => 'fa-home',
         'order' => 80,
 		'disabled' => false, 
