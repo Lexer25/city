@@ -4,45 +4,16 @@ class Controller_Timezone extends Controller_Template {
     
     private $maxTimezones = 16; // Максимальное количество временных зон
     
-    public function before()
-    {
-        parent::before();
-        
-        $action = $this->request->action();
-        $method = $this->request->method();
-       Kohana::$log->add(Log::DEBUG, '13 '. $action); 
-       Kohana::$log->add(Log::DEBUG, '14 '. $method); 
-        // Правила: какие экшены требуют admin для определенных HTTP методов
-        $restricted = [
-            'add'    => ['POST'],           // только POST на add требует admin
-            'edit'   => ['POST'],           // только POST на edit требует admin
-            'delete' => ['POST', 'GET'],    // любой запрос на delete требует admin
-        ];
-        
-        // Проверяем, требуется ли авторизация для текущего экшена и метода
-        if (isset($restricted[$action]) && in_array($method, $restricted[$action])) {
-            if (!Auth::instance()->logged_in('admin')) {
-                // Для AJAX запросов возвращаем JSON
-                if ($this->request->is_ajax()) {
-                    header('Content-Type: application/json');
-                    echo json_encode([
-                        'success' => false, 
-                        'error' => __('Требуется авторизация для выполнения этого действия')
-                    ]);
-                    exit;
-                }
-                
-                // Для обычных запросов — выводим сообщение
-                $content = View::factory('accessCategory/error', array(
-                    'message' => __('Требуется авторизация для выполнения этого действия'),
-                    'back_url' => 'timezone'
-                ));
-                $this->template->content = $content;
-                return; // Останавливаем выполнение экшена
-            }
-        }
-    }
-    
+	 public function before()
+		{
+			parent::before();
+			$session = Session::instance();
+
+			// Передаем в шаблон флаг авторизации
+			$this->is_admin = Auth::instance()->logged_in('admin');
+			View::bind_global('is_admin', $this->is_admin);
+		}
+		
     /**
      * Список временных зон
      */

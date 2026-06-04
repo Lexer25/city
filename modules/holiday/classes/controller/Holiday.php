@@ -2,11 +2,15 @@
 
 class Controller_Holiday extends Controller_Template {
     
-    public function before()
-    {
-        parent::before();
-        $session = Session::instance();
-    }
+	 public function before()
+		{
+			parent::before();
+			$session = Session::instance();
+
+			// Передаем в шаблон флаг авторизации
+			$this->is_admin = Auth::instance()->logged_in('admin');
+			View::bind_global('is_admin', $this->is_admin);
+		}
     
     /**
      * Список праздников

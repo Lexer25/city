@@ -21,9 +21,15 @@
         <!-- Верхняя панель с кнопкой добавления -->
         <div class="row" style="margin-bottom: 15px;">
             <div class="col-xs-12">
-                <a href="<?php echo URL::site('holiday/add'); ?>" class="btn btn-success">
-                    <span class="glyphicon glyphicon-plus"></span> <?php echo __('Добавить праздник'); ?>
-                </a>
+                <?php if ($is_admin): ?>
+                    <a href="<?php echo URL::site('holiday/add'); ?>" class="btn btn-success">
+                        <span class="glyphicon glyphicon-plus"></span> <?php echo __('Добавить праздник'); ?>
+                    </a>
+                <?php else: ?>
+                    <span class="btn btn-success disabled" title="<?php echo __('Доступно только администраторам'); ?>">
+                        <span class="glyphicon glyphicon-plus"></span> <?php echo __('Добавить праздник'); ?>
+                    </span>
+                <?php endif; ?>
             </div>
         </div>
         
@@ -65,12 +71,21 @@
                                 <td><?php echo date('d.m.Y', strtotime(Arr::get($holiday, 'date'))); ?></td>
                                 <td>
                                     <div class="btn-group btn-group-xs">
-                                        <a href="<?php echo URL::site('holiday/edit/' . Arr::get($holiday, 'id_holiday')); ?>" class="btn btn-primary" title="<?php echo __('Редактировать'); ?>">
-                                            <span class="glyphicon glyphicon-edit"></span>
-                                        </a>
-                                        <a href="<?php echo URL::site('holiday/delete/' . Arr::get($holiday, 'id_holiday')); ?>" class="btn btn-danger" title="<?php echo __('Удалить'); ?>" onclick="return confirm('<?php echo __('Вы уверены, что хотите удалить этот праздник?'); ?>')">
-                                            <span class="glyphicon glyphicon-trash"></span>
-                                        </a>
+                                        <?php if ($is_admin): ?>
+                                            <a href="<?php echo URL::site('holiday/edit/' . Arr::get($holiday, 'id_holiday')); ?>" class="btn btn-primary" title="<?php echo __('Редактировать'); ?>">
+                                                <span class="glyphicon glyphicon-edit"></span>
+                                            </a>
+                                            <a href="<?php echo URL::site('holiday/delete/' . Arr::get($holiday, 'id_holiday')); ?>" class="btn btn-danger" title="<?php echo __('Удалить'); ?>" onclick="return confirm('<?php echo __('Вы уверены, что хотите удалить этот праздник?'); ?>')">
+                                                <span class="glyphicon glyphicon-trash"></span>
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="btn btn-primary disabled" title="<?php echo __('Доступно только администраторам'); ?>">
+                                                <span class="glyphicon glyphicon-edit"></span>
+                                            </span>
+                                            <span class="btn btn-danger disabled" title="<?php echo __('Доступно только администраторам'); ?>">
+                                                <span class="glyphicon glyphicon-trash"></span>
+                                            </span>
+                                        <?php endif; ?>
                                     </div>
                                   </td>
                               </tr>
@@ -86,18 +101,24 @@
                                         , <?php echo __('Показано'); ?>: <span id="filteredCount">0</span>
                                     </span>
                                 </small>
-                             </td>
-                         </tr>
+                              </td>
+                           </tr>
                     </tfoot>
-                 </table>
+                </table>
             </div>
             
             <!-- Нижняя панель с кнопкой добавления -->
             <div class="row" style="margin-top: 15px;">
                 <div class="col-xs-12">
-                    <a href="<?php echo URL::site('holiday/add'); ?>" class="btn btn-success">
-                        <span class="glyphicon glyphicon-plus"></span> <?php echo __('Добавить праздник'); ?>
-                    </a>
+                    <?php if ($is_admin): ?>
+                        <a href="<?php echo URL::site('holiday/add'); ?>" class="btn btn-success">
+                            <span class="glyphicon glyphicon-plus"></span> <?php echo __('Добавить праздник'); ?>
+                        </a>
+                    <?php else: ?>
+                        <span class="btn btn-success disabled" title="<?php echo __('Доступно только администраторам'); ?>">
+                            <span class="glyphicon glyphicon-plus"></span> <?php echo __('Добавить праздник'); ?>
+                        </span>
+                    <?php endif; ?>
                 </div>
             </div>
             
@@ -107,9 +128,22 @@
             </div>
             
             <div class="form-group" style="margin-top: 15px;">
-                <a href="<?php echo URL::site('holiday/add'); ?>" class="btn btn-success">
-                    <span class="glyphicon glyphicon-plus"></span> <?php echo __('Добавить праздник'); ?>
-                </a>
+                <?php if ($is_admin): ?>
+                    <a href="<?php echo URL::site('holiday/add'); ?>" class="btn btn-success">
+                        <span class="glyphicon glyphicon-plus"></span> <?php echo __('Добавить праздник'); ?>
+                    </a>
+                <?php else: ?>
+                    <span class="btn btn-success disabled" title="<?php echo __('Доступно только администраторам'); ?>">
+                        <span class="glyphicon glyphicon-plus"></span> <?php echo __('Добавить праздник'); ?>
+                    </span>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (!$is_admin && count($holidays) > 0): ?>
+            <div class="alert alert-info text-center" style="margin-top: 15px;">
+                <span class="glyphicon glyphicon-lock"></span> 
+                <?php echo __('Режим только для просмотра. Для редактирования праздников необходимы права администратора.'); ?>
             </div>
         <?php endif; ?>
         
@@ -224,5 +258,11 @@
     
     #holidaysTable th.active {
         background-color: #d9edf7;
+    }
+    
+    .disabled {
+        pointer-events: none;
+        opacity: 0.6;
+        cursor: not-allowed;
     }
 </style>
