@@ -2,6 +2,19 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/about" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/accessCategory" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/apb" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/bas" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/dbsetting" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/dev" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/door" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/eventConfig" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/events" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/eximdata" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/modules/identifier" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/parsec" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/people" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/setting" vcs="Git" />
   </component>
 </project>
