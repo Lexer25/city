@@ -151,7 +151,7 @@ Kohana::modules(array(
 	 'accessCategory' => MODPATH.'accessCategory', // модуль для работы с категориями доступа
 	 //'accCat' => MODPATH.'accCat', // модуль для работы с категориями доступа
 	 'holiday' => MODPATH.'holiday',
-	 'timezone' => MODPATH.'timezone',
+	 //'timezone' => MODPATH.'timezone',
 	));
 	
 	
