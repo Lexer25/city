@@ -28,7 +28,7 @@ return array(
 	
 	'guide' => array(
         'title' => 'Справка',
-        'url' => '/',
+        'url' => '/guide',
         'icon' => 'fa-home',
         'order' => 80,
 		'disabled' => false, 
