@@ -54,3 +54,9 @@
 	path = modules/accessCategory
 	url = https://github.com/Lexer25/city_accessCategory.git
 	branch = main
+[submodule "modules/timezone"]
+	path = modules/timezone
+	url = https://github.com/Lexer25/adm_timezone.git
+[submodule "modules/adm_holiday"]
+	path = modules/adm_holiday
+	url = https://github.com/Lexer25/adm_holiday.git
