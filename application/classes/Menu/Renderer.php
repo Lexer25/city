@@ -63,9 +63,9 @@ class Menu_Renderer {
      * Получить все пункты меню с учетом условий отображения
      * @return array
      */
-    public static function get_visible_items()
+    public static function get_visible_items($name)
     {
-        $all_items = Kohana::$config->load('menu')->as_array();
+        $all_items = Kohana::$config->load($name)->as_array();
         $visible_items = array();
         
         foreach ($all_items as $key => $item) {
@@ -250,9 +250,9 @@ private static function get_url($item)
     /**
      * Отрендерить меню
      */
-    public static function render($ul_class = 'nav')
+    public static function render($name='menu', $ul_class = 'nav')
     {
-        $items = self::get_visible_items();
+        $items = self::get_visible_items($name);
         $current_uri = Request::current()->uri();
         
         if (empty($items)) {

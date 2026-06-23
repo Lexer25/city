@@ -4,13 +4,18 @@
 <nav class="navbar navbar-default navbar-fixed-top disable" role="navigation">
     <div class="container-fluid">
 	<div class="navbar-collapse collapse">
-
-  
-			 <?php // В любом представлении (view)
-			 
-	echo Menu_Renderer::render('nav navbar-nav');
-	?>
+		<?php 
+			echo Menu_Renderer::render('menu', 'nav navbar-nav');
+		?>
 	</div>
+	
+	<div class="navbar-collapse collapse">
+		<?php 
+			echo Menu_Renderer::render('adm', 'nav navbar-nav');
+		?>
+	</div>
+	
+	
        <!-- В шаблоне -->
   
             <!-- Правая часть меню (авторизация) -->

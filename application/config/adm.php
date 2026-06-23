@@ -7,6 +7,7 @@ return array(
         'url' => '/',
         'icon' => 'fa-home',
         'order' => 0,
+		'disabled' => false, 
 		
 
     ),
@@ -38,6 +39,7 @@ return array(
         'url' => '/',
         'icon' => 'fa-home',
         'order' => 0,
+		'disabled' => true, 
 		
 
     ),
