@@ -10,8 +10,8 @@ return array(
     'dir_compare' => 'C:\\xampp\\htdocs\\city',
     'stat_day_befor' => 2,
     'city_name' => 'ЖК Хедлайнер',
-    'ver' => '3.0.0',
-    'timeUpdate' => '2026-06-03',
+    'ver' => '3.0.1',
+    'timeUpdate' => '2026-06-23',
     'lightVerDay' => 3,
     'developer' => 'www.artonit.ru',
     'main_windows' => array(
