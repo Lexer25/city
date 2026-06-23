@@ -1,8 +1,15 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 return array(
-    'current' => '3.0.0', // Текущая версия
+    'current' => '3.0.1', // Текущая версия
     'changelog' => array(
+        '3.0.1' => array(
+            'date' => '2026-06-23',
+            'changes' => array(
+                'Сформирована строка Конфигуратор',
+                'Добавлены пункты конфигуратора',
+                
+            )
         '3.0.0' => array(
             'date' => '2026-06-03',
             'changes' => array(
