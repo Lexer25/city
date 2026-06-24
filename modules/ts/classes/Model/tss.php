@@ -27,12 +27,16 @@ class Model_tss extends Model {
 			join servertypelist stl on stl.id_server=s.id_server
 			join servertype st on st.id=stl.id_type';
 		
-		
-		$query = DB::query(Database::SELECT, $sql)
-			->execute(Database::instance('fb'))
-			->as_array();
-			
-		return $query;	
+	    $query = DB::query(Database::SELECT, $sql)
+        ->execute(Database::instance('fb'))
+        ->as_array();
+    
+			// Преобразуем только строковые поля
+			foreach ($query as &$row) {
+				$row['NAME'] = iconv('Windows-1251', 'UTF-8//IGNORE', $row['NAME']);
+				$row['NAMETYPE'] = iconv('Windows-1251', 'UTF-8//IGNORE', $row['NAMETYPE']);
+			}
+			return $query;
 	}
 	
 	
@@ -46,6 +50,11 @@ class Model_tss extends Model {
 		$query = DB::query(Database::SELECT, $sql)
 			->execute(Database::instance('fb'))
 			->as_array();
+		foreach ($query as &$row) {
+				$row['NAME'] = iconv('Windows-1251', 'UTF-8//IGNORE', $row['NAME']);
+				$row['DESCRIPTION'] = iconv('Windows-1251', 'UTF-8//IGNORE', $row['DESCRIPTION']);
+			}
+			return $query;
 			
 		return $query;	
 	}
@@ -119,6 +128,95 @@ class Model_tss extends Model {
 		
 		return $query;	
 	}
+	
+	
+	public function get_server_by_id($id)
+	{
+		$sql = 'select s.id_server, s.name, s.ip, s.port, s."ACTIVE", stl.id_type, st.name as nameType 
+				from server s
+				join servertypelist stl on stl.id_server = s.id_server
+				join servertype st on st.id = stl.id_type
+				where s.id_server = '.$id;
+		
+		$query = DB::query(Database::SELECT, $sql)
+			->execute(Database::instance('fb'))
+			->as_array();
+		
+		if (!empty($query)) {
+			$row = $query[0];
+			// Преобразуем кодировку
+			$row['NAME'] = iconv('Windows-1251', 'UTF-8//IGNORE', $row['NAME']);
+			$row['NAMETYPE'] = iconv('Windows-1251', 'UTF-8//IGNORE', $row['NAMETYPE']);
+			return $row;
+		}
+		
+		return null;
+	}
+	
+	
+	
+	
+	public function update_server_by_id($data)
+	{
+		echo Debug::vars('161', Arr::get($data, 'name'));exit;
+		$sql = 'select s.id_server, s.name, s.ip, s.port, s."ACTIVE", stl.id_type, st.name as nameType 
+				from server s
+				join servertypelist stl on stl.id_server = s.id_server
+				join servertype st on st.id = stl.id_type
+				where s.id_server = '.$id;
+		
+		$query = DB::query(Database::SELECT, $sql)
+			->execute(Database::instance('fb'))
+			->as_array();
+		
+		if (!empty($query)) {
+			$row = $query[0];
+			// Преобразуем кодировку
+			$row['NAME'] = iconv('Windows-1251', 'UTF-8//IGNORE', $row['NAME']);
+			$row['NAMETYPE'] = iconv('Windows-1251', 'UTF-8//IGNORE', $row['NAMETYPE']);
+			return $row;
+		}
+		
+		return null;
+	}
+	
+	
+	
+	public function add_server($data)
+	{
+		echo Debug::vars('187', $data);//exit;
+		
+		
+		$id_server = DB::query(Database::SELECT, 'select id_server from  SERVER_GETID(1)')
+                ->execute(Database::instance('fb'))
+				->get('ID_SERVER');
+		
+		$sql = 'INSERT INTO SERVER (ID_SERVER, ID_DB, NAME, IP, PORT, "ACTIVE") VALUES (' .
+            (int)$id_server . ', ' .
+            (int)Arr::get($data, 'ID_DB') . ', ' .
+            '\'' . addslashes (Arr::get($data,'name')) . '\', ' .
+            (int) Arr::get($data,'ip') . ', ' .
+            (int) Arr::get($data,'port') . ', ' .
+            (int) Arr::get($data,'ACTIVE', 1) . ')';
+			
+			//echo Debug::vars('195', $sql);exit;
+			
+          try {
+            DB::query(Database::UPDATE, iconv('UTF-8', 'Windows-1251', $sql))
+                ->execute(Database::instance('fb'));
+            
+            return true;
+        } catch (Exception $e) {
+            Kohana::$log->add(Log::ERROR, 'Error updating table server: ' . $e->getMessage());
+            return false;
+        }
+		
+		return null;
+	}
+	
+	
+	
+	
 	
 	
 	
