@@ -60,10 +60,13 @@ class Model_tss extends Model {
     
     public function update_type($data)
     {
-        $sql = 'UPDATE servertype 
+        //echo Debug::vars('63', Arr::get($data, 'is_enabled'));exit;
+		 $is_enabled = isset($data['is_enabled']) && $data['is_enabled'] ? 1 : 0;
+		$sql = 'UPDATE servertype 
                 SET NAME = \'' . addslashes(Arr::get($data, 'name')) . '\',
                     DESCRIPTION = \'' . addslashes(Arr::get($data, 'description')) . '\',
-                    DATECHANGE = CURRENT_TIMESTAMP
+                    DATECHANGE = CURRENT_TIMESTAMP,
+					IS_ENABLED = '.$is_enabled.'
                 WHERE id = ' . (int)Arr::get($data, 'id');
         
         try {
@@ -139,13 +142,16 @@ class Model_tss extends Model {
         $id_server = DB::query(Database::SELECT, 'SELECT id_server FROM SERVER_GETID(1)')
             ->execute(Database::instance('fb'))
             ->get('ID_SERVER');
-        
+  // echo Debug::vars('145', Arr::get($data, 'ip') );//exit;      
+  // echo Debug::vars('145-0', implode('.', array_reverse(explode('.', Arr::get($data, 'ip')))) );exit;   
+
+$ip=implode('.', array_reverse(explode('.', Arr::get($data, 'ip'))));  
         $sql = 'INSERT INTO SERVER (ID_SERVER, ID_DB, NAME, IP, PORT, "ACTIVE") 
                 VALUES (
                     ' . (int)$id_server . ',
                     1,
                     \'' . addslashes(Arr::get($data, 'name')) . '\',
-                    ' . (int)Arr::get($data, 'ip') . ',
+                    ' . ip2long($ip) . ',
                     ' . (int)Arr::get($data, 'port') . ',
                     1
                 )';
@@ -162,11 +168,17 @@ class Model_tss extends Model {
     
     public function update_server($data)
     {
-        $sql = 'UPDATE SERVER 
+     
+$is_active = isset($data['is_active']) && $data['is_active'] ? 1 : 0;  
+
+$ip=implode('.', array_reverse(explode('.', Arr::get($data, 'ip'))));  
+
+
+	   $sql = 'UPDATE SERVER 
                 SET NAME = \'' . addslashes(Arr::get($data, 'name')) . '\',
-                    IP = ' . (int)Arr::get($data, 'ip') . ',
+                    IP = ' . ip2long($ip) . ',
                     PORT = ' . (int)Arr::get($data, 'port') . ',
-                    "ACTIVE" = ' . (int)Arr::get($data, 'is_active', 1) . '
+                    "ACTIVE" = ' . $is_active . '
                 WHERE ID_SERVER = ' . (int)Arr::get($data, 'id');
         
         try {

@@ -150,7 +150,8 @@ class Controller_TS extends Controller_Template {
      */
     private function _update_type()
     {
-        $data = Validation::factory($this->request->post());
+      
+	   $data = Validation::factory($this->request->post());
         $data->rule('id', 'not_empty')
              ->rule('id', 'digit')
              ->rule('name', 'not_empty')

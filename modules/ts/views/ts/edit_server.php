@@ -32,7 +32,7 @@
                 
                 <div class="form-group">
                     <?php echo Form::label('ip', __('IP-адрес')); ?>
-                    <?php echo Form::input('ip', $server['IP'], array(
+                    <?php echo Form::input('ip', Model::factory('Stat')->IntToIP($server['IP']), array(
                         'class' => 'form-control',
                         'placeholder' => '192.168.1.1',
                         'required' => 'required'

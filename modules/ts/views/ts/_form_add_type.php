@@ -34,7 +34,8 @@ echo Form::open('ts/control_types');
         <?php echo Form::button('todo', __('Добавить'), array(
             'value' => 'add_type',
             'class' => 'btn btn-success',
-            'type' => 'submit'
+            'type' => 'submit',
+			    'disabled' => 'disabled'
         )); ?>
     </div>
 </div>
