@@ -12,13 +12,14 @@
             <tr>
                 <th width="30"><?php echo __('№'); ?></th>
                 <th><?php echo __('ID'); ?></th>
+                <th><?php echo __('SNAME'); ?></th>
                 <th><?php echo __('Название'); ?></th>
                 <th><?php echo __('Описание'); ?></th>
                 <th><?php echo __('Активен'); ?></th>
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($listTypes as $index => $type): ?>
+            <?php foreach ($listTypes as $index => $type)://exit; ?>
                 <tr>
                     <td>
                         <?php if ($is_logged_in): ?>
@@ -28,6 +29,7 @@
                         <?php endif; ?>
                     </td>
                     <td><?php echo HTML::chars($type['ID']); ?></td>
+                    <td><?php echo HTML::chars(Arr::get($type,'SNAME')); ?></td>
                     <td><?php echo HTML::chars($type['NAME']); ?></td>
                     <td><?php echo HTML::chars($type['DESCRIPTION']); ?></td>
                     <td>

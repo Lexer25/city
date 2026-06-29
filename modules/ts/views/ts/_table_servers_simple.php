@@ -29,6 +29,7 @@
                 </tr>
             <?php else: ?>
                 <?php foreach ($listTS as $index => $server): ?>
+				
                     <tr>
                         <td>
                             <?php if ($is_logged_in): ?>
