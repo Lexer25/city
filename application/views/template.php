@@ -96,26 +96,26 @@ $container_class = (isset($full_width) && $full_width) ? 'container-fluid' : 'co
 
 <div class="<?php echo $container_class; ?>">
     <span id="time-top"></span>
-    <div class="row">
+    
         <?php
         // Подготовка данных для меню (код не меняется)
         $menu_data = array(
-            'menu_active' => Arr::get($_SESSION, 'menu_active', ''),
             'config' => $config,
-            'logged_in' => Auth::instance()->logged_in(),
-            'user' => Auth::instance()->get_user(),
-            'view_without_auth' => (array) $config->get('view_without_auth', array())
         );
         
         echo View::factory('top_menu', $menu_data)->render();
-        echo $content;
-        ?>
-        
+		?>
+		
+
+			<?php			
+				echo $content;
+			?>
+ 
         <button onclick="topFunction()" id="myBtn" title="<?php echo __('top'); ?>">
             <?php echo __('top'); ?>
         </button>
 
-   </div>
+   
 </div>
 
 <!-- Остальная часть шаблона (таймеры и скрипты) остаётся без изменений -->
@@ -145,5 +145,37 @@ $container_class = (isset($full_width) && $full_width) ? 'container-fluid' : 'co
     });
     </script>
 
+<script>
+$(document).ready(function() {
+    $('.dropdown-toggle').dropdown();
+});
+</script>
+
+<style>
+/* В вашем CSS файле */
+.nav {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;  /* Горизонтальное расположение */
+    gap: 20px;      /* Расстояние между пунктами */
+}
+
+.nav li {
+    display: inline-block;  /* Альтернатива для старых браузеров */
+}
+
+/* Или используйте float (старый способ) */
+.nav li {
+    float: left;
+    margin-right: 20px;
+}
+
+.nav:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+</style>
 </body>
 </html>

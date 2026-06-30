@@ -8,7 +8,7 @@ return array(
 		'auth' => array(
 
 			// Whether this modules userguide pages should be shown
-			'enabled' => TRUE,
+			'enabled' => false,
 
 			// The name that should show up on the userguide index page
 			'name' => 'Auth',

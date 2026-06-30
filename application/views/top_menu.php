@@ -3,159 +3,21 @@
 <!-- Static navbar -->
 <nav class="navbar navbar-default navbar-fixed-top disable" role="navigation">
     <div class="container-fluid">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only"><?php echo HTML::chars(__('Toggle navigation')) ?></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <?php echo HTML::anchor('dashboard', HTML::chars(__('City')), array('class' => 'navbar-brand')) ?>
-        </div>
-        
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <?php
-                // Массив основных пунктов меню (без сервисных)
-                $menu_items = array(
-                    'load' => array(
-                        'title' => __('Load'),
-                        'url' => 'dev/load',
-                        'condition' => (isset($view_without_auth['load']) && $view_without_auth['load']) ? true : $logged_in
-                    ),
-                    'load_order' => array(
-                        'title' => __('Load_order'),
-                        'url' => 'dev/load_order',
-                        'condition' => (isset($view_without_auth['load_order']) && $view_without_auth['load_order']) ? true : $logged_in
-                    ),
-                    'device_control' => array(
-                        'title' => __('device_control'),
-                        'url' => 'dev/device_control',
-                        'condition' => (isset($view_without_auth['device_control']) && $view_without_auth['device_control']) ? true : $logged_in
-                    ),
-                    'events' => array(
-                        'title' => __('events'),
-                        'url' => 'event',
-                        'condition' => (isset($view_without_auth['events']) && $view_without_auth['events']) ? true : $logged_in
-                    ),
-                    'people' => array(
-                        'title' => __('people'),
-                        'url' => 'people/peopleInfo',
-                        'condition' => (isset($view_without_auth['people']) && $view_without_auth['people']) ? true : $logged_in
-                    ),
-                    'door' => array(
-                        'title' => __('door'),
-                        'url' => 'door/doorInfo',
-                        'condition' => (isset($view_without_auth['door']) && $view_without_auth['door']) ? true : $logged_in
-                    ),
-                    'log' => array(
-                        'title' => __('log'),
-                        'url' => 'dashboard/log',
-                        'condition' => (isset($view_without_auth['log']) && $view_without_auth['log']) ? true : $logged_in
-                    ),
-                    'identifier' => array(
-                        'title' => __('identifier'),
-                        'url' => 'identifier',
-                        'condition' => $logged_in
-                    ),
-					'guide' => array(
-                        'title' => __('guide'),
-                        'url' => 'guide',
-                        'condition' => true
-                    ),
-					'about' => array(
-                        'title' => __('О программе'),
-                        'url' => 'about',
-                        'condition' => true
-                    )
-                );
-                
-                // Вывод основных пунктов меню
-                foreach ($menu_items as $key => $item) {
-                    $is_visible = isset($item['condition']) ? (bool)$item['condition'] : false;
-                    
-                    if ($is_visible) {
-                        $active_class = ($menu_active == $key) ? ' class="active"' : '';
-                        $url = $item['url'];
-                        $title = HTML::chars($item['title']);
-                        echo '<li' . $active_class . '>' . HTML::anchor($url, $title) . '</li>';
-                    }
-                }
-                
-                // Пункт "Сервисы" с выпадающим списком
-                $services_items = array(
-                    'skud' => array(
-                        'title' => __('сводная'),
-                        'url' => 'skud',
-                        'condition' => false
-                    ),
-                    'eximdata' => array(
-                        'title' => __('Экспорт/импорт'),
-                        'url' => 'eximdata',
-                        'condition' => true
-                    ),
-                    'apb' => array(
-                        'title' => __('АПБ'),
-                        'url' => 'apb',
-                        'condition' => true
-                    ),
-                    'parsec' => array(
-                        'title' => __('parsec'),
-                        'url' => 'parsec',
-                        'condition' => true
-                    ),
-                    'setting' => array(
-                        'title' => __('setting.menu_title'),
-                        'url' => 'setting',
-                        'condition' => true
-                    ),
-					'dbsetting' => array(
-                        'title' => __('База данных'),
-                        'url' => 'dbsetting',
-                        'condition' => true
-                    ),
-					'eventConfig' => array(
-						'title' => __('Настройка событий'),
-						'url' => 'eventConfig',
-						'condition' => true
-					)
-										
-                );
-                
-                // Проверяем, есть ли видимые пункты в сервисах
-                $has_visible_services = false;
-                foreach ($services_items as $item) {
-                    if (isset($item['condition']) && (bool)$item['condition']) {
-                        $has_visible_services = true;
-                        break;
-                    }
-                }
-                
-                // Выводим пункт "Сервисы" только если есть видимые подпункты
-                if ($has_visible_services):
-                ?>
-                <li class="dropdown <?php echo (in_array($menu_active, array_keys($services_items))) ? 'active' : ''; ?>">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <?php echo HTML::chars(__('services')) ?> <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <?php
-                        foreach ($services_items as $key => $item) {
-                            $is_visible = isset($item['condition']) ? (bool)$item['condition'] : false;
-                            
-                            if ($is_visible) {
-                                $active_class = ($menu_active == $key) ? ' class="active"' : '';
-                                $url = $item['url'];
-                                $title = HTML::chars($item['title']);
-                                echo '<li' . $active_class . '>' . HTML::anchor($url, $title) . '</li>';
-                            }
-                        }
-                        ?>
-                    </ul>
-                </li>
-                <?php endif; ?>
-            </ul>
-            
+	<div class="navbar-collapse collapse">
+		<?php 
+			echo Menu_Renderer::render('menu', 'nav navbar-nav');
+		?>
+	</div>
+	
+	<div class="navbar-collapse collapse">
+		<?php 
+			echo Menu_Renderer::render('adm', 'nav navbar-nav');
+		?>
+	</div>
+	
+	
+       <!-- В шаблоне -->
+  
             <!-- Правая часть меню (авторизация) -->
             <ul class="nav navbar-nav navbar-right">
                 <li>
@@ -226,10 +88,9 @@
                     <?php endif; ?>
                 </li>
             </ul>
-        </div>
- 
+
         <!-- Версия и время -->
-        <div class="navbar-collapse collapse">
+        <div >
             <?php 
             // подсветка версии в течении 3 суток после обновления.
             // если дата обновления отсутствует, то выводится только версия, без даты обновления
@@ -278,4 +139,104 @@
             ?>
         </div>
     </div>
+	<!-- Добавьте стили -->
+<style>
+/* Компенсация фиксированного меню */
+body {
+    padding-top: 70px; /* Значение по умолчанию */
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-top: 100px;
+    }
+}
+
+/* Если меню очень высокое (много пунктов) */
+@media (max-width: 1200px) {
+    .navbar-collapse.collapse.in {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+}
+</style>
+
+<script>
+// Динамическая компенсация высоты меню
+(function() {
+    function fixNavbarOverlap() {
+        var $navbar = $('.navbar-fixed-top');
+        if ($navbar.length && $navbar.css('position') === 'fixed') {
+            var navbarHeight = $navbar.outerHeight();
+            if (navbarHeight > 0) {
+                $('body').css('padding-top', navbarHeight + 'px');
+            }
+        }
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixNavbarOverlap);
+    } else {
+        fixNavbarOverlap();
+    }
+    
+    $(window).on('resize', fixNavbarOverlap);
+})();
+</script>
 </nav>
+<style>
+/* В city.css добавьте в самый конец */
+
+/* Ограничиваем ширину меню и добавляем прокрутку */
+@media (max-width: 1400px) {
+    .navbar-collapse {
+        overflow-x: auto;
+        overflow-y: visible;
+        white-space: nowrap;
+    }
+    
+    .navbar-nav {
+        display: inline-block;
+        float: none;
+        white-space: nowrap;
+    }
+    
+    .navbar-nav > li {
+        display: inline-block;
+        float: none;
+    }
+    
+    /* Стили для скроллбара */
+    .navbar-collapse::-webkit-scrollbar {
+        height: 3px;
+    }
+    
+    .navbar-collapse::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    
+    .navbar-collapse::-webkit-scrollbar-thumb {
+        background: #888;
+    }
+}
+
+/* Компактный режим для всех экранов */
+.navbar-nav > li > a {
+    padding: 15px 10px !important;
+    font-size: 13px !important;
+}
+
+/* Скрываем иконки везде для экономии места */
+.navbar-nav > li > a > i,
+.navbar-nav > li > a > [class^="fa-"] {
+    display: none !important;
+}
+
+/* Убираем лишние отступы */
+.container-fluid {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+</style>
+
+
