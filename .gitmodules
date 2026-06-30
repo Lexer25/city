@@ -64,3 +64,6 @@
 	path = modules/ts
 	url = https://github.com/Lexer25/adm_ts.git
 	branch = main
+[submodule "modules/devices"]
+	path = modules/devices
+	url = https://github.com/Lexer25/adm_devices.git
