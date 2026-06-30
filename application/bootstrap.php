@@ -154,6 +154,7 @@ Kohana::modules(array(
 	 'timezone' => MODPATH.'timezone',
 	 'auditlog' => MODPATH.'auditlog',
 	 'ts' => MODPATH.'ts',
+	 'devices' => MODPATH.'devices',
 	));
 	
 	
