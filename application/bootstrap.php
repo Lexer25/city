@@ -153,6 +153,7 @@ Kohana::modules(array(
 	 'holiday' => MODPATH.'holiday',
 	 'timezone' => MODPATH.'timezone',
 	 'auditlog' => MODPATH.'auditlog',
+	 'ts' => MODPATH.'ts',
 	));
 	
 	

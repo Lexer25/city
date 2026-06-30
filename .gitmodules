@@ -63,3 +63,7 @@
 [submodule "modules/holiday"]
 	path = modules/holiday
 	url = https://github.com/Lexer25/adm_holiday.git
+[submodule "modules/ts"]
+	path = modules/ts
+	url = https://github.com/Lexer25/adm_ts.git
+	branch = main
