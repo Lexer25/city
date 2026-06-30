@@ -144,7 +144,7 @@ Kohana::modules(array(
 	 'about' => MODPATH.'about', // About module
 	 'dbsetting' => MODPATH.'dbsetting', // Database management module
 	 'eventConfig' => MODPATH.'eventConfig', // Конфигурация типов событий
-	 'ts' => MODPATH.'ts', // 
+	 //'ts' => MODPATH.'ts', // 
 	 //'device' => MODPATH.'cfg/device', // 
 	 'log' => MODPATH.'log', // 
 	 'bas' => MODPATH.'bas', // модуль для работы с bas-ip
