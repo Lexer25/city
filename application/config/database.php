@@ -5,7 +5,7 @@ return array
 		'fb' => array(
 				'type'			=> 'pdo',
 				'connection'	=> array(
-					'dsn' => 'odbc:HL',
+					'dsn' => 'odbc:Kalibr',
 					'charset'   => 'windows-1251',
 					)
 				),

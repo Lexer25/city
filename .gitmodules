@@ -67,3 +67,7 @@
 [submodule "modules/devices"]
 	path = modules/devices
 	url = https://github.com/Lexer25/adm_devices.git
+[submodule "modules/monitors"]
+	path = modules/monitors
+	url = https://github.com/Lexer25/crm_monitors.git
+	branch = main
