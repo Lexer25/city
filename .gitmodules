@@ -71,3 +71,7 @@
 	path = modules/monitors
 	url = https://github.com/Lexer25/crm_monitors.git
 	branch = main
+[submodule "modules/devgroup"]
+	path = modules/devgroup
+	url = https://github.com/Lexer25/adm_devgroup.git
+	branch = main
