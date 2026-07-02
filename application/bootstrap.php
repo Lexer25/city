@@ -156,6 +156,7 @@ Kohana::modules(array(
 	 'auditlog' => MODPATH.'auditlog',
 	 'ts' => MODPATH.'ts',
 	 'devices' => MODPATH.'devices',
+	 'monitors' => MODPATH.'monitors',
 	));
 	
 	
