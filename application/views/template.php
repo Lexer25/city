@@ -28,13 +28,15 @@
     <link rel="stylesheet" href="/city/static/css/2.31.3/jquery.tablesorter.pager.min.css">
 	
 	<!-- ДОБАВЬТЕ jQuery UI CSS -->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    
+    <link rel="stylesheet" href="/city/static/css/jquery-ui.css">
 	
 	
     
     <!-- JavaScript -->
     <script src="/city/static/js/jquery-2.2.4.js"></script>
-	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+	
+	<script src="/city/static/js/jquery-ui.min.js"></script>
 	
     <script src="/city/static/js/moment-with-locales.min.js"></script>
     <script src="/city/static/js/bootstrap.min.js"></script>
