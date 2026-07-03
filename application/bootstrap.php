@@ -154,9 +154,11 @@ Kohana::modules(array(
 	 'holiday' => MODPATH.'holiday',
 	 'timezone' => MODPATH.'timezone',
 	 'auditlog' => MODPATH.'auditlog',
-	 'ts' => MODPATH.'ts',
-	 'devices' => MODPATH.'devices',
-	 'monitors' => MODPATH.'monitors',
+	 'ts' => MODPATH.'ts',//управление транспортными серверами
+	 'devices' => MODPATH.'devices',//управление контроллерами
+	 'monitors' => MODPATH.'monitors',//монитор в браузере
+	 'devgroup' => MODPATH.'devgroup',//группы устройств
+	 'floorplan' => MODPATH.'floorplan',//планировки
 	));
 	
 	

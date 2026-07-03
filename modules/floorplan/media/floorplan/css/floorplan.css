@@ -1,0 +1,54 @@
+.floorplan-container {
+    background: #fafafa;
+    min-height: 400px;
+    position: relative;
+}
+
+.floorplan-point {
+    z-index: 10;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.floorplan-point:hover {
+    z-index: 20;
+}
+
+.floorplan-point .point-icon {
+    text-shadow: 0 0 5px rgba(255,255,255,0.8);
+}
+
+.floorplan-point.status-online .point-icon {
+    opacity: 1;
+}
+
+.floorplan-point.status-offline .point-icon {
+    opacity: 0.4;
+}
+
+.floorplan-point.draggable {
+    cursor: move;
+}
+
+.floorplan-point.draggable:hover .point-actions {
+    display: block !important;
+}
+
+.point-actions {
+    display: none;
+    z-index: 30;
+}
+
+.text-success {
+    color: #5cb85c;
+}
+
+.text-danger {
+    color: #d9534f;
+}
+
+.floorplan-thumb {
+    height: 200px;
+    object-fit: cover;
+    background: #f0f0f0;
+}

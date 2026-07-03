@@ -2,7 +2,8 @@
 // application/classes/Controller/Template.php
 class Controller_Template extends Kohana_Controller_Template {
     
-    /**
+   
+	/**
      * Переопределяем before() для автоматической подготовки данных
      */
     public function before() {

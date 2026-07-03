@@ -26,15 +26,24 @@
     <link rel="stylesheet" href="/city/static/css/city.css">
     <link rel="stylesheet" href="/city/static/css/2.31.3/theme.blue.min.css">
     <link rel="stylesheet" href="/city/static/css/2.31.3/jquery.tablesorter.pager.min.css">
+	
+	<!-- ДОБАВЬТЕ jQuery UI CSS -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	
+	
     
     <!-- JavaScript -->
     <script src="/city/static/js/jquery-2.2.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+	
     <script src="/city/static/js/moment-with-locales.min.js"></script>
     <script src="/city/static/js/bootstrap.min.js"></script>
     <script src="/city/static/js/bootstrap-datetimepicker.min.js"></script>
     <script src="/city/static/js/2.31.3/jquery.tablesorter.min.js"></script>
     <script src="/city/static/js/2.31.3/jquery.tablesorter.widgets.min.js"></script>
     <script src="/city/static/js/2.31.3/jquery.tablesorter.pager.min.js"></script>
+	
+	
 </head>
 
 <body>
@@ -69,7 +78,12 @@
             'odbc' => $odbc_data,
         ))->render(); 
         ?>
-        
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
         <!-- Контент -->
         <?php echo isset($content) ? $content : ''; ?>
         
