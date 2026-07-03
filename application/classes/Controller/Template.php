@@ -78,7 +78,7 @@ protected function _getODBC() {
 	//echo Debug::vars('78', $config['fb']['connection']['dsn']);exit;
     $result=array(
 		
-		'dsn'=> isset($db_config['fb']['connection']['dsn'])?  $config['fb']['connection']['dsn'] : '---',
+		'dsn'=> isset($config['fb']['connection']['dsn'])?  $config['fb']['connection']['dsn'] : '---',
 	
 	
 	);
