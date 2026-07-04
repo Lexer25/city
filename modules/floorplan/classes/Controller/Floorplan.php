@@ -1,15 +1,15 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
 class Controller_Floorplan extends Controller_Template { 
-	
-	public $template = 'template';
+    
+    public $template = 'template';
+    
     public function before()
     {
         parent::before();
-		$session = Session::instance();
-		  $this->is_admin = Auth::instance()->logged_in('admin');
+        $session = Session::instance();
+        $this->is_admin = Auth::instance()->logged_in('admin');
         View::bind_global('is_admin', $this->is_admin); 
-		
     }
 
     /**
@@ -19,12 +19,14 @@ class Controller_Floorplan extends Controller_Template {
     {
         $model = Model::factory('Floorplanm');
         $floorplans = $model->getFloorplans();
+        $buildings = $model->getBuildings();
 
         $content = View::factory('floorplan/index', array(
             'floorplans' => $floorplans,
+            'buildings' => $buildings,
             'is_admin' => $this->is_admin,
         ));
-//echo Debug::vars('27', $this);exit;
+
         $this->template->content = $content;
     }
 
@@ -42,17 +44,19 @@ class Controller_Floorplan extends Controller_Template {
 
         $floorplan = $model->getFloorplanById($id);
         $points = $model->getPointsByFloorplan($id);
+        $building = $model->getBuildingById($floorplan['id_building']);
+        $floors = $model->getFloorsByBuilding($floorplan['id_building']);
 
         // Получаем статусы устройств (имитация)
         $deviceStatuses = $this->getDeviceStatuses($points);
 
-        $content = View::factory('floorplan/edit', array(
+        $content = View::factory('floorplan/view', array(
             'floorplan' => $floorplan,
             'points' => $points,
+            'floors' => $floors,
+            'building' => $building,
             'deviceStatuses' => $deviceStatuses,
-            'availableDevices' => $model->getAvailableDevices(),
             'is_admin' => $this->is_admin,
-            'mode' => 'view',
         ));
 
         $this->template->full_width = true;
@@ -60,7 +64,7 @@ class Controller_Floorplan extends Controller_Template {
     }
 
     /**
-     * Редактирование плана
+     * Редактирование плана (с поддержкой этажей и замены изображения)
      */
     public function action_edit()
     {
@@ -76,7 +80,25 @@ class Controller_Floorplan extends Controller_Template {
         }
 
         $floorplan = $model->getFloorplanById($id);
-        $points = $model->getPointsByFloorplan($id);
+        $building = $model->getBuildingById($floorplan['id_building']);
+        $floors = $model->getFloorsByBuilding($floorplan['id_building']);
+
+        // Получаем ID текущего этажа из GET или используем текущий
+        $floorParam = $this->request->query('floor');
+        if ($floorParam !== null && $floorParam !== '') {
+            $currentFloorId = (int)$floorParam;
+        } else {
+            $currentFloorId = $id;
+        }
+        
+        // Получаем текущий этаж
+        $currentFloor = $model->getFloorplanById($currentFloorId);
+        if (!$currentFloor) {
+            $currentFloor = $floorplan;
+            $currentFloorId = $id;
+        }
+        
+        $points = $model->getPointsByFloorplan($currentFloorId);
 
         // Обработка POST запроса
         if ($this->request->method() == HTTP_Request::POST) {
@@ -88,14 +110,48 @@ class Controller_Floorplan extends Controller_Template {
                 $description = Arr::get($post, 'description');
                 $width = Arr::get($post, 'width', 800);
                 $height = Arr::get($post, 'height', 600);
+                
+                // Обработка нового изображения
+                $image = $currentFloor['image']; // По умолчанию оставляем текущее
+                
+                if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+                    $uploadDir = DOCROOT . 'media/floorplan/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0777, true);
+                    }
 
-                $result = $model->updateFloorplan($id, $name, $description, $floorplan['image'], $width, $height);
+                    $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                    $filename = 'floorplan_' . time() . '.' . $ext;
+                    $targetPath = $uploadDir . $filename;
+
+                    if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
+                        // Удаляем старое изображение (опционально)
+                        if (!empty($currentFloor['image']) && file_exists(DOCROOT . $currentFloor['image'])) {
+                            @unlink(DOCROOT . $currentFloor['image']);
+                        }
+                        $image = 'media/floorplan/' . $filename;
+                        
+                        // Обновляем размеры
+                        $imageInfo = getimagesize($uploadDir . $filename);
+                        $width = $imageInfo[0];
+                        $height = $imageInfo[1];
+                    }
+                }
+
+                $result = $model->updateFloorplan(
+                    $currentFloorId, 
+                    $name, 
+                    $description, 
+                    $image, 
+                    $width, 
+                    $height
+                );
 
                 if ($result) {
                     Session::instance()->set('message', 'План успешно обновлен');
                     Session::instance()->set('message_type', 'success');
                 }
-                $this->redirect('floorplan/edit/' . $id);
+                $this->redirect('floorplan/edit/' . $id . '?floor=' . $currentFloorId);
             }
 
             if ($action == 'add_point') {
@@ -106,11 +162,11 @@ class Controller_Floorplan extends Controller_Template {
                 $label = Arr::get($post, 'label', '');
 
                 if ($deviceId > 0) {
-                    $model->addPoint($id, $x, $y, $deviceId, $point_type, $label);
+                    $model->addPoint($currentFloorId, $x, $y, $deviceId, $point_type, $label);
                     Session::instance()->set('message', 'Точка добавлена');
                     Session::instance()->set('message_type', 'success');
                 }
-                $this->redirect('floorplan/edit/' . $id);
+                $this->redirect('floorplan/edit/' . $id . '?floor=' . $currentFloorId);
             }
 
             if ($action == 'delete_point') {
@@ -120,16 +176,56 @@ class Controller_Floorplan extends Controller_Template {
                     Session::instance()->set('message', 'Точка удалена');
                     Session::instance()->set('message_type', 'success');
                 }
-                $this->redirect('floorplan/edit/' . $id);
+                $this->redirect('floorplan/edit/' . $id . '?floor=' . $currentFloorId);
+            }
+
+            if ($action == 'copy_floor') {
+                $newFloorNumber = (int)Arr::get($post, 'new_floor_number', 0);
+                $newFloorName = Arr::get($post, 'new_floor_name', '');
+
+                if ($newFloorNumber > 0 && !$model->floorExists($floorplan['id_building'], $newFloorNumber)) {
+                    $newId = $model->copyFloorplan($currentFloorId, $newFloorNumber, $newFloorName);
+                    if ($newId) {
+                        Session::instance()->set('message', 'Этаж скопирован успешно');
+                        Session::instance()->set('message_type', 'success');
+                        $this->redirect('floorplan/edit/' . $id . '?floor=' . $newId);
+                    }
+                } else {
+                    Session::instance()->set('message', 'Ошибка при копировании этажа');
+                    Session::instance()->set('message_type', 'danger');
+                }
+                $this->redirect('floorplan/edit/' . $id . '?floor=' . $currentFloorId);
+            }
+
+            if ($action == 'delete_floor') {
+                $deleteFloorId = (int)Arr::get($post, 'delete_floor_id', 0);
+                if ($deleteFloorId && $deleteFloorId != $id) {
+                    $model->deleteFloorplan($deleteFloorId);
+                    Session::instance()->set('message', 'Этаж удален');
+                    Session::instance()->set('message_type', 'success');
+                } else {
+                    Session::instance()->set('message', 'Нельзя удалить основной этаж');
+                    Session::instance()->set('message_type', 'danger');
+                }
+                $this->redirect('floorplan/edit/' . $id . '?floor=' . $currentFloorId);
             }
         }
 
+        // Получаем статусы устройств
+        $deviceStatuses = $this->getDeviceStatuses($points);
+
         $content = View::factory('floorplan/edit', array(
             'floorplan' => $floorplan,
+            'current_floor' => $currentFloor,
+            'floors' => $floors,
+            'building' => $building,
             'points' => $points,
+            'deviceStatuses' => $deviceStatuses,
             'availableDevices' => $model->getAvailableDevices(),
             'is_admin' => $this->is_admin,
             'mode' => 'edit',
+            'current_floor_id' => $currentFloorId,
+            'main_floor_id' => $id,
         ));
 
         $this->template->full_width = true;
@@ -241,7 +337,7 @@ class Controller_Floorplan extends Controller_Template {
     }
 
     /**
-     * Добавление нового плана
+     * Добавление нового плана (этажа)
      */
     public function action_add()
     {
@@ -250,12 +346,16 @@ class Controller_Floorplan extends Controller_Template {
         }
 
         $model = Model::factory('Floorplanm');
+        $buildings = $model->getBuildings();
 
         if ($this->request->method() == HTTP_Request::POST) {
             $post = $this->request->post();
 
             $name = Arr::get($post, 'name');
             $description = Arr::get($post, 'description');
+            $buildingId = (int)Arr::get($post, 'building_id', 1);
+            $floorNumber = (int)Arr::get($post, 'floor_number', 1);
+            $floorName = Arr::get($post, 'floor_name', '');
 
             // Обработка загрузки изображения
             $image = '';
@@ -282,6 +382,7 @@ class Controller_Floorplan extends Controller_Template {
                 $content = View::factory('floorplan/add', array(
                     'errors' => $errors,
                     'post' => $post,
+                    'buildings' => $buildings,
                     'is_admin' => $this->is_admin,
                 ));
                 $this->template->content = $content;
@@ -293,7 +394,8 @@ class Controller_Floorplan extends Controller_Template {
             $width = $imageInfo[0];
             $height = $imageInfo[1];
 
-            $result = $model->addFloorplan($name, $description, $image, $width, $height);
+            $result = $model->addFloorplan($name, $description, $image, $width, $height, 
+                $buildingId, $floorNumber, $floorName);
 
             if ($result) {
                 Session::instance()->set('message', 'План успешно добавлен');
@@ -308,6 +410,7 @@ class Controller_Floorplan extends Controller_Template {
         $content = View::factory('floorplan/add', array(
             'errors' => array(),
             'post' => array(),
+            'buildings' => $buildings,
             'is_admin' => $this->is_admin,
         ));
 
@@ -353,5 +456,177 @@ class Controller_Floorplan extends Controller_Template {
             }
         }
         return $statuses;
+    }
+
+    // ==========================================
+    // УПРАВЛЕНИЕ ЗДАНИЯМИ
+    // ==========================================
+
+    /**
+     * Список зданий
+     */
+    public function action_buildings()
+    {
+        if (!$this->is_admin) {
+            $this->redirect('floorplan');
+        }
+
+        $model = Model::factory('Floorplanm');
+        $buildings = $model->getBuildings();
+
+        foreach ($buildings as &$building) {
+            $floors = $model->getFloorsByBuilding($building['id_building']);
+            $building['floors_count_actual'] = count($floors);
+        }
+
+        $content = View::factory('floorplan/buildings', array(
+            'buildings' => $buildings,
+            'is_admin' => $this->is_admin,
+        ));
+
+        $this->template->content = $content;
+    }
+
+    /**
+     * Добавление здания
+     */
+    public function action_addBuilding()
+    {
+        if (!$this->is_admin) {
+            $this->redirect('floorplan');
+        }
+
+        $model = Model::factory('Floorplanm');
+
+        if ($this->request->method() == HTTP_Request::POST) {
+            $post = $this->request->post();
+
+            $name = Arr::get($post, 'name');
+            $address = Arr::get($post, 'address', '');
+            $floorsCount = (int)Arr::get($post, 'floors_count', 1);
+
+            $errors = array();
+            if (empty($name)) {
+                $errors['name'] = 'Название здания обязательно';
+            }
+
+            if (empty($errors)) {
+                $result = $model->addBuilding($name, $address, $floorsCount);
+
+                if ($result) {
+                    Session::instance()->set('message', 'Здание успешно добавлено');
+                    Session::instance()->set('message_type', 'success');
+                    $this->redirect('floorplan/buildings');
+                } else {
+                    Session::instance()->set('message', 'Ошибка при добавлении здания');
+                    Session::instance()->set('message_type', 'danger');
+                }
+            }
+
+            $content = View::factory('floorplan/add_building', array(
+                'errors' => $errors,
+                'post' => $post,
+                'is_admin' => $this->is_admin,
+            ));
+            $this->template->content = $content;
+            return;
+        }
+
+        $content = View::factory('floorplan/add_building', array(
+            'errors' => array(),
+            'post' => array(),
+            'is_admin' => $this->is_admin,
+        ));
+
+        $this->template->content = $content;
+    }
+
+    /**
+     * Редактирование здания
+     */
+    public function action_editBuilding()
+    {
+        if (!$this->is_admin) {
+            $this->redirect('floorplan');
+        }
+
+        $id = (int)$this->request->param('id', 0);
+        $model = Model::factory('Floorplanm');
+
+        if (!$id || !$model->buildingExists($id)) {
+            $this->redirect('floorplan/buildings');
+        }
+
+        $building = $model->getBuildingById($id);
+
+        if ($this->request->method() == HTTP_Request::POST) {
+            $post = $this->request->post();
+
+            $name = Arr::get($post, 'name');
+            $address = Arr::get($post, 'address', '');
+            $floorsCount = (int)Arr::get($post, 'floors_count', 1);
+
+            $errors = array();
+            if (empty($name)) {
+                $errors['name'] = 'Название здания обязательно';
+            }
+
+            if (empty($errors)) {
+                $result = $model->updateBuilding($id, $name, $address, $floorsCount);
+
+                if ($result) {
+                    Session::instance()->set('message', 'Здание успешно обновлено');
+                    Session::instance()->set('message_type', 'success');
+                    $this->redirect('floorplan/buildings');
+                } else {
+                    Session::instance()->set('message', 'Ошибка при обновлении здания');
+                    Session::instance()->set('message_type', 'danger');
+                }
+            }
+
+            $content = View::factory('floorplan/edit_building', array(
+                'building' => $building,
+                'errors' => $errors,
+                'post' => $post,
+                'is_admin' => $this->is_admin,
+            ));
+            $this->template->content = $content;
+            return;
+        }
+
+        $content = View::factory('floorplan/edit_building', array(
+            'building' => $building,
+            'errors' => array(),
+            'post' => array(),
+            'is_admin' => $this->is_admin,
+        ));
+
+        $this->template->content = $content;
+    }
+
+    /**
+     * Удаление здания
+     */
+    public function action_deleteBuilding()
+    {
+        if (!$this->is_admin) {
+            $this->redirect('floorplan');
+        }
+
+        $id = (int)$this->request->param('id', 0);
+        $model = Model::factory('Floorplanm');
+
+        if ($id && $model->buildingExists($id)) {
+            $result = $model->deleteBuilding($id);
+            if ($result['success']) {
+                Session::instance()->set('message', 'Здание удалено');
+                Session::instance()->set('message_type', 'success');
+            } else {
+                Session::instance()->set('message', $result['error']);
+                Session::instance()->set('message_type', 'danger');
+            }
+        }
+
+        $this->redirect('floorplan/buildings');
     }
 }

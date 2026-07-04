@@ -23,3 +23,22 @@
 - `/floorplan/view/<id>` - просмотр плана
 - `/floorplan/edit/<id>` - редактирование плана
 - `/floorplan/add` - добавление нового плана
+
+modules/floorplan/
+├── classes/
+│   ├── Controller/
+│   │   └── Floorplan.php          ✅
+│   └── Model/
+│       └── Floorplanm.php         ✅
+├── views/
+│   └── floorplan/
+│       ├── index.php              ✅
+│       ├── view.php               ✅
+│       ├── edit.php               ✅
+│       └── add.php                ✅
+├── media/
+│   └── floorplan/
+│       └── css/
+│           └── floorplan.css      ✅
+├── init.php                       ✅
+└── README.md                      ✅

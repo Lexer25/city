@@ -12,6 +12,9 @@
             <a href="<?php echo URL::site('floorplan/add'); ?>" class="btn btn-success" style="margin-bottom: 15px;">
                 <span class="glyphicon glyphicon-plus"></span> Добавить план
             </a>
+            <a href="<?php echo URL::site('floorplan/buildings'); ?>" class="btn btn-info" style="margin-bottom: 15px;">
+                <span class="glyphicon glyphicon-building"></span> Управление зданиями
+            </a>
         <?php endif; ?>
 
         <!-- Сообщения -->
@@ -37,6 +40,9 @@
                                 <p><?php echo htmlspecialchars($plan['description']); ?></p>
                                 <p>
                                     <span class="label label-info">Точек: <?php echo $plan['points_count']; ?></span>
+                                    <?php if (isset($plan['floor_number'])): ?>
+                                        <span class="label label-default">Этаж: <?php echo $plan['floor_number']; ?></span>
+                                    <?php endif; ?>
                                 </p>
                                 <p>
                                     <a href="<?php echo URL::site('floorplan/view/' . $plan['id_floorplan']); ?>" class="btn btn-primary">

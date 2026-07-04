@@ -56,6 +56,33 @@ Route::set('floorplan_add', 'floorplan/add')
         'action' => 'add',
     ));
 
+// ==========================================
+// УПРАВЛЕНИЕ ЗДАНИЯМИ
+// ==========================================
+Route::set('floorplan_buildings', 'floorplan/buildings')
+    ->defaults(array(
+        'controller' => 'Floorplan',
+        'action' => 'buildings',
+    ));
+
+Route::set('floorplan_addBuilding', 'floorplan/addBuilding')
+    ->defaults(array(
+        'controller' => 'Floorplan',
+        'action' => 'addBuilding',
+    ));
+
+Route::set('floorplan_editBuilding', 'floorplan/editBuilding/<id>', array('id' => '\d+'))
+    ->defaults(array(
+        'controller' => 'Floorplan',
+        'action' => 'editBuilding',
+    ));
+
+Route::set('floorplan_deleteBuilding', 'floorplan/deleteBuilding/<id>', array('id' => '\d+'))
+    ->defaults(array(
+        'controller' => 'Floorplan',
+        'action' => 'deleteBuilding',
+    ));
+
 // Главный маршрут - ДОЛЖЕН БЫТЬ ПОСЛЕДНИМ!
 Route::set('floorplan', 'floorplan(/<action>(/<id>))', array('id' => '\d+'))
     ->defaults(array(

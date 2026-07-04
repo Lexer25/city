@@ -29,14 +29,15 @@ class Model_Floorplanm extends Model
     }
 
     /**
-     * Получить список планов
+     * Получить список планов (всех)
      */
     public function getFloorplans()
     {
         $sql = 'SELECT fp.id_floorplan, fp.name, fp.description, fp.image, fp.width, fp.height,
+                       fp.id_building, fp.floor_number, fp.floor_name,
                        (SELECT COUNT(*) FROM floorplan_point fp2 WHERE fp2.id_floorplan = fp.id_floorplan) as points_count
                 FROM floorplan fp
-                ORDER BY fp.name';
+                ORDER BY fp.id_building, fp.floor_number';
 
         $query = DB::query(Database::SELECT, $sql)
             ->execute(Database::instance('fb'))
@@ -50,7 +51,8 @@ class Model_Floorplanm extends Model
      */
     public function getFloorplanById($id)
     {
-        $sql = 'SELECT fp.id_floorplan, fp.name, fp.description, fp.image, fp.width, fp.height
+        $sql = 'SELECT fp.id_floorplan, fp.name, fp.description, fp.image, fp.width, fp.height,
+                       fp.id_building, fp.floor_number, fp.floor_name
                 FROM floorplan fp
                 WHERE fp.id_floorplan = ' . intval($id);
 
@@ -64,6 +66,182 @@ class Model_Floorplanm extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Получить план по зданию и номеру этажа
+     */
+    public function getFloorplanByBuildingAndFloor($buildingId, $floorNumber)
+    {
+        $sql = 'SELECT fp.id_floorplan, fp.name, fp.description, fp.image, fp.width, fp.height,
+                       fp.id_building, fp.floor_number, fp.floor_name
+                FROM floorplan fp
+                WHERE fp.id_building = ' . intval($buildingId) . '
+                AND fp.floor_number = ' . intval($floorNumber);
+
+        $query = DB::query(Database::SELECT, $sql)
+            ->execute(Database::instance('fb'))
+            ->as_array();
+
+        if (count($query) > 0) {
+            $result = $this->convertToUtf8($query);
+            return $result[0];
+        }
+
+        return null;
+    }
+
+    /**
+     * Получить все этажи здания
+     */
+    public function getFloorsByBuilding($buildingId)
+    {
+        $sql = 'SELECT fp.id_floorplan, fp.name, fp.floor_number, fp.floor_name,
+                       (SELECT COUNT(*) FROM floorplan_point fp2 WHERE fp2.id_floorplan = fp.id_floorplan) as points_count
+                FROM floorplan fp
+                WHERE fp.id_building = ' . intval($buildingId) . '
+                ORDER BY fp.floor_number';
+
+        $query = DB::query(Database::SELECT, $sql)
+            ->execute(Database::instance('fb'))
+            ->as_array();
+
+        return $this->convertToUtf8($query);
+    }
+
+    /**
+     * Получить список зданий
+     */
+    public function getBuildings()
+    {
+        $sql = 'SELECT b.id_building, b.name, b.address, b.floors_count
+                FROM building b
+                ORDER BY b.name';
+
+        $query = DB::query(Database::SELECT, $sql)
+            ->execute(Database::instance('fb'))
+            ->as_array();
+
+        return $this->convertToUtf8($query);
+    }
+
+    /**
+     * Получить здание по ID
+     */
+    public function getBuildingById($id)
+    {
+        $sql = 'SELECT b.id_building, b.name, b.address, b.floors_count
+                FROM building b
+                WHERE b.id_building = ' . intval($id);
+
+        $query = DB::query(Database::SELECT, $sql)
+            ->execute(Database::instance('fb'))
+            ->as_array();
+
+        if (count($query) > 0) {
+            $result = $this->convertToUtf8($query);
+            return $result[0];
+        }
+
+        return null;
+    }
+
+    /**
+     * Добавить здание
+     */
+    public function addBuilding($name, $address = '', $floorsCount = 1)
+    {
+        $nameForDb = iconv('UTF-8', 'Windows-1251//IGNORE', $name);
+        $nameForDb = addslashes($nameForDb);
+        $addressForDb = iconv('UTF-8', 'Windows-1251//IGNORE', $address);
+        $addressForDb = addslashes($addressForDb);
+
+        $sql = "INSERT INTO building (name, address, floors_count)
+                VALUES ('{$nameForDb}', '{$addressForDb}', " . intval($floorsCount) . ")";
+
+        try {
+            $result = DB::query(Database::INSERT, $sql)
+                ->execute(Database::instance('fb'));
+
+            $lastId = DB::query(Database::SELECT, "SELECT MAX(id_building) as last_id FROM building")
+                ->execute(Database::instance('fb'))
+                ->as_array();
+
+            return $lastId[0]['LAST_ID'];
+        } catch (Exception $e) {
+            Kohana::$log->add(Log::ERROR, 'Error adding building: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Обновить здание
+     */
+    public function updateBuilding($id, $name, $address = '', $floorsCount = 1)
+    {
+        $nameForDb = iconv('UTF-8', 'Windows-1251//IGNORE', $name);
+        $nameForDb = addslashes($nameForDb);
+        $addressForDb = iconv('UTF-8', 'Windows-1251//IGNORE', $address);
+        $addressForDb = addslashes($addressForDb);
+
+        $sql = "UPDATE building
+                SET name = '{$nameForDb}',
+                    address = '{$addressForDb}',
+                    floors_count = " . intval($floorsCount) . "
+                WHERE id_building = " . intval($id);
+
+        try {
+            DB::query(Database::UPDATE, $sql)
+                ->execute(Database::instance('fb'));
+
+            return true;
+        } catch (Exception $e) {
+            Kohana::$log->add(Log::ERROR, 'Error updating building: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Удалить здание
+     */
+    public function deleteBuilding($id)
+    {
+        try {
+            $db = Database::instance('fb');
+
+            // Проверяем, есть ли этажи у здания
+            $checkSql = "SELECT COUNT(*) as cnt FROM floorplan WHERE id_building = " . intval($id);
+            $result = DB::query(Database::SELECT, $checkSql)
+                ->execute($db)
+                ->as_array();
+
+            if ($result[0]['CNT'] > 0) {
+                return array('success' => false, 'error' => 'У здания есть этажи. Сначала удалите все этажи.');
+            }
+
+            // Удаляем здание
+            $sql = "DELETE FROM building WHERE id_building = " . intval($id);
+            DB::query(Database::DELETE, $sql)->execute($db);
+
+            return array('success' => true);
+        } catch (Exception $e) {
+            Kohana::$log->add(Log::ERROR, 'Error deleting building: ' . $e->getMessage());
+            return array('success' => false, 'error' => $e->getMessage());
+        }
+    }
+
+    /**
+     * Проверить, существует ли здание
+     */
+    public function buildingExists($id)
+    {
+        $sql = "SELECT COUNT(*) as cnt FROM building WHERE id_building = " . intval($id);
+
+        $result = DB::query(Database::SELECT, $sql)
+            ->execute(Database::instance('fb'))
+            ->as_array();
+
+        return ($result[0]['CNT'] > 0);
     }
 
     /**
@@ -103,17 +281,20 @@ class Model_Floorplanm extends Model
     }
 
     /**
-     * Добавить новый план
+     * Добавить новый план (этаж)
      */
-    public function addFloorplan($name, $description, $image, $width, $height)
+    public function addFloorplan($name, $description, $image, $width, $height, $buildingId = 1, $floorNumber = 1, $floorName = '')
     {
         $nameForDb = iconv('UTF-8', 'Windows-1251//IGNORE', $name);
         $nameForDb = addslashes($nameForDb);
         $descForDb = iconv('UTF-8', 'Windows-1251//IGNORE', $description);
         $descForDb = addslashes($descForDb);
+        $floorNameForDb = iconv('UTF-8', 'Windows-1251//IGNORE', $floorName);
+        $floorNameForDb = addslashes($floorNameForDb);
 
-        $sql = "INSERT INTO floorplan (name, description, image, width, height)
-                VALUES ('{$nameForDb}', '{$descForDb}', '{$image}', " . intval($width) . ", " . intval($height) . ")";
+        $sql = "INSERT INTO floorplan (name, description, image, width, height, id_building, floor_number, floor_name)
+                VALUES ('{$nameForDb}', '{$descForDb}', '{$image}', " . intval($width) . ", " . intval($height) . ", 
+                        " . intval($buildingId) . ", " . intval($floorNumber) . ", '{$floorNameForDb}')";
 
         try {
             $result = DB::query(Database::INSERT, $sql)
@@ -131,9 +312,9 @@ class Model_Floorplanm extends Model
     }
 
     /**
-     * Обновить план
+     * Обновить план (с возможностью обновить изображение)
      */
-    public function updateFloorplan($id, $name, $description, $image, $width, $height)
+    public function updateFloorplan($id, $name, $description, $image, $width, $height, $buildingId = null, $floorNumber = null, $floorName = null)
     {
         $nameForDb = iconv('UTF-8', 'Windows-1251//IGNORE', $name);
         $nameForDb = addslashes($nameForDb);
@@ -145,8 +326,21 @@ class Model_Floorplanm extends Model
                     description = '{$descForDb}',
                     image = '{$image}',
                     width = " . intval($width) . ",
-                    height = " . intval($height) . "
-                WHERE id_floorplan = " . intval($id);
+                    height = " . intval($height);
+
+        if ($buildingId !== null) {
+            $sql .= ", id_building = " . intval($buildingId);
+        }
+        if ($floorNumber !== null) {
+            $sql .= ", floor_number = " . intval($floorNumber);
+        }
+        if ($floorName !== null) {
+            $floorNameForDb = iconv('UTF-8', 'Windows-1251//IGNORE', $floorName);
+            $floorNameForDb = addslashes($floorNameForDb);
+            $sql .= ", floor_name = '{$floorNameForDb}'";
+        }
+
+        $sql .= " WHERE id_floorplan = " . intval($id);
 
         try {
             DB::query(Database::UPDATE, $sql)
@@ -293,5 +487,82 @@ class Model_Floorplanm extends Model
             ->as_array();
 
         return ($result[0]['CNT'] > 0);
+    }
+
+    /**
+     * Проверить, существует ли этаж в здании
+     */
+    public function floorExists($buildingId, $floorNumber)
+    {
+        $sql = "SELECT COUNT(*) as cnt FROM floorplan 
+                WHERE id_building = " . intval($buildingId) . " 
+                AND floor_number = " . intval($floorNumber);
+
+        $result = DB::query(Database::SELECT, $sql)
+            ->execute(Database::instance('fb'))
+            ->as_array();
+
+        return ($result[0]['CNT'] > 0);
+    }
+
+    /**
+     * Копировать этаж
+     */
+    public function copyFloorplan($fromId, $newFloorNumber, $newFloorName = '')
+    {
+        // Получаем исходный план
+        $source = $this->getFloorplanById($fromId);
+        if (!$source) {
+            return false;
+        }
+
+        // Получаем все точки исходного плана
+        $points = $this->getPointsByFloorplan($fromId);
+
+        // Создаем новый план
+        $newName = $source['name'] . ' (копия ' . $newFloorNumber . ' эт.)';
+        $newId = $this->addFloorplan(
+            $newName,
+            $source['description'],
+            $source['image'],
+            $source['width'],
+            $source['height'],
+            $source['id_building'],
+            $newFloorNumber,
+            $newFloorName ?: $newFloorNumber . ' этаж'
+        );
+
+        if (!$newId) {
+            return false;
+        }
+
+        // Копируем точки
+        foreach ($points as $point) {
+            $this->addPoint(
+                $newId,
+                $point['x_pos'],
+                $point['y_pos'],
+                $point['id_dev'],
+                $point['point_type'],
+                $point['label']
+            );
+        }
+
+        return $newId;
+    }
+
+    /**
+     * Получить максимальный номер этажа в здании
+     */
+    public function getMaxFloorNumber($buildingId)
+    {
+        $sql = "SELECT MAX(floor_number) as max_floor FROM floorplan 
+                WHERE id_building = " . intval($buildingId);
+
+        $result = DB::query(Database::SELECT, $sql)
+            ->execute(Database::instance('fb'))
+            ->as_array();
+
+        return $result[0]['MAX_FLOOR'] ?: 0;
     }
 }
