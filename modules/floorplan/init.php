@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
-defined('FLOORPLAN_VERSION') OR define('FLOORPLAN_VERSION', '1.0.0');
+defined('FLOORPLAN_VERSION') OR define('FLOORPLAN_VERSION', '1.0.1');
 
 // Добавляем в админ-меню (если используется)
 if (Kohana::$config->load('adm')) {

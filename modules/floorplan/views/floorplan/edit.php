@@ -23,7 +23,7 @@
                             <input type="text" name="description" value="<?php echo htmlspecialchars($current_floor['description']); ?>" class="form-control" style="width: 250px;">
                         </div>
                         
-                        <!-- ===== ПОЛЕ ДЛЯ ЗАМЕНЫ ИЗОБРАЖЕНИЯ ===== -->
+                        <!-- Поле для замены изображения -->
                         <div class="form-group" style="margin-left: 10px;">
                             <label>Новое изображение: </label>
                             <input type="file" name="image" class="form-control" style="display: inline-block; width: auto;" accept="image/*">
@@ -94,10 +94,35 @@
         </div>
 
         <!-- ========================================== -->
+        <!-- ПАНЕЛЬ УПРАВЛЕНИЯ МАСШТАБОМ                -->
+        <!-- ========================================== -->
+        <div class="floorplan-toolbar">
+            <div class="btn-group">
+                <button type="button" class="btn btn-default btn-sm" onclick="zoomIn()" title="Увеличить (Ctrl++)">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </button>
+                <button type="button" class="btn btn-default btn-sm" onclick="zoomOut()" title="Уменьшить (Ctrl+-)">
+                    <span class="glyphicon glyphicon-minus"></span>
+                </button>
+                <button type="button" class="btn btn-default btn-sm" onclick="resetZoom()" title="100% (Ctrl+0)">
+                    <span class="glyphicon glyphicon-resize-full"></span> 100%
+                </button>
+                <button type="button" class="btn btn-default btn-sm" onclick="fitToScreen()" title="Подогнать под размер экрана">
+                    <span class="glyphicon glyphicon-zoom-in"></span> По размеру
+                </button>
+            </div>
+            <span class="zoom-level">Масштаб: <strong id="zoomLevelDisplay">100</strong>%</span>
+            <span class="text-muted" style="font-size: 11px; margin-left: 15px;">
+                <span class="glyphicon glyphicon-info-sign"></span> 
+                Ctrl+Колесо для масштабирования
+            </span>
+        </div>
+
+        <!-- ========================================== -->
         <!-- КОНТЕЙНЕР ДЛЯ ПЛАНА -->
         <!-- ========================================== -->
-        <div class="floorplan-container" style="position: relative; border: 1px solid #ddd; border-radius: 4px; overflow: auto; background: #fafafa;">
-            <div id="floorplanCanvas" style="position: relative; width: <?php echo $current_floor['width']; ?>px; height: <?php echo $current_floor['height']; ?>px; margin: 0 auto;">
+        <div class="floorplan-scrollable" id="floorplanScrollable">
+            <div id="floorplanCanvas" style="position: relative; width: <?php echo $current_floor['width']; ?>px; height: <?php echo $current_floor['height']; ?>px; margin: 0 auto; transform: scale(1); transform-origin: top left;">
                 <!-- Изображение плана -->
                 <img src="<?php echo URL::base() . $current_floor['image']; ?>" 
                      id="floorplanImage" 
@@ -347,125 +372,22 @@
 </div>
 
 <!-- ========================================== -->
-<!-- CSS -->
+<!-- ПОДКЛЮЧЕНИЕ МАСШТАБИРОВАНИЯ                -->
 <!-- ========================================== -->
-<style>
-.floor-selector {
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 15px;
-}
+<script>
+// Передаем данные в JavaScript
+window.floorplanId = <?php echo $current_floor_id; ?>;
+window.floorplanWidth = <?php echo $current_floor['width']; ?>;
+window.floorplanHeight = <?php echo $current_floor['height']; ?>;
+</script>
 
-.floor-btn {
-    min-width: 40px;
-    border-radius: 0 !important;
-    position: relative;
-}
+<?php include Kohana::find_file('views', 'floorplan/zoom_script'); ?>
 
-.floor-btn:first-child {
-    border-radius: 4px 0 0 4px !important;
-}
-
-.floor-btn:last-child {
-    border-radius: 0 4px 4px 0 !important;
-}
-
-.floor-btn .floor-badge {
-    background: rgba(0,0,0,0.1);
-    color: inherit;
-    margin-left: 4px;
-}
-
-.floor-btn.active .floor-badge {
-    background: rgba(255,255,255,0.3);
-    color: #fff;
-}
-
-.floor-btn.active {
-    background: #337ab7;
-    color: #fff;
-    border-color: #2e6da4;
-}
-
-.floor-btn.active::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid #337ab7;
-}
-
-.floor-btn:hover .floor-badge {
-    background: rgba(0,0,0,0.15);
-}
-
-.floor-btn.active:hover .floor-badge {
-    background: rgba(255,255,255,0.4);
-}
-
-.floorplan-container {
-    background: #fafafa;
-    min-height: 600px;
-    position: relative;
-}
-
-.floorplan-point {
-    z-index: 10;
-    transition: all 0.2s ease;
-    user-select: none;
-}
-
-.floorplan-point:hover {
-    z-index: 20;
-}
-
-.floorplan-point .point-icon {
-    text-shadow: 0 0 5px rgba(255,255,255,0.8);
-    cursor: grab;
-}
-
-.floorplan-point .point-icon:active {
-    cursor: grabbing;
-}
-
-.floorplan-point.status-online .point-icon {
-    opacity: 1;
-}
-
-.floorplan-point.status-offline .point-icon {
-    opacity: 0.4;
-}
-
-.floorplan-point.draggable {
-    cursor: grab;
-}
-
-.floorplan-point.draggable:active {
-    cursor: grabbing;
-}
-
-.floorplan-point.draggable:hover .point-actions {
-    display: block !important;
-}
-
-.point-actions {
-    display: none;
-    z-index: 30;
-}
-
-.text-success {
-    color: #5cb85c;
-}
-
-.text-danger {
-    color: #d9534f;
-}
-</style>
+<script>
+$(document).ready(function() {
+    FloorplanZoom.init(window.floorplanId);
+});
+</script>
 
 <!-- ========================================== -->
 <!-- JS ДЛЯ ПЕРЕТАСКИВАНИЯ ТОЧЕК -->
@@ -569,3 +491,174 @@ $(document).ready(function() {
 });
 </script>
 <?php endif; ?>
+
+<!-- ========================================== -->
+<!-- СТИЛИ -->
+<!-- ========================================== -->
+<style>
+.floor-selector {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 15px;
+}
+
+.floor-btn {
+    min-width: 40px;
+    border-radius: 0 !important;
+    position: relative;
+}
+
+.floor-btn:first-child {
+    border-radius: 4px 0 0 4px !important;
+}
+
+.floor-btn:last-child {
+    border-radius: 0 4px 4px 0 !important;
+}
+
+.floor-btn .floor-badge {
+    background: rgba(0,0,0,0.1);
+    color: inherit;
+    margin-left: 4px;
+}
+
+.floor-btn.active .floor-badge {
+    background: rgba(255,255,255,0.3);
+    color: #fff;
+}
+
+.floor-btn.active {
+    background: #337ab7;
+    color: #fff;
+    border-color: #2e6da4;
+}
+
+.floor-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #337ab7;
+}
+
+.floor-btn:hover .floor-badge {
+    background: rgba(0,0,0,0.15);
+}
+
+.floor-btn.active:hover .floor-badge {
+    background: rgba(255,255,255,0.4);
+}
+
+/* Панель управления масштабом */
+.floorplan-toolbar {
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.floorplan-toolbar .btn-group {
+    display: flex;
+    gap: 2px;
+}
+
+.floorplan-toolbar .btn-group .btn {
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
+.floorplan-toolbar .zoom-level {
+    font-size: 12px;
+    color: #666;
+    min-width: 80px;
+}
+
+.floorplan-toolbar .zoom-level strong {
+    color: #333;
+}
+
+.floorplan-toolbar .text-muted {
+    font-size: 11px;
+    color: #999;
+}
+
+/* Контейнер с возможностью скролла */
+.floorplan-scrollable {
+    overflow: auto;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 0 0 4px 4px;
+    background: #fafafa;
+    max-height: 600px;
+    min-height: 400px;
+}
+
+#floorplanCanvas {
+    position: relative;
+    margin: 0 auto;
+    transform-origin: top left;
+    transition: transform 0.15s ease;
+}
+
+.floorplan-point {
+    z-index: 10;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.floorplan-point:hover {
+    z-index: 20;
+}
+
+.floorplan-point .point-icon {
+    text-shadow: 0 0 5px rgba(255,255,255,0.8);
+    cursor: grab;
+}
+
+.floorplan-point .point-icon:active {
+    cursor: grabbing;
+}
+
+.floorplan-point.status-online .point-icon {
+    opacity: 1;
+}
+
+.floorplan-point.status-offline .point-icon {
+    opacity: 0.4;
+}
+
+.floorplan-point.draggable {
+    cursor: grab;
+}
+
+.floorplan-point.draggable:active {
+    cursor: grabbing;
+}
+
+.floorplan-point.draggable:hover .point-actions {
+    display: block !important;
+}
+
+.point-actions {
+    display: none;
+    z-index: 30;
+}
+
+.text-success {
+    color: #5cb85c;
+}
+
+.text-danger {
+    color: #d9534f;
+}
+</style>

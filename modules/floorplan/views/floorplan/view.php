@@ -24,9 +24,36 @@
             </div>
         </div>
 
-        <!-- Контейнер для плана -->
-        <div class="floorplan-container" style="position: relative; border: 1px solid #ddd; border-radius: 4px; overflow: auto; background: #fafafa; min-height: 400px;">
-            <div style="position: relative; width: <?php echo $floorplan['width']; ?>px; height: <?php echo $floorplan['height']; ?>px; margin: 0 auto;">
+        <!-- ========================================== -->
+        <!-- ПАНЕЛЬ УПРАВЛЕНИЯ МАСШТАБОМ                -->
+        <!-- ========================================== -->
+        <div class="floorplan-toolbar">
+            <div class="btn-group">
+                <button type="button" class="btn btn-default btn-sm" onclick="zoomIn()" title="Увеличить (Ctrl++)">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </button>
+                <button type="button" class="btn btn-default btn-sm" onclick="zoomOut()" title="Уменьшить (Ctrl+-)">
+                    <span class="glyphicon glyphicon-minus"></span>
+                </button>
+                <button type="button" class="btn btn-default btn-sm" onclick="resetZoom()" title="100% (Ctrl+0)">
+                    <span class="glyphicon glyphicon-resize-full"></span> 100%
+                </button>
+                <button type="button" class="btn btn-default btn-sm" onclick="fitToScreen()" title="Подогнать под размер экрана">
+                    <span class="glyphicon glyphicon-zoom-in"></span> По размеру
+                </button>
+            </div>
+            <span class="zoom-level">Масштаб: <strong id="zoomLevelDisplay">100</strong>%</span>
+            <span class="text-muted" style="font-size: 11px; margin-left: 15px;">
+                <span class="glyphicon glyphicon-info-sign"></span> 
+                Ctrl+Колесо для масштабирования
+            </span>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- КОНТЕЙНЕР ДЛЯ ПЛАНА -->
+        <!-- ========================================== -->
+        <div class="floorplan-scrollable" id="floorplanScrollable">
+            <div id="floorplanCanvas" style="position: relative; width: <?php echo $floorplan['width']; ?>px; height: <?php echo $floorplan['height']; ?>px; margin: 0 auto; transform: scale(1); transform-origin: top left;">
                 <!-- Изображение плана -->
                 <img src="<?php echo URL::base() . $floorplan['image']; ?>" 
                      style="width: 100%; height: 100%; display: block;"
@@ -116,7 +143,84 @@
     </div>
 </div>
 
+<!-- ========================================== -->
+<!-- ПОДКЛЮЧЕНИЕ МАСШТАБИРОВАНИЯ                -->
+<!-- ========================================== -->
+<script>
+// Передаем данные в JavaScript
+window.floorplanId = <?php echo $floorplan['id_floorplan']; ?>;
+window.floorplanWidth = <?php echo $floorplan['width']; ?>;
+window.floorplanHeight = <?php echo $floorplan['height']; ?>;
+</script>
+
+<?php include Kohana::find_file('views', 'floorplan/zoom_script'); ?>
+
+<script>
+$(document).ready(function() {
+    FloorplanZoom.init(window.floorplanId);
+});
+</script>
+
+<!-- ========================================== -->
+<!-- СТИЛИ -->
+<!-- ========================================== -->
 <style>
+/* Панель управления масштабом */
+.floorplan-toolbar {
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.floorplan-toolbar .btn-group {
+    display: flex;
+    gap: 2px;
+}
+
+.floorplan-toolbar .btn-group .btn {
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
+.floorplan-toolbar .zoom-level {
+    font-size: 12px;
+    color: #666;
+    min-width: 80px;
+}
+
+.floorplan-toolbar .zoom-level strong {
+    color: #333;
+}
+
+.floorplan-toolbar .text-muted {
+    font-size: 11px;
+    color: #999;
+}
+
+/* Контейнер с возможностью скролла */
+.floorplan-scrollable {
+    overflow: auto;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 0 0 4px 4px;
+    background: #fafafa;
+    max-height: 600px;
+    min-height: 400px;
+}
+
+#floorplanCanvas {
+    position: relative;
+    margin: 0 auto;
+    transform-origin: top left;
+    transition: transform 0.15s ease;
+}
+
 .floorplan-container {
     background: #fafafa;
     min-height: 400px;
