@@ -27,18 +27,22 @@
 modules/floorplan/
 ├── classes/
 │   ├── Controller/
-│   │   └── Floorplan.php          ✅
+│   │   └── Floorplan.php
 │   └── Model/
-│       └── Floorplanm.php         ✅
+│       └── Floorplanm.php
 ├── views/
 │   └── floorplan/
-│       ├── index.php              ✅
-│       ├── view.php               ✅
-│       ├── edit.php               ✅
-│       └── add.php                ✅
+│       ├── index.php
+│       ├── view.php          (с масштабированием)
+│       ├── edit.php          (с масштабированием)
+│       ├── add.php
+│       ├── zoom_script.php   
+│       ├── buildings.php
+│       ├── add_building.php
+│       └── edit_building.php
 ├── media/
 │   └── floorplan/
 │       └── css/
-│           └── floorplan.css      ✅
-├── init.php                       ✅
-└── README.md                      ✅
+│           └── floorplan.css
+├── init.php
+└── README.md
