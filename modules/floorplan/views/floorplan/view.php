@@ -1,3 +1,31 @@
+<!-- ========================================== -->
+<!-- ПРОВЕРКА БАЗЫ ДАННЫХ                       -->
+<!-- ========================================== -->
+<?php
+// Проверяем БД только для администраторов
+if ($is_admin) {
+    $installModel = Model::factory('Floorplan_Installm');
+    $checkResult = $installModel->checkDatabase();
+    
+    if (!$checkResult['all_ok']):
+?>
+    <div class="alert alert-warning alert-dismissible fade in">
+        <button type="button" class="close" data-dismiss="alert">×</button>
+        <strong>
+            <span class="glyphicon glyphicon-warning-sign"></span> 
+            Внимание!
+        </strong>
+        <p>База данных модуля "Планы объекта" не полностью установлена.</p>
+        <p>
+            <a href="<?php echo URL::site('floorplan/install'); ?>" class="btn btn-warning btn-sm">
+                <span class="glyphicon glyphicon-database"></span> Перейти к установке
+            </a>
+        </p>
+    </div>
+<?php
+    endif;
+}
+?>
 <div class="panel panel-primary">
     <div class="panel-heading">
         <h3 class="panel-title">

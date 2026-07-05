@@ -9,12 +9,20 @@
     <div class="panel-body">
 
         <?php if ($is_admin): ?>
-            <a href="<?php echo URL::site('floorplan/add'); ?>" class="btn btn-success" style="margin-bottom: 15px;">
-                <span class="glyphicon glyphicon-plus"></span> Добавить план
-            </a>
-            <a href="<?php echo URL::site('floorplan/buildings'); ?>" class="btn btn-info" style="margin-bottom: 15px;">
-                <span class="glyphicon glyphicon-building"></span> Управление зданиями
-            </a>
+            <div class="row" style="margin-bottom: 15px;">
+                <div class="col-md-12">
+                    <a href="<?php echo URL::site('floorplan/add'); ?>" class="btn btn-success">
+                        <span class="glyphicon glyphicon-plus"></span> Добавить план
+                    </a>
+                    <a href="<?php echo URL::site('floorplan/buildings'); ?>" class="btn btn-info">
+                        <span class="glyphicon glyphicon-building"></span> Управление зданиями
+                    </a>
+                    <!-- ===== НОВАЯ КНОПКА ===== -->
+                    <a href="<?php echo URL::site('floorplan/install'); ?>" class="btn btn-warning">
+                        <span class="glyphicon glyphicon-database"></span> Проверка БД
+                    </a>
+                </div>
+            </div>
         <?php endif; ?>
 
         <!-- Сообщения -->

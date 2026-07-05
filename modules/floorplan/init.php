@@ -10,10 +10,27 @@ if (Kohana::$config->load('adm')) {
             'url' => 'floorplan',
             'icon' => 'fa-map',
             'order' => 95,
+			'children'=> array(
+            array(
+                'title' => 'Планы объекта 2',
+                'url' => 'floorplan',
+                'icon' => 'fa-search',
+            ),
+            array(
+                'title' => 'Установка БД планов 2',
+                'url' => 'floorplan/install',
+                'icon' => 'fa-lock',
+            ),
+          
+        )
         ));
 }
 
-// Основные маршруты - ВАЖНО: порядок имеет значение!
+// ==========================================
+// ОСНОВНЫЕ МАРШРУТЫ
+// ==========================================
+
+// AJAX маршруты
 Route::set('floorplan_savePositions', 'floorplan/savePositions')
     ->defaults(array(
         'controller' => 'Floorplan',
@@ -31,6 +48,16 @@ Route::set('floorplan_deletePointAjax', 'floorplan/deletePointAjax')
         'controller' => 'Floorplan',
         'action' => 'deletePointAjax',
     ));
+
+Route::set('floorplan_saveZoom', 'floorplan/saveZoom')
+    ->defaults(array(
+        'controller' => 'Floorplan',
+        'action' => 'saveZoom',
+    ));
+
+// ==========================================
+// ОСНОВНЫЕ СТРАНИЦЫ
+// ==========================================
 
 Route::set('floorplan_view', 'floorplan/view/<id>', array('id' => '\d+'))
     ->defaults(array(
@@ -59,6 +86,7 @@ Route::set('floorplan_add', 'floorplan/add')
 // ==========================================
 // УПРАВЛЕНИЕ ЗДАНИЯМИ
 // ==========================================
+
 Route::set('floorplan_buildings', 'floorplan/buildings')
     ->defaults(array(
         'controller' => 'Floorplan',
@@ -83,7 +111,20 @@ Route::set('floorplan_deleteBuilding', 'floorplan/deleteBuilding/<id>', array('i
         'action' => 'deleteBuilding',
     ));
 
-// Главный маршрут - ДОЛЖЕН БЫТЬ ПОСЛЕДНИМ!
+// ==========================================
+// УСТАНОВКА БАЗЫ ДАННЫХ
+// ==========================================
+
+Route::set('floorplan_install', 'floorplan/install(/<action>)')
+    ->defaults(array(
+        'controller' => 'Floorplan_Install',
+        'action' => 'index',
+    ));
+
+// ==========================================
+// ГЛАВНЫЙ МАРШРУТ (ДОЛЖЕН БЫТЬ ПОСЛЕДНИМ!)
+// ==========================================
+
 Route::set('floorplan', 'floorplan(/<action>(/<id>))', array('id' => '\d+'))
     ->defaults(array(
         'controller' => 'Floorplan',

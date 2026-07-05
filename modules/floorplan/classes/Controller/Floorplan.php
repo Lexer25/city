@@ -1,15 +1,21 @@
 <?php defined('SYSPATH') OR die('No direct script access.');
 
-class Controller_Floorplan extends Controller_Template { 
-    
+class Controller_Floorplan extends Controller_Template
+{
     public $template = 'template';
     
     public function before()
     {
         parent::before();
-        $session = Session::instance();
+        
         $this->is_admin = Auth::instance()->logged_in('admin');
-        View::bind_global('is_admin', $this->is_admin); 
+        View::bind_global('is_admin', $this->is_admin);
+        
+       /*  if (!$this->is_admin) {
+            Session::instance()->set('message', 'Доступ запрещен');
+            Session::instance()->set('message_type', 'danger');
+            $this->redirect('floorplan');
+        } */
     }
 
     /**
@@ -47,7 +53,6 @@ class Controller_Floorplan extends Controller_Template {
         $building = $model->getBuildingById($floorplan['id_building']);
         $floors = $model->getFloorsByBuilding($floorplan['id_building']);
 
-        // Получаем статусы устройств (имитация)
         $deviceStatuses = $this->getDeviceStatuses($points);
 
         $content = View::factory('floorplan/view', array(
@@ -64,7 +69,7 @@ class Controller_Floorplan extends Controller_Template {
     }
 
     /**
-     * Редактирование плана (с поддержкой этажей и замены изображения)
+     * Редактирование плана (с поддержкой этажей)
      */
     public function action_edit()
     {
@@ -83,7 +88,6 @@ class Controller_Floorplan extends Controller_Template {
         $building = $model->getBuildingById($floorplan['id_building']);
         $floors = $model->getFloorsByBuilding($floorplan['id_building']);
 
-        // Получаем ID текущего этажа из GET или используем текущий
         $floorParam = $this->request->query('floor');
         if ($floorParam !== null && $floorParam !== '') {
             $currentFloorId = (int)$floorParam;
@@ -91,7 +95,6 @@ class Controller_Floorplan extends Controller_Template {
             $currentFloorId = $id;
         }
         
-        // Получаем текущий этаж
         $currentFloor = $model->getFloorplanById($currentFloorId);
         if (!$currentFloor) {
             $currentFloor = $floorplan;
@@ -111,8 +114,7 @@ class Controller_Floorplan extends Controller_Template {
                 $width = Arr::get($post, 'width', 800);
                 $height = Arr::get($post, 'height', 600);
                 
-                // Обработка нового изображения
-                $image = $currentFloor['image']; // По умолчанию оставляем текущее
+                $image = $currentFloor['image'];
                 
                 if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
                     $uploadDir = DOCROOT . 'media/floorplan/';
@@ -125,13 +127,10 @@ class Controller_Floorplan extends Controller_Template {
                     $targetPath = $uploadDir . $filename;
 
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
-                        // Удаляем старое изображение (опционально)
                         if (!empty($currentFloor['image']) && file_exists(DOCROOT . $currentFloor['image'])) {
                             @unlink(DOCROOT . $currentFloor['image']);
                         }
                         $image = 'media/floorplan/' . $filename;
-                        
-                        // Обновляем размеры
                         $imageInfo = getimagesize($uploadDir . $filename);
                         $width = $imageInfo[0];
                         $height = $imageInfo[1];
@@ -211,7 +210,6 @@ class Controller_Floorplan extends Controller_Template {
             }
         }
 
-        // Получаем статусы устройств
         $deviceStatuses = $this->getDeviceStatuses($points);
 
         $content = View::factory('floorplan/edit', array(
@@ -357,7 +355,6 @@ class Controller_Floorplan extends Controller_Template {
             $floorNumber = (int)Arr::get($post, 'floor_number', 1);
             $floorName = Arr::get($post, 'floor_name', '');
 
-            // Обработка загрузки изображения
             $image = '';
             if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
                 $uploadDir = DOCROOT . 'media/floorplan/';
@@ -389,7 +386,6 @@ class Controller_Floorplan extends Controller_Template {
                 return;
             }
 
-            // Получаем размеры изображения
             $imageInfo = getimagesize($uploadDir . $filename);
             $width = $imageInfo[0];
             $height = $imageInfo[1];
@@ -439,31 +435,7 @@ class Controller_Floorplan extends Controller_Template {
     }
 
     /**
-     * Получить статусы устройств (имитация)
-     */
-    private function getDeviceStatuses($points)
-    {
-        $statuses = array();
-        foreach ($points as $point) {
-            $deviceId = $point['id_dev'];
-            if ($deviceId) {
-                // В реальном проекте здесь запрос к API или БД
-                $statuses[$deviceId] = array(
-                    'status' => 'online',
-                    'mode' => 'normal',
-                    'last_event' => date('Y-m-d H:i:s'),
-                );
-            }
-        }
-        return $statuses;
-    }
-
-    // ==========================================
-    // УПРАВЛЕНИЕ ЗДАНИЯМИ
-    // ==========================================
-
-    /**
-     * Список зданий
+     * Управление зданиями - список
      */
     public function action_buildings()
     {
@@ -628,5 +600,24 @@ class Controller_Floorplan extends Controller_Template {
         }
 
         $this->redirect('floorplan/buildings');
+    }
+
+    /**
+     * Получить статусы устройств (имитация)
+     */
+    private function getDeviceStatuses($points)
+    {
+        $statuses = array();
+        foreach ($points as $point) {
+            $deviceId = $point['id_dev'];
+            if ($deviceId) {
+                $statuses[$deviceId] = array(
+                    'status' => 'online',
+                    'mode' => 'normal',
+                    'last_event' => date('Y-m-d H:i:s'),
+                );
+            }
+        }
+        return $statuses;
     }
 }
