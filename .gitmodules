@@ -75,3 +75,7 @@
 	path = modules/devgroup
 	url = https://github.com/Lexer25/adm_devgroup.git
 	branch = main
+[submodule "modules/floorplan"]
+	path = modules/floorplan
+	url = https://github.com/Lexer25/city_floorplan.git
+	branch = main
