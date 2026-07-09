@@ -2,24 +2,22 @@
 // application/classes/Controller/Template.php
 class Controller_Template extends Kohana_Controller_Template {
     
-   
+   protected $is_admin = false;
 	/**
      * Переопределяем before() для автоматической подготовки данных
      */
-    public function before() {
-        // Вызываем родительский метод
+        public function before() {
         parent::before();
         
-        // Если шаблон не задан или не является объектом View, выходим
+        // Инициализируем is_admin один раз в базовом контроллере
+        $this->is_admin = Auth::instance()->logged_in('admin');
+        View::bind_global('is_admin', $this->is_admin);
+        
         if (!is_object($this->template)) {
             return;
         }
         
-        // Загружаем конфиг
         $config = Kohana::$config->load('artonitcity_config');
-        
-        
-        // Подготавливаем данные
         $this->_prepareTemplateData($config);
     }
     
