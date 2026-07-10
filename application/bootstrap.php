@@ -159,6 +159,7 @@ Kohana::modules(array(
 	 'monitors' => MODPATH.'monitors',//монитор в браузере
 	 'devgroup' => MODPATH.'devgroup',//группы устройств
 	 'floorplan' => MODPATH.'floorplan',//планировки
+	 'baseref' => MODPATH.'baseref',//справочники
 	));
 	
 	

@@ -79,3 +79,7 @@
 	path = modules/floorplan
 	url = https://github.com/Lexer25/city_floorplan.git
 	branch = main
+[submodule "modules/baseref"]
+	path = modules/baseref
+	url = https://github.com/Lexer25/adm_baseref.git
+	branch = main
