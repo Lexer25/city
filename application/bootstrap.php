@@ -153,7 +153,7 @@ Kohana::modules(array(
 	 //'accCat' => MODPATH.'accCat', // модуль для работы с категориями доступа
 	 'holiday' => MODPATH.'holiday',
 	 'timezone' => MODPATH.'timezone',
-	 'auditlog' => MODPATH.'auditlog',
+	 //'auditlog' => MODPATH.'auditlog',
 	 'ts' => MODPATH.'ts',//управление транспортными серверами
 	 'devices' => MODPATH.'devices',//управление контроллерами
 	 'monitors' => MODPATH.'monitors',//монитор в браузере
