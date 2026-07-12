@@ -6,7 +6,7 @@ class Controller_Template extends Kohana_Controller_Template {
 	/**
      * Переопределяем before() для автоматической подготовки данных
      */
-        public function before() {
+     public function before() {
         parent::before();
         
         // Инициализируем is_admin один раз в базовом контроллере
@@ -16,7 +16,7 @@ class Controller_Template extends Kohana_Controller_Template {
         if (!is_object($this->template)) {
             return;
         }
-        
+ // echo Debug::vars('19', $this);exit;      
         $config = Kohana::$config->load('artonitcity_config');
         $this->_prepareTemplateData($config);
     }
@@ -25,6 +25,7 @@ class Controller_Template extends Kohana_Controller_Template {
      * Подготовка данных для шаблона
      */
     protected function _prepareTemplateData($config) {
+		
         // Проверяем, установлены ли уже данные (чтобы не перезаписывать)
         // В Kohana View нет метода as_array(), используем прямой доступ к переменным
         $has_site = isset($this->template->site);
@@ -33,7 +34,7 @@ class Controller_Template extends Kohana_Controller_Template {
         $has_version = isset($this->template->version);
         $has_flash = isset($this->template->flash);
         $has_odbc = isset($this->template->has_odbc);
-        
+     
         // Подготавливаем данные только для отсутствующих ключей
         if (!$has_site) {
             $this->template->set('site', array(
@@ -226,19 +227,22 @@ protected function _getODBC() {
         }
     }
     
-    /**
-     * Установка full-width режима
-     */
-    protected function set_full_width($enabled = true) {
-        $this->full_width = $enabled;
-        
-        // Если шаблон уже существует, обновляем данные
-        if (isset($this->template) && is_object($this->template)) {
-            $site = $this->template->get('site');
-            if ($site !== null) {
+/**
+ * Установка full-width режима
+ */
+protected function set_full_width($enabled = true) {
+    $this->full_width = $enabled;
+    
+    // Если шаблон уже существует, обновляем данные
+    if (isset($this->template) && is_object($this->template)) {
+        // В Kohana View нет метода get(), используем прямой доступ к свойству
+        if (isset($this->template->site)) {
+            $site = $this->template->site;  // ← вместо $this->template->get('site')
+            if ($site !== null && is_array($site)) {
                 $site['full_width'] = $enabled;
                 $this->template->set('site', $site);
             }
         }
     }
+}
 }
