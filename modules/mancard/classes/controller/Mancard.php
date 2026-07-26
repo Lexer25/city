@@ -654,45 +654,67 @@ class Controller_Mancard extends Controller_Template {
         )));
     }
     
-    /**
-     * AJAX: Получить категории доступа для организации или сотрудника
-     */
-    public function action_get_entity_access()
-    {
-        $this->auto_render = false;
-        $type = $this->request->param('type', '');
-        $id = (int) $this->request->param('id', 0);
-        
-        if (empty($type) || $id <= 0) {
-            $this->response->body(json_encode(array(
-                'success' => false,
-                'message' => 'Неверные параметры'
-            )));
-            return;
-        }
-        
-        $result = array();
-        $org_access = array();
-        $person_access = array();
-        
+ /**
+ * AJAX: Получить категории доступа для организации или сотрудника
+ */
+public function action_get_entity_access()
+{
+    $this->auto_render = false;
+    $type = $this->request->param('type', '');
+    $id = (int) $this->request->param('id', 0);
+    
+    if (empty($type) || $id <= 0) {
+        $this->response->headers('Content-Type', 'application/json');
+        $this->response->body(json_encode(array(
+            'success' => false,
+            'message' => 'Неверные параметры'
+        )));
+        return;
+    }
+    
+    $result = array();
+    $org_access = array();
+    
+    try {
         if ($type === 'org') {
+            // Для организации - только её категории
             $result = Model::factory('Mancard')->getOrgAccessNames($id);
+            
         } elseif ($type === 'person') {
+            // Для сотрудника - ТОЛЬКО его категории из SS_ACCESSUSER
             $result = Model::factory('Mancard')->getPersonAccessNames($id);
+            
+            // Дополнительно получаем категории родительской организации для сравнения
             $org_id = Model::factory('Mancard')->getPersonOrganization($id);
             if ($org_id) {
                 $org_access = Model::factory('Mancard')->getOrgAccessNames($org_id);
             }
+        } else {
+            $this->response->headers('Content-Type', 'application/json');
+            $this->response->body(json_encode(array(
+                'success' => false,
+                'message' => 'Неверный тип: ' . $type
+            )));
+            return;
         }
         
+		// Принудительно преобразуем в числа
+		
         $this->response->headers('Content-Type', 'application/json');
         $this->response->body(json_encode(array(
             'success' => true,
-            'data' => $result,
-            'org_access' => $org_access,
-            'person_access' => $person_access
+            'data' => $result,        // <- основные категории (для сотрудника - его, для организации - её)
+            'org_access' => $org_access // <- категории организации (только для сравнения)
+        )));
+        
+    } catch (Exception $e) {
+        $this->response->headers('Content-Type', 'application/json');
+        $this->response->body(json_encode(array(
+            'success' => false,
+            'message' => $e->getMessage()
         )));
     }
+}
     
     /**
      * AJAX: Обновить категории доступа

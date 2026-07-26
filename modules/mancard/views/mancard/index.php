@@ -790,7 +790,7 @@ $(document).on('click', '.tree-item-person', function(e) {
     
 // ===== Загрузка категорий доступа для организации =====
 function loadAccessForOrg(orgId) {
-    console.log('loadAccessForOrg called with orgId:', orgId);
+    console.log('793 loadAccessForOrg called with orgId:', orgId);
     currentEntityType = 'org';
     currentEntityId = orgId;
     
@@ -805,7 +805,7 @@ function loadAccessForOrg(orgId) {
         return;
     }
     
-    console.log('allAccessNames loaded, count:', allAccessNames.length);
+    console.log('808 allAccessNames loaded, count:', allAccessNames.length);
     
     $.ajax({
         url: '<?php echo URL::site('mancard/get_entity_access'); ?>/org/' + orgId,
@@ -839,28 +839,50 @@ function loadAccessForOrg(orgId) {
     });
 }
     
-    // ===== Загрузка категорий доступа для сотрудника =====
-    function loadAccessForPerson(personId) {
-        currentEntityType = 'person';
-        currentEntityId = personId;
-        
+// ===== Загрузка категорий доступа для сотрудника =====
+function loadAccessForPerson(personId) {
+    console.log('844 loadAccessForPerson called with personId:', personId);
+    currentEntityType = 'person';
+    currentEntityId = personId;
+    
+    // Проверяем, загружены ли категории доступа
+    if (allAccessNames.length === 0) {
+        console.log('allAccessNames is empty, loading...');
         loadAllAccessNames();
-        
-        $.ajax({
-            url: '<?php echo URL::site('mancard/get_entity_access'); ?>/person/' + personId,
-            type: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    personAccessIds = response.data;
-                    orgAccessIds = response.org_access || [];
-                    renderAccessList();
-                    $('#btn-save-access').show();
-                    isDirty = false;
-                }
-            }
-        });
+        // Ждем загрузки, потом повторяем запрос
+        setTimeout(function() {
+            loadAccessForOrg(orgId);
+        }, 500);
+        return;
     }
+    
+    console.log('859 allAccessNames loaded, count:', allAccessNames.length);
+    
+    $.ajax({
+        url: '<?php echo URL::site('mancard/get_entity_access'); ?>/person/' + personId,
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            console.log('Person access response:', response);
+            if (response.success) {
+                // personAccessIds - это ТОЛЬКО категории сотрудника
+                personAccessIds = response.data || [];
+                // orgAccessIds - это категории родительской организации (для сравнения)
+                orgAccessIds = response.org_access || [];
+                console.log('personAccessIds:', personAccessIds);
+                console.log('orgAccessIds (for comparison):', orgAccessIds);
+                renderAccessList();
+                $('#btn-save-access').show();
+                isDirty = false;
+            } else {
+                console.error('Error loading person access:', response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX error:', status, error);
+        }
+    });
+}
     
     // ===== Загрузка всех категорий доступа =====
     function loadAllAccessNames() {
@@ -879,90 +901,119 @@ function loadAccessForOrg(orgId) {
         });
     }
     
-    // ===== Рендеринг списка категорий доступа =====
-    function renderAccessList() {
-        var $container = $('#access-container');
+// ===== Рендеринг списка категорий доступа =====
+function renderAccessList() {
+    var $container = $('#access-container');
+    
+    if (allAccessNames.length === 0) {
+        $container.html('<div class="text-center text-muted" style="padding: 40px 0;"><i class="fa fa-spinner fa-spin fa-3x"></i><p style="margin-top: 10px;"><?php echo __('Загрузка...'); ?></p></div>');
+        return;
+    }
+    
+    // ОТЛАДКА: выводим данные
+    console.log('===== renderAccessList DEBUG =====');
+    console.log('currentEntityType:', currentEntityType);
+    console.log('allAccessNames:', allAccessNames);
+    console.log('personAccessIds:', personAccessIds);
+    console.log('orgAccessIds:', orgAccessIds);
+    console.log('====================================');
+    
+    var html = '<div class="access-list">';
+    var count = 0;
+    
+    $.each(allAccessNames, function(index, access) {
+        var id = access.ID_ACCESSNAME;
+        var isOrg = orgAccessIds.indexOf(id) !== -1;
+        var isPerson = personAccessIds.indexOf(id) !== -1;
         
-        if (allAccessNames.length === 0) {
-            $container.html('<div class="text-center text-muted" style="padding: 40px 0;"><i class="fa fa-spinner fa-spin fa-3x"></i><p style="margin-top: 10px;"><?php echo __('Загрузка...'); ?></p></div>');
-            return;
-        }
+        // ОТЛАДКА: выводим каждую категорию
+       // console.log('Category ID:', id, 'Name:', access.NAME, 'isPerson:', isPerson, 'isOrg:', isOrg);
         
-        var html = '<div class="access-list">';
-        var count = 0;
-        
-        $.each(allAccessNames, function(index, access) {
-            var id = access.ID_ACCESSNAME;
-            var isOrg = orgAccessIds.indexOf(id) !== -1;
-            var isPerson = personAccessIds.indexOf(id) !== -1;
-            var isDifferent = false;
-            
-            if (currentEntityType === 'person') {
-                isDifferent = isPerson !== isOrg;
-            }
-            
-            var differentClass = isDifferent ? 'different' : '';
-            var checkedAttr = currentEntityType === 'org' ? (isOrg ? 'checked' : '') : (isPerson ? 'checked' : '');
-            
-            html += '<div class="access-item ' + differentClass + '">';
-            html += '<div class="checkbox">';
-            html += '<label>';
-            html += '<input type="checkbox" class="access-checkbox" value="' + id + '" ' + checkedAttr + '>';
-            html += access.NAME;
-            
-            if (currentEntityType === 'person') {
-                if (isOrg) {
-                    html += ' <span class="badge-org"><i class="fa fa-building-o"></i> ' + __('есть в организации') + '</span>';
-                }
-                if (isPerson && !isOrg) {
-                    html += ' <span class="badge-person"><i class="fa fa-user"></i> ' + __('у сотрудника') + '</span>';
-                }
-            }
-            
-            html += '</label>';
-            html += '</div>';
-            html += '</div>';
-            
-            if (isPerson || isOrg) count++;
-        });
-        
-        html += '</div>';
-        $container.html(html);
-        $('#access-count').text(count);
-        
-        $('.access-checkbox').on('change', function() {
-            isDirty = true;
-            $('#btn-save-access').addClass('btn-warning').removeClass('btn-success');
-            updateAccessCount();
-        });
+        var checkedAttr = '';
+        var isDifferent = false;
+        var displayBadges = false;
         
         if (currentEntityType === 'person') {
-            highlightDifferences();
+            // Для сотрудника: отмечаем ТОЛЬКО его категории
+            checkedAttr = isPerson ? 'checked' : '';
+            isDifferent = isPerson !== isOrg;
+            displayBadges = true;
+            //console.log('  -> checkedAttr:', checkedAttr, 'isDifferent:', isDifferent);
+        } else if (currentEntityType === 'org') {
+            checkedAttr = isOrg ? 'checked' : '';
         }
-    }
-    
-    // ===== Подсветка отличий =====
-    function highlightDifferences() {
-        $('.access-item').each(function() {
-            var $item = $(this);
-            var $checkbox = $item.find('.access-checkbox');
-            var id = parseInt($checkbox.val());
-            var isOrg = orgAccessIds.indexOf(id) !== -1;
-            var isPerson = personAccessIds.indexOf(id) !== -1;
-            
-            if (isPerson !== isOrg) {
-                $item.addClass('different');
-            } else {
-                $item.removeClass('different');
+        
+        var differentClass = isDifferent ? 'different' : '';
+        
+        html += '<div class="access-item ' + differentClass + '">';
+        html += '<div class="checkbox">';
+        html += '<label>';
+        html += '<input type="checkbox" class="access-checkbox" value="' + id + '" ' + checkedAttr + '>';
+        html += access.NAME;
+        html += ' (' + id + ')';
+        html += ' (' + checkedAttr + ')';
+        
+if (id === 86) {
+    console.log('957 Category ID:', id, 'Name:', access.NAME, 'isPerson:', isPerson, 'isOrg:', isOrg);
+    console.log('958 HTML input:', '<input type="checkbox" class="access-checkbox" value="' + id + '" ' + checkedAttr + '>');
+    console.log('959 checkedAttr value: "' + checkedAttr + '"');
+}
+			
+        if (displayBadges) {
+            if (isOrg && isPerson) {
+                html += ' <span class="badge-org"><i class="fa fa-building-o"></i> ' + __('есть в организации') + '</span>';
+                html += ' <span class="badge-person"><i class="fa fa-user"></i> ' + __('у сотрудника') + '</span>';
+            } else if (isOrg && !isPerson) {
+                html += ' <span class="badge-org"><i class="fa fa-building-o"></i> ' + __('есть в организации') + '</span>';
+            } else if (!isOrg && isPerson) {
+                html += ' <span class="badge-person"><i class="fa fa-user"></i> ' + __('у сотрудника') + '</span>';
             }
-        });
-    }
+        }
+        
+        html += '</label>';
+        html += '</div>';
+        html += '</div>';
+        
+        if (checkedAttr === 'checked') count++;
+    });
     
-    // ===== Обновление счетчика =====
-    function updateAccessCount() {
-        var count = $('.access-checkbox:checked').length;
-        $('#access-count').text(count);
-    }
+    html += '</div>';
+    $container.html(html);
+    $('#access-count').text(count);
+    
+    console.log('Total checked count:', count);
+    console.log('===============================');
+    
+    $('.access-checkbox').on('change', function() {
+        isDirty = true;
+        $('#btn-save-access').addClass('btn-warning').removeClass('btn-success');
+        updateAccessCount();
+    });
+}  
+// ===== Подсветка отличий =====
+function highlightDifferences() {
+    $('.access-item').each(function() {
+        var $item = $(this);
+        var $checkbox = $item.find('.access-checkbox');
+        var id = parseInt($checkbox.val());
+        var isOrg = orgAccessIds.indexOf(id) !== -1;
+        var isPerson = personAccessIds.indexOf(id) !== -1;
+        
+        // Отличие: у сотрудника есть категория, которой нет у организации
+        // или у организации есть категория, которой нет у сотрудника
+        if (isPerson !== isOrg) {
+            $item.addClass('different');
+        } else {
+            $item.removeClass('different');
+        }
+    });
+}
+    
+// ===== Обновление счетчика =====
+function updateAccessCount() {
+    var count = $('.access-checkbox:checked').length;
+    $('#access-count').text(count);
+}
     
     // ===== Выбрать все =====
     $('#btn-select-all-access').on('click', function() {
