@@ -754,58 +754,90 @@ $(document).ready(function() {
         $('#total-orgs').text(count);
     }
     
-    // ===== Клик по организации или сотруднику =====
-    $(document).on('click', '.tree-item-org', function(e) {
-        e.stopPropagation();
-        var $node = $(this).closest('.tree-node');
-        var orgId = $node.data('org-id');
-        
-        if (orgId) {
-            currentEntityType = 'org';
-            currentEntityId = orgId;
-            updateSelectedInfo('org', orgId);
-            updateHoverInfo('org', orgId);
-            loadAccessForOrg(orgId);
-        }
-    });
+// ===== Клик по организации или сотруднику (через делегирование) =====
+$(document).on('click', '.tree-item-org', function(e) {
+    e.stopPropagation();
+    var $node = $(this).closest('.tree-node');
+    var orgId = $node.data('org-id');
     
-    $(document).on('click', '.tree-item-person', function(e) {
-        e.stopPropagation();
-        var personId = $(this).data('person-id');
-        var orgId = $(this).data('org-id');
-        
-        if (personId) {
-            currentEntityType = 'person';
-            currentEntityId = personId;
-            updateSelectedInfo('person', personId, orgId);
-            updateHoverInfo('person', personId, orgId);
-            loadPersonInfo(personId);
-            loadAccessForPerson(personId);
-        }
-    });
+    console.log('Click on organization, orgId:', orgId);  // Отладка
     
-    // ===== Загрузка категорий доступа для организации =====
-    function loadAccessForOrg(orgId) {
+    if (orgId) {
         currentEntityType = 'org';
         currentEntityId = orgId;
-        
-        loadAllAccessNames();
-        
-        $.ajax({
-            url: '<?php echo URL::site('mancard/get_entity_access'); ?>/org/' + orgId,
-            type: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    orgAccessIds = response.data;
-                    personAccessIds = [];
-                    renderAccessList();
-                    $('#btn-save-access').show();
-                    isDirty = false;
-                }
-            }
-        });
+        updateSelectedInfo('org', orgId);
+        updateHoverInfo('org', orgId);
+        loadAccessForOrg(orgId);
     }
+});
+
+$(document).on('click', '.tree-item-person', function(e) {
+    e.stopPropagation();
+    var personId = $(this).data('person-id');
+    var orgId = $(this).data('org-id');
+    
+    console.log('Click on person, personId:', personId, 'orgId:', orgId);  // Отладка
+    
+    if (personId) {
+        currentEntityType = 'person';
+        currentEntityId = personId;
+        updateSelectedInfo('person', personId, orgId);
+        updateHoverInfo('person', personId, orgId);
+        loadPersonInfo(personId);
+        loadAccessForPerson(personId);
+    }
+});
+    
+// ===== Загрузка категорий доступа для организации =====
+function loadAccessForOrg(orgId) {
+    console.log('loadAccessForOrg called with orgId:', orgId);
+    currentEntityType = 'org';
+    currentEntityId = orgId;
+    
+    // Проверяем, загружены ли категории доступа
+    if (allAccessNames.length === 0) {
+        console.log('allAccessNames is empty, loading...');
+        loadAllAccessNames();
+        // Ждем загрузки, потом повторяем запрос
+        setTimeout(function() {
+            loadAccessForOrg(orgId);
+        }, 500);
+        return;
+    }
+    
+    console.log('allAccessNames loaded, count:', allAccessNames.length);
+    
+    $.ajax({
+        url: '<?php echo URL::site('mancard/get_entity_access'); ?>/org/' + orgId,
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            console.log('Access response:', response);
+            if (response.success) {
+                orgAccessIds = response.data || [];
+                personAccessIds = [];
+                console.log('orgAccessIds:', orgAccessIds);
+                renderAccessList();
+                $('#btn-save-access').show();
+                isDirty = false;
+            } else {
+                console.error('Error loading access:', response.message);
+                $('#access-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('===== AJAX ERROR DETAILS =====');
+            console.error('Status:', status);
+            console.error('Error:', error);
+            console.error('Response Text:', xhr.responseText);
+            console.error('Status Code:', xhr.status);
+            console.error('Response Headers:', xhr.getAllResponseHeaders());
+            console.error('===== END ERROR DETAILS =====');
+            
+            $('#access-container').html('<div class="alert alert-danger">Ошибка загрузки: ' + status + '<br><small>' + error + '</small></div>');
+        }
+    });
+}
     
     // ===== Загрузка категорий доступа для сотрудника =====
     function loadAccessForPerson(personId) {

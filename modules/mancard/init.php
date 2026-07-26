@@ -21,3 +21,11 @@ Kohana::$config->load('menu')
             ),
         )
     ));
+	
+	
+	
+	Route::set('mancard_entity_access', 'mancard/get_entity_access/<type>/<id>')
+    ->defaults(array(
+        'controller' => 'mancard',
+        'action'     => 'get_entity_access',
+    ));
