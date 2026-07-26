@@ -937,7 +937,7 @@ public function getOrgStructureLevelWithCards($org_id = 1)
         $result['NAME'] = iconv('windows-1251', 'UTF-8', $query[0]['NAME']);
     }
     
-    // Получаем сотрудников с картами
+    // Получаем сотрудников с картами - ДОБАВЛЯЕМ p.ID_ORG
     $sql = 'SELECT 
                 p.ID_PEP,
                 p.SURNAME,
@@ -945,7 +945,8 @@ public function getOrgStructureLevelWithCards($org_id = 1)
                 p.PATRONYMIC,
                 p.POST,
                 p.PHONEWORK,
-                p."ACTIVE"
+                p."ACTIVE",
+                p.ID_ORG
             FROM PEOPLE p
             WHERE p.ID_ORG = ' . $org_id . '
             AND p.ID_ORG NOT IN (2, 3)
@@ -958,6 +959,7 @@ public function getOrgStructureLevelWithCards($org_id = 1)
     foreach ($people_query as $person) {
         $person_data = array(
             'ID_PEP' => $person['ID_PEP'],
+            'ID_ORG' => $person['ID_ORG'],  // <-- ДОБАВЛЯЕМ ЭТУ СТРОКУ
             'SURNAME' => iconv('windows-1251', 'UTF-8', $person['SURNAME']),
             'NAME' => iconv('windows-1251', 'UTF-8', $person['NAME']),
             'PATRONYMIC' => iconv('windows-1251', 'UTF-8', $person['PATRONYMIC']),
@@ -995,5 +997,149 @@ public function getOrgStructureLevelWithCards($org_id = 1)
     }
     
     return $result;
+}
+
+/**
+ * Получить все категории доступа
+ */
+public function getAllAccessNames()
+{
+    $sql = 'SELECT ID_ACCESSNAME, NAME, TIME_STAMP 
+            FROM ACCESSNAME 
+            WHERE ID_DB = 1
+            ORDER BY NAME';
+    
+    $query = DB::query(Database::SELECT, iconv('UTF-8', 'windows-1251', $sql))
+        ->execute(Database::instance('fb'))
+        ->as_array();
+    
+    $result = array();
+    foreach ($query as $row) {
+        $result[] = array(
+            'ID_ACCESSNAME' => $row['ID_ACCESSNAME'],
+            'NAME' => iconv('windows-1251', 'UTF-8', $row['NAME']),
+            'TIME_STAMP' => $row['TIME_STAMP'],
+        );
+    }
+    
+    return $result;
+}
+
+/**
+ * Получить категории доступа организации
+ */
+public function getOrgAccessNames($id_org)
+{
+    $id_org = (int)$id_org;
+    
+    $sql = 'SELECT ID_ACCESSNAME 
+            FROM SS_ACCESSORG 
+            WHERE ID_ORG = ' . $id_org . '
+            AND ID_DB = 1';
+    
+    $query = DB::query(Database::SELECT, $sql)
+        ->execute(Database::instance('fb'))
+        ->as_array();
+    
+    $result = array();
+    foreach ($query as $row) {
+        $result[] = $row['ID_ACCESSNAME'];
+    }
+    
+    return $result;
+}
+
+/**
+ * Получить категории доступа сотрудника
+ */
+public function getPersonAccessNames($id_pep)
+{
+    $id_pep = (int)$id_pep;
+    
+    $sql = 'SELECT ID_ACCESSNAME 
+            FROM SS_ACCESSUSER 
+            WHERE ID_PEP = ' . $id_pep;
+    
+    $query = DB::query(Database::SELECT, $sql)
+        ->execute(Database::instance('fb'))
+        ->as_array();
+    
+    $result = array();
+    foreach ($query as $row) {
+        $result[] = $row['ID_ACCESSNAME'];
+    }
+    
+    return $result;
+}
+
+/**
+ * Получить организацию сотрудника
+ */
+public function getPersonOrganization($id_pep)
+{
+    $id_pep = (int)$id_pep;
+    
+    $sql = 'SELECT ID_ORG FROM PEOPLE WHERE ID_PEP = ' . $id_pep;
+    $query = DB::query(Database::SELECT, $sql)
+        ->execute(Database::instance('fb'))
+        ->as_array();
+    
+    if (empty($query)) {
+        return null;
+    }
+    
+    return $query[0]['ID_ORG'];
+}
+
+/**
+ * Обновить категории доступа для организации
+ */
+public function updateOrgAccessNames($id_org, $access_ids)
+{
+    $id_org = (int)$id_org;
+    
+    // Удаляем старые
+    $sql = 'DELETE FROM SS_ACCESSORG WHERE ID_ORG = ' . $id_org;
+    DB::query(Database::DELETE, $sql)
+        ->execute(Database::instance('fb'));
+    
+    // Добавляем новые
+    if (!empty($access_ids)) {
+        $values = array();
+        foreach ($access_ids as $access_id) {
+            $access_id = (int)$access_id;
+            $values[] = '(GEN_ID(GEN_SS_ACCESSORG, 1), 1, ' . $id_org . ', ' . $access_id . ')';
+        }
+        
+        $sql = 'INSERT INTO SS_ACCESSORG (ID_ACCESSORG, ID_DB, ID_ORG, ID_ACCESSNAME) VALUES ' . implode(',', $values);
+        DB::query(Database::INSERT, $sql)
+            ->execute(Database::instance('fb'));
+    }
+}
+
+/**
+ * Обновить категории доступа для сотрудника
+ */
+public function updatePersonAccessNames($id_pep, $access_ids)
+{
+    $id_pep = (int)$id_pep;
+    
+    // Удаляем старые
+    $sql = 'DELETE FROM SS_ACCESSUSER WHERE ID_PEP = ' . $id_pep;
+    DB::query(Database::DELETE, $sql)
+        ->execute(Database::instance('fb'));
+    
+    // Добавляем новые
+    if (!empty($access_ids)) {
+        $values = array();
+        foreach ($access_ids as $access_id) {
+            $access_id = (int)$access_id;
+            $values[] = '(GEN_ID(GEN_SS_ACCESSUSER, 1), 1, ' . $id_pep . ', ' . $access_id . ')';
+        }
+        
+        $sql = 'INSERT INTO SS_ACCESSUSER (ID_ACCESSUSER, ID_DB, ID_PEP, ID_ACCESSNAME) VALUES ' . implode(',', $values);
+        DB::query(Database::INSERT, $sql)
+            ->execute(Database::instance('fb'));
+    }
 }
 }

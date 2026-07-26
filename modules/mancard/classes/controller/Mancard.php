@@ -7,7 +7,7 @@ class Controller_Mancard extends Controller_Template {
         parent::before();
         $session = Session::instance();
         $_SESSION['menu_active'] = 'mancard';
-		$this->set_full_width(true);
+        $this->set_full_width(true);
     }
     
     /**
@@ -366,7 +366,6 @@ class Controller_Mancard extends Controller_Template {
             return;
         }
         
-        // Преобразуем в массив целых чисел
         $person_ids = array_map('intval', $person_ids);
         $person_ids = array_filter($person_ids);
         
@@ -440,184 +439,306 @@ class Controller_Mancard extends Controller_Template {
             'data' => $orgs
         )));
     }
-	
-	/**
- * Страница массового перемещения
- */
-public function action_move()
-{
-    $_SESSION['menu_active'] = 'mancard';
     
-    // Получаем дерево организаций
-    $org_tree = Model::factory('Mancard')->getOrganizationTree();
-    
-    // Получаем все организации для выпадающих списков
-    $organizations = Model::factory('Mancard')->getAllOrganizations();
-    
-    // Получаем всех сотрудников с их организациями
-    $all_people = Model::factory('Mancard')->getAllPeopleWithOrgs();
-    
-    $content = View::factory('mancard/move', array(
-        'org_tree' => $org_tree,
-        'organizations' => $organizations,
-        'all_people' => $all_people,
-    ));
-    
-    $this->template->content = $content;
-}
-
-/**
- * AJAX: Получить дерево организаций для панели перемещения
- */
-public function action_get_move_tree()
-{
-    $this->auto_render = false;
-    
-    $org_tree = Model::factory('Mancard')->getOrganizationTree();
-    
-    $this->response->headers('Content-Type', 'application/json');
-    $this->response->body(json_encode(array(
-        'success' => true,
-        'data' => $org_tree
-    )));
-}
-
-/**
- * AJAX: Получить сотрудников для панели перемещения
- */
-public function action_get_move_people()
-{
-    $this->auto_render = false;
-    $org_id = (int) $this->request->param('id', 0);
-    
-    if ($org_id <= 0) {
-        $this->response->body(json_encode(array(
-            'success' => false,
-            'message' => 'Не указана организация'
-        )));
-        return;
+    /**
+     * Страница массового перемещения
+     */
+    public function action_move()
+    {
+        $_SESSION['menu_active'] = 'mancard';
+        
+        $org_tree = Model::factory('Mancard')->getOrganizationTree();
+        $organizations = Model::factory('Mancard')->getAllOrganizations();
+        $all_people = Model::factory('Mancard')->getAllPeopleWithOrgs();
+        
+        $content = View::factory('mancard/move', array(
+            'org_tree' => $org_tree,
+            'organizations' => $organizations,
+            'all_people' => $all_people,
+        ));
+        
+        $this->template->content = $content;
     }
     
-    $people = Model::factory('Mancard')->getPeopleByOrganization($org_id);
-    
-    $this->response->headers('Content-Type', 'application/json');
-    $this->response->body(json_encode(array(
-        'success' => true,
-        'data' => $people
-    )));
-}
-
-/**
- * AJAX: Массовое перемещение (для новой панели)
- */
-public function action_move_items()
-{
-    $this->auto_render = false;
-    $post = $this->request->post();
-    
-    $source_org_id = (int) Arr::get($post, 'source_org_id', 0);
-    $target_org_id = (int) Arr::get($post, 'target_org_id', 0);
-    $move_people = Arr::get($post, 'move_people', array());
-    $move_orgs = Arr::get($post, 'move_orgs', array());
-    
-    if ($source_org_id <= 0 || $target_org_id <= 0) {
-        $this->response->body(json_encode(array(
-            'success' => false,
-            'message' => 'Не выбраны организации'
-        )));
-        return;
-    }
-    
-    if ($source_org_id == $target_org_id) {
-        $this->response->body(json_encode(array(
-            'success' => false,
-            'message' => 'Нельзя перемещать в ту же организацию'
-        )));
-        return;
-    }
-    
-    try {
-        $result = array(
-            'people_moved' => 0,
-            'orgs_moved' => 0,
-            'errors' => array()
-        );
+    /**
+     * AJAX: Получить дерево организаций для панели перемещения
+     */
+    public function action_get_move_tree()
+    {
+        $this->auto_render = false;
         
-        // Перемещаем сотрудников
-        if (!empty($move_people)) {
-            $move_people = array_map('intval', $move_people);
-            $move_people = array_filter($move_people);
-            
-            if (!empty($move_people)) {
-                $count = Model::factory('Mancard')->movePeople($move_people, $target_org_id);
-                $result['people_moved'] = $count;
-            }
-        }
+        $org_tree = Model::factory('Mancard')->getOrganizationTree();
         
-        // Перемещаем организации
-        if (!empty($move_orgs)) {
-            $move_orgs = array_map('intval', $move_orgs);
-            $move_orgs = array_filter($move_orgs);
-            
-            foreach ($move_orgs as $org_id) {
-                if ($org_id == 1) {
-                    $result['errors'][] = 'Нельзя перемещать корневую организацию (ID: 1)';
-                    continue;
-                }
-                try {
-                    Model::factory('Mancard')->moveOrganization($org_id, $target_org_id);
-                    $result['orgs_moved']++;
-                } catch (Exception $e) {
-                    $result['errors'][] = $e->getMessage() . ' (ID: ' . $org_id . ')';
-                }
-            }
-        }
-        
+        $this->response->headers('Content-Type', 'application/json');
         $this->response->body(json_encode(array(
             'success' => true,
-            'message' => 'Перемещено: ' . $result['people_moved'] . ' сотрудников, ' . $result['orgs_moved'] . ' организаций',
-            'data' => $result
-        )));
-        
-    } catch (Exception $e) {
-        $this->response->body(json_encode(array(
-            'success' => false,
-            'message' => $e->getMessage()
+            'data' => $org_tree
         )));
     }
-}
-
-/**
- * AJAX: Получить структуру организации (один уровень)
- */
-public function action_get_org_structure()
-{
-    $this->auto_render = false;
-    $org_id = (int) $this->request->param('id', 1);
     
-    $structure = Model::factory('Mancard')->getOrgStructureLevel($org_id);
+    /**
+     * AJAX: Получить сотрудников для панели перемещения
+     */
+    public function action_get_move_people()
+    {
+        $this->auto_render = false;
+        $org_id = (int) $this->request->param('id', 0);
+        
+        if ($org_id <= 0) {
+            $this->response->body(json_encode(array(
+                'success' => false,
+                'message' => 'Не указана организация'
+            )));
+            return;
+        }
+        
+        $people = Model::factory('Mancard')->getPeopleByOrganization($org_id);
+        
+        $this->response->headers('Content-Type', 'application/json');
+        $this->response->body(json_encode(array(
+            'success' => true,
+            'data' => $people
+        )));
+    }
     
-    $this->response->headers('Content-Type', 'application/json');
-    $this->response->body(json_encode(array(
-        'success' => true,
-        'data' => $structure
-    )));
-}
-
-/**
- * AJAX: Получить структуру организации с картами (один уровень)
- */
-public function action_get_org_structure_cards()
-{
-    $this->auto_render = false;
-    $org_id = (int) $this->request->param('id', 1);
+    /**
+     * AJAX: Массовое перемещение (для новой панели)
+     */
+    public function action_move_items()
+    {
+        $this->auto_render = false;
+        $post = $this->request->post();
+        
+        $source_org_id = (int) Arr::get($post, 'source_org_id', 0);
+        $target_org_id = (int) Arr::get($post, 'target_org_id', 0);
+        $move_people = Arr::get($post, 'move_people', array());
+        $move_orgs = Arr::get($post, 'move_orgs', array());
+        
+        if ($source_org_id <= 0 || $target_org_id <= 0) {
+            $this->response->body(json_encode(array(
+                'success' => false,
+                'message' => 'Не выбраны организации'
+            )));
+            return;
+        }
+        
+        if ($source_org_id == $target_org_id) {
+            $this->response->body(json_encode(array(
+                'success' => false,
+                'message' => 'Нельзя перемещать в ту же организацию'
+            )));
+            return;
+        }
+        
+        try {
+            $result = array(
+                'people_moved' => 0,
+                'orgs_moved' => 0,
+                'errors' => array()
+            );
+            
+            if (!empty($move_people)) {
+                $move_people = array_map('intval', $move_people);
+                $move_people = array_filter($move_people);
+                
+                if (!empty($move_people)) {
+                    $count = Model::factory('Mancard')->movePeople($move_people, $target_org_id);
+                    $result['people_moved'] = $count;
+                }
+            }
+            
+            if (!empty($move_orgs)) {
+                $move_orgs = array_map('intval', $move_orgs);
+                $move_orgs = array_filter($move_orgs);
+                
+                foreach ($move_orgs as $org_id) {
+                    if ($org_id == 1) {
+                        $result['errors'][] = 'Нельзя перемещать корневую организацию (ID: 1)';
+                        continue;
+                    }
+                    try {
+                        Model::factory('Mancard')->moveOrganization($org_id, $target_org_id);
+                        $result['orgs_moved']++;
+                    } catch (Exception $e) {
+                        $result['errors'][] = $e->getMessage() . ' (ID: ' . $org_id . ')';
+                    }
+                }
+            }
+            
+            $this->response->body(json_encode(array(
+                'success' => true,
+                'message' => 'Перемещено: ' . $result['people_moved'] . ' сотрудников, ' . $result['orgs_moved'] . ' организаций',
+                'data' => $result
+            )));
+            
+        } catch (Exception $e) {
+            $this->response->body(json_encode(array(
+                'success' => false,
+                'message' => $e->getMessage()
+            )));
+        }
+    }
     
-    $structure = Model::factory('Mancard')->getOrgStructureLevelWithCards($org_id);
+    /**
+     * AJAX: Получить структуру организации (один уровень)
+     */
+    public function action_get_org_structure()
+    {
+        $this->auto_render = false;
+        $org_id = (int) $this->request->param('id', 1);
+        
+        $structure = Model::factory('Mancard')->getOrgStructureLevel($org_id);
+        
+        $this->response->headers('Content-Type', 'application/json');
+        $this->response->body(json_encode(array(
+            'success' => true,
+            'data' => $structure
+        )));
+    }
     
-    $this->response->headers('Content-Type', 'application/json');
-    $this->response->body(json_encode(array(
-        'success' => true,
-        'data' => $structure
-    )));
-}
+    /**
+     * AJAX: Получить структуру организации с картами (один уровень)
+     */
+    public function action_get_org_structure_cards()
+    {
+        $this->auto_render = false;
+        $org_id = (int) $this->request->param('id', 1);
+        
+        $structure = Model::factory('Mancard')->getOrgStructureLevelWithCards($org_id);
+        
+        $this->response->headers('Content-Type', 'application/json');
+        $this->response->body(json_encode(array(
+            'success' => true,
+            'data' => $structure
+        )));
+    }
+    
+    /**
+     * AJAX: Получить карты сотрудника
+     */
+    public function action_get_person_cards()
+    {
+        $this->auto_render = false;
+        $id_pep = (int) $this->request->param('id', 0);
+        
+        if ($id_pep <= 0) {
+            $this->response->body(json_encode(array(
+                'success' => false,
+                'message' => 'Неверный ID сотрудника'
+            )));
+            return;
+        }
+        
+        $cards = Model::factory('Mancard')->getPersonCards($id_pep);
+        
+        $this->response->headers('Content-Type', 'application/json');
+        $this->response->body(json_encode(array(
+            'success' => true,
+            'data' => $cards
+        )));
+    }
+    
+    /**
+     * AJAX: Получить все категории доступа
+     */
+    public function action_get_access_names()
+    {
+        $this->auto_render = false;
+        
+        $access_names = Model::factory('Mancard')->getAllAccessNames();
+        
+        $this->response->headers('Content-Type', 'application/json');
+        $this->response->body(json_encode(array(
+            'success' => true,
+            'data' => $access_names
+        )));
+    }
+    
+    /**
+     * AJAX: Получить категории доступа для организации или сотрудника
+     */
+    public function action_get_entity_access()
+    {
+        $this->auto_render = false;
+        $type = $this->request->param('type', '');
+        $id = (int) $this->request->param('id', 0);
+        
+        if (empty($type) || $id <= 0) {
+            $this->response->body(json_encode(array(
+                'success' => false,
+                'message' => 'Неверные параметры'
+            )));
+            return;
+        }
+        
+        $result = array();
+        $org_access = array();
+        $person_access = array();
+        
+        if ($type === 'org') {
+            $result = Model::factory('Mancard')->getOrgAccessNames($id);
+        } elseif ($type === 'person') {
+            $result = Model::factory('Mancard')->getPersonAccessNames($id);
+            $org_id = Model::factory('Mancard')->getPersonOrganization($id);
+            if ($org_id) {
+                $org_access = Model::factory('Mancard')->getOrgAccessNames($org_id);
+            }
+        }
+        
+        $this->response->headers('Content-Type', 'application/json');
+        $this->response->body(json_encode(array(
+            'success' => true,
+            'data' => $result,
+            'org_access' => $org_access,
+            'person_access' => $person_access
+        )));
+    }
+    
+    /**
+     * AJAX: Обновить категории доступа
+     */
+    public function action_update_access()
+    {
+        $this->auto_render = false;
+        $post = $this->request->post();
+        
+        $type = Arr::get($post, 'type', '');
+        $id = (int) Arr::get($post, 'id', 0);
+        $access_ids = Arr::get($post, 'access_ids', array());
+        
+        if (empty($type) || $id <= 0) {
+            $this->response->body(json_encode(array(
+                'success' => false,
+                'message' => 'Неверные параметры'
+            )));
+            return;
+        }
+        
+        $access_ids = array_map('intval', $access_ids);
+        $access_ids = array_filter($access_ids);
+        
+        try {
+            if ($type === 'org') {
+                Model::factory('Mancard')->updateOrgAccessNames($id, $access_ids);
+            } elseif ($type === 'person') {
+                Model::factory('Mancard')->updatePersonAccessNames($id, $access_ids);
+            } else {
+                $this->response->body(json_encode(array(
+                    'success' => false,
+                    'message' => 'Неверный тип'
+                )));
+                return;
+            }
+            
+            $this->response->body(json_encode(array(
+                'success' => true,
+                'message' => 'Категории доступа обновлены'
+            )));
+        } catch (Exception $e) {
+            $this->response->body(json_encode(array(
+                'success' => false,
+                'message' => $e->getMessage()
+            )));
+        }
+    }
 }
