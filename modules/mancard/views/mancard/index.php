@@ -840,8 +840,9 @@ function loadAccessForOrg(orgId) {
 }
     
 // ===== Загрузка категорий доступа для сотрудника =====
+// ===== Загрузка категорий доступа для сотрудника =====
 function loadAccessForPerson(personId) {
-    console.log('844 loadAccessForPerson called with personId:', personId);
+    console.log('loadAccessForPerson called with personId:', personId);
     currentEntityType = 'person';
     currentEntityId = personId;
     
@@ -851,12 +852,12 @@ function loadAccessForPerson(personId) {
         loadAllAccessNames();
         // Ждем загрузки, потом повторяем запрос
         setTimeout(function() {
-            loadAccessForOrg(orgId);
+            loadAccessForPerson(personId);  // <-- ИСПРАВЛЕНО!
         }, 500);
         return;
     }
     
-    console.log('859 allAccessNames loaded, count:', allAccessNames.length);
+    console.log('allAccessNames loaded, count:', allAccessNames.length);
     
     $.ajax({
         url: '<?php echo URL::site('mancard/get_entity_access'); ?>/person/' + personId,
@@ -865,9 +866,7 @@ function loadAccessForPerson(personId) {
         success: function(response) {
             console.log('Person access response:', response);
             if (response.success) {
-                // personAccessIds - это ТОЛЬКО категории сотрудника
                 personAccessIds = response.data || [];
-                // orgAccessIds - это категории родительской организации (для сравнения)
                 orgAccessIds = response.org_access || [];
                 console.log('personAccessIds:', personAccessIds);
                 console.log('orgAccessIds (for comparison):', orgAccessIds);
@@ -901,44 +900,51 @@ function loadAccessForPerson(personId) {
         });
     }
     
+
+// ===== Рендеринг списка категорий доступа =====
 // ===== Рендеринг списка категорий доступа =====
 function renderAccessList() {
+    console.log('===== renderAccessList START =====');
+    console.log('currentEntityType:', currentEntityType);
+    console.log('personAccessIds (raw):', personAccessIds);
+    console.log('orgAccessIds (raw):', orgAccessIds);
+    
     var $container = $('#access-container');
+    $container.empty();
     
     if (allAccessNames.length === 0) {
         $container.html('<div class="text-center text-muted" style="padding: 40px 0;"><i class="fa fa-spinner fa-spin fa-3x"></i><p style="margin-top: 10px;"><?php echo __('Загрузка...'); ?></p></div>');
         return;
     }
     
-    // ОТЛАДКА: выводим данные
-    console.log('===== renderAccessList DEBUG =====');
-    console.log('currentEntityType:', currentEntityType);
-    console.log('allAccessNames:', allAccessNames);
-    console.log('personAccessIds:', personAccessIds);
-    console.log('orgAccessIds:', orgAccessIds);
-    console.log('====================================');
+    // ===== ПРИНУДИТЕЛЬНОЕ ПРЕОБРАЗОВАНИЕ В ЧИСЛА =====
+    var personIds = personAccessIds.map(Number);
+    var orgIds = orgAccessIds.map(Number);
+    console.log('personIds (converted):', personIds);
+    console.log('orgIds (converted):', orgIds);
+    // ================================================
     
     var html = '<div class="access-list">';
     var count = 0;
     
     $.each(allAccessNames, function(index, access) {
-        var id = access.ID_ACCESSNAME;
-        var isOrg = orgAccessIds.indexOf(id) !== -1;
-        var isPerson = personAccessIds.indexOf(id) !== -1;
+        var id = Number(access.ID_ACCESSNAME);
+        var isOrg = orgIds.indexOf(id) !== -1;
+        var isPerson = personIds.indexOf(id) !== -1;
         
-        // ОТЛАДКА: выводим каждую категорию
-       // console.log('Category ID:', id, 'Name:', access.NAME, 'isPerson:', isPerson, 'isOrg:', isOrg);
+        // ОТЛАДКА ДЛЯ ВАЖНЫХ ID
+        if (id === 1 || id === 86 || id === 197) {
+            console.log('=== ID:', id, 'isPerson:', isPerson, 'isOrg:', isOrg);
+        }
         
         var checkedAttr = '';
         var isDifferent = false;
         var displayBadges = false;
         
         if (currentEntityType === 'person') {
-            // Для сотрудника: отмечаем ТОЛЬКО его категории
             checkedAttr = isPerson ? 'checked' : '';
             isDifferent = isPerson !== isOrg;
             displayBadges = true;
-            //console.log('  -> checkedAttr:', checkedAttr, 'isDifferent:', isDifferent);
         } else if (currentEntityType === 'org') {
             checkedAttr = isOrg ? 'checked' : '';
         }
@@ -952,21 +958,15 @@ function renderAccessList() {
         html += access.NAME;
         html += ' (' + id + ')';
         html += ' (' + checkedAttr + ')';
-        
-if (id === 86) {
-    console.log('957 Category ID:', id, 'Name:', access.NAME, 'isPerson:', isPerson, 'isOrg:', isOrg);
-    console.log('958 HTML input:', '<input type="checkbox" class="access-checkbox" value="' + id + '" ' + checkedAttr + '>');
-    console.log('959 checkedAttr value: "' + checkedAttr + '"');
-}
-			
+            
         if (displayBadges) {
             if (isOrg && isPerson) {
-                html += ' <span class="badge-org"><i class="fa fa-building-o"></i> ' + __('есть в организации') + '</span>';
-                html += ' <span class="badge-person"><i class="fa fa-user"></i> ' + __('у сотрудника') + '</span>';
+                html += ' <span class="badge-org"><i class="fa fa-building-o"></i> есть в организации</span>';
+                html += ' <span class="badge-person"><i class="fa fa-user"></i> у сотрудника</span>';
             } else if (isOrg && !isPerson) {
-                html += ' <span class="badge-org"><i class="fa fa-building-o"></i> ' + __('есть в организации') + '</span>';
+                html += ' <span class="badge-org"><i class="fa fa-building-o"></i> есть в организации</span>';
             } else if (!isOrg && isPerson) {
-                html += ' <span class="badge-person"><i class="fa fa-user"></i> ' + __('у сотрудника') + '</span>';
+                html += ' <span class="badge-person"><i class="fa fa-user"></i> у сотрудника</span>';
             }
         }
         
@@ -978,18 +978,26 @@ if (id === 86) {
     });
     
     html += '</div>';
+    
+    console.log('=== AFTER LOOP ===');
+    console.log('Total checked count:', count);
+    
     $container.html(html);
     $('#access-count').text(count);
     
-    console.log('Total checked count:', count);
-    console.log('===============================');
+    // ===== ПРОВЕРКА =====
+    console.log('=== CHECKBOXES IN DOM ===');
+    $('.access-checkbox').each(function() {
+        var id = $(this).val();
+        console.log('ID:', id, 'checked:', $(this).prop('checked'), 'attr:', $(this).attr('checked'));
+    });
     
     $('.access-checkbox').on('change', function() {
         isDirty = true;
         $('#btn-save-access').addClass('btn-warning').removeClass('btn-success');
         updateAccessCount();
     });
-}  
+}
 // ===== Подсветка отличий =====
 function highlightDifferences() {
     $('.access-item').each(function() {
