@@ -1196,4 +1196,58 @@ public function searchPeople($query)
 
 
 
+/**
+ * Поиск сотрудников по номеру карты (идентификатору)
+ */
+public function searchByCard($query)
+{
+    $query = trim($query);
+    
+    if (empty($query) || strlen($query) < 2) {
+        return array();
+    }
+    
+    // Экранируем кавычки для безопасности
+    $query_safe = str_replace("'", "''", $query);
+    
+    $sql = 'SELECT 
+                p.ID_PEP,
+                p.SURNAME,
+                p.NAME,
+                p.PATRONYMIC,
+                p.ID_ORG,
+                o.NAME AS ORG_NAME,
+                c.ID_CARD,
+                ct.NAME AS CARDTYPE_NAME
+            FROM PEOPLE p
+            JOIN ORGANIZATION o ON o.ID_ORG = p.ID_ORG
+            JOIN CARD c ON c.ID_PEP = p.ID_PEP
+            JOIN CARDTYPE ct ON ct.ID = c.ID_CARDTYPE
+            WHERE p.ID_ORG NOT IN (2, 3)
+            AND (
+                c.ID_CARD CONTAINING \'' . $query_safe . '\'
+            )
+            ORDER BY p.SURNAME, p.NAME';
+    
+    $query = DB::query(Database::SELECT, iconv('UTF-8', 'windows-1251', $sql))
+        ->execute(Database::instance('fb'))
+        ->as_array();
+    
+    $result = array();
+    foreach ($query as $row) {
+        $result[] = array(
+            'ID_PEP' => $row['ID_PEP'],
+            'SURNAME' => iconv('windows-1251', 'UTF-8', $row['SURNAME']),
+            'NAME' => iconv('windows-1251', 'UTF-8', $row['NAME']),
+            'PATRONYMIC' => iconv('windows-1251', 'UTF-8', $row['PATRONYMIC']),
+            'ID_ORG' => $row['ID_ORG'],
+            'ORG_NAME' => iconv('windows-1251', 'UTF-8', $row['ORG_NAME']),
+            'ID_CARD' => $row['ID_CARD'],
+            'CARDTYPE_NAME' => iconv('windows-1251', 'UTF-8', $row['CARDTYPE_NAME']),
+        );
+    }
+    
+    return $result;
+}
+
 }

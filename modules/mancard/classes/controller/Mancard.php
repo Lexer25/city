@@ -800,4 +800,41 @@ public function action_search_people()
         )));
     }
 }
+
+
+/**
+ * AJAX: Поиск по идентификатору (карте)
+ */
+public function action_search_card()
+{
+    $this->auto_render = false;
+    $post = $this->request->post();
+    $query = trim(Arr::get($post, 'query', ''));
+    
+    if (empty($query) || strlen($query) < 2) {
+        $this->response->headers('Content-Type', 'application/json');
+        $this->response->body(json_encode(array(
+            'success' => false,
+            'message' => 'Запрос слишком короткий'
+        )));
+        return;
+    }
+    
+    try {
+        // Ищем сотрудников по номеру карты
+        $people = Model::factory('Mancard')->searchByCard($query);
+        
+        $this->response->headers('Content-Type', 'application/json');
+        $this->response->body(json_encode(array(
+            'success' => true,
+            'data' => $people
+        )));
+    } catch (Exception $e) {
+        $this->response->headers('Content-Type', 'application/json');
+        $this->response->body(json_encode(array(
+            'success' => false,
+            'message' => $e->getMessage()
+        )));
+    }
+}
 }

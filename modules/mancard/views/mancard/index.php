@@ -338,6 +338,16 @@
 }
 
 
+/* Стили для результатов поиска */
+#search-results-list li .result-card {
+    color: #5bc0de;
+    font-size: 11px;
+    margin-left: 8px;
+}
+#search-results-list li .result-card .fa {
+    margin-right: 2px;
+}
+
 </style>
 
 <div class="panel panel-primary">
@@ -382,14 +392,19 @@
                        
                         <!-- Строки поиска -->
 <!-- Строки поиска -->
+<!-- Строки поиска -->
 <div class="form-group" style="margin-bottom: 5px;">
     <div class="input-group input-group-sm" style="margin-bottom: 3px;">
         <span class="input-group-addon"><i class="fa fa-building-o"></i></span>
         <input type="text" class="form-control" id="org-search" placeholder="<?php echo __('Поиск организаций...'); ?>">
     </div>
-    <div class="input-group input-group-sm">
+    <div class="input-group input-group-sm" style="margin-bottom: 3px;">
         <span class="input-group-addon"><i class="fa fa-users"></i></span>
         <input type="text" class="form-control" id="person-search" placeholder="<?php echo __('Поиск сотрудников...'); ?>">
+    </div>
+    <div class="input-group input-group-sm">
+        <span class="input-group-addon"><i class="fa fa-id-card-o"></i></span>
+        <input type="text" class="form-control" id="card-search" placeholder="<?php echo __('Поиск по идентификатору...'); ?>">
     </div>
 </div>
 
@@ -1604,6 +1619,90 @@ function revealAndHighlightPerson(personId, orgId) {
             }
         }
     }, 300);
+}
+
+// ===== Поиск по идентификатору (карте) =====
+$('#card-search').on('keyup', function() {
+    var query = $(this).val().toLowerCase().trim();
+    
+    clearTimeout(searchTimeout);
+    
+    if (query.length < 2) {
+        $('#search-results').hide();
+        $('#search-results-list').empty();
+        $('.tree-node').show();
+        $('#card-search').removeClass('searching');
+        return;
+    }
+    
+    $('#card-search').addClass('searching');
+    
+    searchTimeout = setTimeout(function() {
+        $.ajax({
+            url: '<?php echo URL::site('mancard/search_card'); ?>',
+            type: 'POST',
+            data: { query: query },
+            dataType: 'json',
+            success: function(response) {
+                $('#card-search').removeClass('searching');
+                console.log('Card search response:', response);
+                
+                if (response.success && response.data && response.data.length > 0) {
+                    // Показываем результаты поиска
+                    showCardSearchResults(response.data);
+                } else {
+                    // Если ничего не найдено
+                    $('#search-results').show();
+                    $('#search-results-list').html('<li class="text-muted text-center" style="padding: 10px;">По идентификатору ничего не найдено</li>');
+                    $('#search-results-count').text('0');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#card-search').removeClass('searching');
+                console.error('AJAX card search error:', status, error);
+            }
+        });
+    }, 300);
+});
+
+// ===== Отображение результатов поиска по идентификатору =====
+function showCardSearchResults(people) {
+    var $list = $('#search-results-list');
+    var $container = $('#search-results');
+    
+    $list.empty();
+    
+    people.forEach(function(person) {
+        var fullName = person.SURNAME + ' ' + person.NAME + ' ' + person.PATRONYMIC;
+        var orgName = person.ORG_NAME || 'Без организации';
+        var cardInfo = person.ID_CARD || 'Нет карты';
+        var cardType = person.CARDTYPE_NAME || 'Неизвестный тип';
+        
+        var $li = $('<li>')
+            .html('<span class="result-name">' + fullName + '</span>' +
+                  '<span class="result-org"><i class="fa fa-building-o"></i> ' + orgName + '</span>' +
+                  '<span class="result-card"><i class="fa fa-id-card-o"></i> ' + cardType + ': ' + cardInfo + '</span>' +
+                  '<span class="result-id">ID: ' + person.ID_PEP + '</span>')
+            .data('person-id', person.ID_PEP)
+            .data('org-id', person.ID_ORG)
+            .on('click', function() {
+                var personId = $(this).data('person-id');
+                var orgId = $(this).data('org-id');
+                console.log('Clicked on person from card search:', personId, 'org:', orgId);
+                
+                // Раскрываем дерево к сотруднику
+                revealAndHighlightPerson(personId, orgId);
+                
+                // Скрываем результаты поиска
+                $('#search-results').hide();
+                $('#card-search').val('');
+            });
+        
+        $list.append($li);
+    });
+    
+    $('#search-results-count').text(people.length);
+    $container.show();
 }
 
 });
