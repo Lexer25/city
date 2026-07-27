@@ -282,10 +282,24 @@
     transition: all 0.3s ease;
 }
 
-/* Поиск */
-#org-search:focus {
+/* Стили для поиска */
+#org-search, #person-search {
+    font-size: 12px;
+    height: 28px;
+}
+#org-search:focus, #person-search:focus {
     border-color: #66afe9;
     box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+}
+.input-group-addon {
+    padding: 0 8px;
+    font-size: 12px;
+}
+#person-search.searching {
+    background-image: url('data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWVs3XjUEUrgXGcUU0zwOMADhlSgH1R4H2g7E1xTp0kRlgAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAA7');
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
 }
 
 /* Адаптивность */
@@ -297,6 +311,33 @@
         margin-top: 15px;
     }
 }
+
+/* Стили для результатов поиска */
+#search-results {
+    display: none;
+}
+#search-results-list li {
+    padding: 4px 8px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 13px;
+}
+#search-results-list li:hover {
+    background: #e8f4fd;
+}
+#search-results-list li .result-org {
+    color: #999;
+    font-size: 11px;
+    margin-left: 8px;
+}
+#search-results-list li .result-id {
+    color: #999;
+    font-size: 10px;
+    margin-left: 5px;
+    font-family: monospace;
+}
+
+
 </style>
 
 <div class="panel panel-primary">
@@ -338,13 +379,30 @@
                         </h4>
                     </div>
                     <div class="panel-body" style="padding: 5px;">
-                        <!-- Строка поиска -->
-                        <div class="form-group" style="margin-bottom: 5px;">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-addon"><i class="fa fa-search"></i></span>
-                                <input type="text" class="form-control" id="org-search" placeholder="<?php echo __('Поиск...'); ?>">
-                            </div>
-                        </div>
+                       
+                        <!-- Строки поиска -->
+<!-- Строки поиска -->
+<div class="form-group" style="margin-bottom: 5px;">
+    <div class="input-group input-group-sm" style="margin-bottom: 3px;">
+        <span class="input-group-addon"><i class="fa fa-building-o"></i></span>
+        <input type="text" class="form-control" id="org-search" placeholder="<?php echo __('Поиск организаций...'); ?>">
+    </div>
+    <div class="input-group input-group-sm">
+        <span class="input-group-addon"><i class="fa fa-users"></i></span>
+        <input type="text" class="form-control" id="person-search" placeholder="<?php echo __('Поиск сотрудников...'); ?>">
+    </div>
+</div>
+
+<!-- === НОВЫЙ КОНТЕЙНЕР ДЛЯ РЕЗУЛЬТАТОВ ПОИСКА === -->
+<div id="search-results" style="display: none; margin-bottom: 10px; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; background: #fafafa;">
+    <div class="panel-heading" style="background: #f5f5f5; padding: 5px 10px; font-size: 12px; border-bottom: 1px solid #ddd;">
+        <span class="badge" id="search-results-count">0</span> <?php echo __('найдено'); ?>
+        <button class="btn btn-xs btn-default pull-right" id="clear-search-results"><i class="fa fa-times"></i></button>
+    </div>
+    <ul class="list-unstyled" id="search-results-list" style="margin: 0; padding: 5px;">
+        <!-- Результаты будут добавляться сюда -->
+    </ul>
+</div>
                         
                         <!-- Дерево -->
                         <div class="move-list" id="org-tree-container" style="max-height: 450px; overflow-y: auto; overflow-x: auto; padding: 5px;">
@@ -482,6 +540,7 @@ $(document).ready(function() {
     var orgAccessIds = [];
     var personAccessIds = [];
     var isDirty = false;
+    var searchTimeout = null;
     
     // ===== Обновление ID информации при наведении =====
     function updateHoverInfo(type, id, orgId) {
@@ -650,37 +709,34 @@ $(document).ready(function() {
     });
     
     // ===== Загрузка содержимого узла =====
-    function loadNodeContent($node) {
-        var orgId = $node.data('org-id');
-        var $children = $node.children('.tree-children');
-        var $icon = $node.find('.tree-toggle .fa');
-        
-        $.ajax({
-            url: '<?php echo URL::site('mancard/get_org_structure_cards'); ?>/' + orgId,
-            type: 'GET',
-            dataType: 'json',
-            beforeSend: function() {
-                $children.html('<div class="text-center text-muted" style="padding: 10px;"><i class="fa fa-spinner fa-spin"></i> <?php echo __('Загрузка...'); ?></div>');
-            },
-            success: function(response) {
-                if (response.success && response.data) {
-                    renderNodeChildren($children, response.data);
-                    $children.slideDown();
-                    $icon.removeClass('fa-folder-o').addClass('fa-folder-open-o');
-                    $node.data('expanded', true);
-                    
-                    if (orgId == 1) {
-                        updateRootCount();
-                    }
-                } else {
-                    $children.html('<div class="text-muted" style="padding: 10px;"><i class="fa fa-info-circle"></i> <?php echo __('Нет данных'); ?></div>');
-                }
-            },
-            error: function() {
-                $children.html('<div class="text-danger" style="padding: 10px;"><i class="fa fa-exclamation-circle"></i> <?php echo __('Ошибка загрузки'); ?></div>');
+// ===== Загрузка содержимого узла =====
+function loadNodeContent($node) {
+    var orgId = $node.data('org-id');
+    var $children = $node.children('.tree-children');
+    var $icon = $node.find('.tree-toggle .fa');
+    
+    $.ajax({
+        url: '<?php echo URL::site('mancard/get_org_structure_cards'); ?>/' + orgId,
+        type: 'GET',
+        dataType: 'json',
+        beforeSend: function() {
+            $children.html('<div class="text-center text-muted" style="padding: 10px;"><i class="fa fa-spinner fa-spin"></i> <?php echo __('Загрузка...'); ?></div>');
+        },
+        success: function(response) {
+            if (response.success && response.data) {
+                renderNodeChildren($children, response.data);
+                $children.slideDown();
+                $icon.removeClass('fa-folder-o').addClass('fa-folder-open-o');
+                $node.data('expanded', true);
+            } else {
+                $children.html('<div class="text-muted" style="padding: 10px;"><i class="fa fa-info-circle"></i> <?php echo __('Нет данных'); ?></div>');
             }
-        });
-    }
+        },
+        error: function() {
+            $children.html('<div class="text-danger" style="padding: 10px;"><i class="fa fa-exclamation-circle"></i> <?php echo __('Ошибка загрузки'); ?></div>');
+        }
+    });
+}
     
     // ===== Рендеринг детей узла с картами =====
     function renderNodeChildren($container, data) {
@@ -754,134 +810,103 @@ $(document).ready(function() {
         $('#total-orgs').text(count);
     }
     
-// ===== Клик по организации или сотруднику (через делегирование) =====
-$(document).on('click', '.tree-item-org', function(e) {
-    e.stopPropagation();
-    var $node = $(this).closest('.tree-node');
-    var orgId = $node.data('org-id');
+    // ===== Клик по организации или сотруднику (через делегирование) =====
+    $(document).on('click', '.tree-item-org', function(e) {
+        e.stopPropagation();
+        var $node = $(this).closest('.tree-node');
+        var orgId = $node.data('org-id');
+        
+        if (orgId) {
+            currentEntityType = 'org';
+            currentEntityId = orgId;
+            updateSelectedInfo('org', orgId);
+            updateHoverInfo('org', orgId);
+            loadAccessForOrg(orgId);
+        }
+    });
     
-    console.log('Click on organization, orgId:', orgId);  // Отладка
+    $(document).on('click', '.tree-item-person', function(e) {
+        e.stopPropagation();
+        var personId = $(this).data('person-id');
+        var orgId = $(this).data('org-id');
+        
+        if (personId) {
+            currentEntityType = 'person';
+            currentEntityId = personId;
+            updateSelectedInfo('person', personId, orgId);
+            updateHoverInfo('person', personId, orgId);
+            loadPersonInfo(personId);
+            loadAccessForPerson(personId);
+        }
+    });
     
-    if (orgId) {
+    // ===== Загрузка категорий доступа для организации =====
+    function loadAccessForOrg(orgId) {
         currentEntityType = 'org';
         currentEntityId = orgId;
-        updateSelectedInfo('org', orgId);
-        updateHoverInfo('org', orgId);
-        loadAccessForOrg(orgId);
+        
+        if (allAccessNames.length === 0) {
+            loadAllAccessNames();
+            setTimeout(function() {
+                loadAccessForOrg(orgId);
+            }, 500);
+            return;
+        }
+        
+        $.ajax({
+            url: '<?php echo URL::site('mancard/get_entity_access'); ?>/org/' + orgId,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    orgAccessIds = response.data || [];
+                    personAccessIds = [];
+                    renderAccessList();
+                    $('#btn-save-access').show();
+                    isDirty = false;
+                } else {
+                    $('#access-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#access-container').html('<div class="alert alert-danger">Ошибка загрузки: ' + status + '</div>');
+            }
+        });
     }
-});
-
-$(document).on('click', '.tree-item-person', function(e) {
-    e.stopPropagation();
-    var personId = $(this).data('person-id');
-    var orgId = $(this).data('org-id');
     
-    console.log('Click on person, personId:', personId, 'orgId:', orgId);  // Отладка
-    
-    if (personId) {
+    // ===== Загрузка категорий доступа для сотрудника =====
+    function loadAccessForPerson(personId) {
         currentEntityType = 'person';
         currentEntityId = personId;
-        updateSelectedInfo('person', personId, orgId);
-        updateHoverInfo('person', personId, orgId);
-        loadPersonInfo(personId);
-        loadAccessForPerson(personId);
-    }
-});
-    
-// ===== Загрузка категорий доступа для организации =====
-function loadAccessForOrg(orgId) {
-    console.log('793 loadAccessForOrg called with orgId:', orgId);
-    currentEntityType = 'org';
-    currentEntityId = orgId;
-    
-    // Проверяем, загружены ли категории доступа
-    if (allAccessNames.length === 0) {
-        console.log('allAccessNames is empty, loading...');
-        loadAllAccessNames();
-        // Ждем загрузки, потом повторяем запрос
-        setTimeout(function() {
-            loadAccessForOrg(orgId);
-        }, 500);
-        return;
-    }
-    
-    console.log('808 allAccessNames loaded, count:', allAccessNames.length);
-    
-    $.ajax({
-        url: '<?php echo URL::site('mancard/get_entity_access'); ?>/org/' + orgId,
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            console.log('Access response:', response);
-            if (response.success) {
-                orgAccessIds = response.data || [];
-                personAccessIds = [];
-                console.log('orgAccessIds:', orgAccessIds);
-                renderAccessList();
-                $('#btn-save-access').show();
-                isDirty = false;
-            } else {
-                console.error('Error loading access:', response.message);
-                $('#access-container').html('<div class="alert alert-danger">' + response.message + '</div>');
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('===== AJAX ERROR DETAILS =====');
-            console.error('Status:', status);
-            console.error('Error:', error);
-            console.error('Response Text:', xhr.responseText);
-            console.error('Status Code:', xhr.status);
-            console.error('Response Headers:', xhr.getAllResponseHeaders());
-            console.error('===== END ERROR DETAILS =====');
-            
-            $('#access-container').html('<div class="alert alert-danger">Ошибка загрузки: ' + status + '<br><small>' + error + '</small></div>');
+        
+        if (allAccessNames.length === 0) {
+            loadAllAccessNames();
+            setTimeout(function() {
+                loadAccessForPerson(personId);
+            }, 500);
+            return;
         }
-    });
-}
-    
-// ===== Загрузка категорий доступа для сотрудника =====
-// ===== Загрузка категорий доступа для сотрудника =====
-function loadAccessForPerson(personId) {
-    console.log('loadAccessForPerson called with personId:', personId);
-    currentEntityType = 'person';
-    currentEntityId = personId;
-    
-    // Проверяем, загружены ли категории доступа
-    if (allAccessNames.length === 0) {
-        console.log('allAccessNames is empty, loading...');
-        loadAllAccessNames();
-        // Ждем загрузки, потом повторяем запрос
-        setTimeout(function() {
-            loadAccessForPerson(personId);  // <-- ИСПРАВЛЕНО!
-        }, 500);
-        return;
-    }
-    
-    console.log('allAccessNames loaded, count:', allAccessNames.length);
-    
-    $.ajax({
-        url: '<?php echo URL::site('mancard/get_entity_access'); ?>/person/' + personId,
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            console.log('Person access response:', response);
-            if (response.success) {
-                personAccessIds = response.data || [];
-                orgAccessIds = response.org_access || [];
-                console.log('personAccessIds:', personAccessIds);
-                console.log('orgAccessIds (for comparison):', orgAccessIds);
-                renderAccessList();
-                $('#btn-save-access').show();
-                isDirty = false;
-            } else {
-                console.error('Error loading person access:', response.message);
+        
+        $.ajax({
+            url: '<?php echo URL::site('mancard/get_entity_access'); ?>/person/' + personId,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    personAccessIds = response.data || [];
+                    orgAccessIds = response.org_access || [];
+                    renderAccessList();
+                    $('#btn-save-access').show();
+                    isDirty = false;
+                } else {
+                    console.error('Error loading person access:', response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', status, error);
             }
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX error:', status, error);
-        }
-    });
-}
+        });
+    }
     
     // ===== Загрузка всех категорий доступа =====
     function loadAllAccessNames() {
@@ -900,128 +925,100 @@ function loadAccessForPerson(personId) {
         });
     }
     
-
-// ===== Рендеринг списка категорий доступа =====
-// ===== Рендеринг списка категорий доступа =====
-function renderAccessList() {
-    console.log('===== renderAccessList START =====');
-    console.log('currentEntityType:', currentEntityType);
-    console.log('personAccessIds (raw):', personAccessIds);
-    console.log('orgAccessIds (raw):', orgAccessIds);
-    
-    var $container = $('#access-container');
-    $container.empty();
-    
-    if (allAccessNames.length === 0) {
-        $container.html('<div class="text-center text-muted" style="padding: 40px 0;"><i class="fa fa-spinner fa-spin fa-3x"></i><p style="margin-top: 10px;"><?php echo __('Загрузка...'); ?></p></div>');
-        return;
+    // ===== Рендеринг списка категорий доступа =====
+    function renderAccessList() {
+        var $container = $('#access-container');
+        $container.empty();
+        
+        if (allAccessNames.length === 0) {
+            $container.html('<div class="text-center text-muted" style="padding: 40px 0;"><i class="fa fa-spinner fa-spin fa-3x"></i><p style="margin-top: 10px;"><?php echo __('Загрузка...'); ?></p></div>');
+            return;
+        }
+        
+        // ===== ПРИНУДИТЕЛЬНОЕ ПРЕОБРАЗОВАНИЕ В ЧИСЛА =====
+        var personIds = personAccessIds.map(Number);
+        var orgIds = orgAccessIds.map(Number);
+        
+        var html = '<div class="access-list">';
+        var count = 0;
+        
+        $.each(allAccessNames, function(index, access) {
+            var id = Number(access.ID_ACCESSNAME);
+            var isOrg = orgIds.indexOf(id) !== -1;
+            var isPerson = personIds.indexOf(id) !== -1;
+            
+            var checkedAttr = '';
+            var isDifferent = false;
+            var displayBadges = false;
+            
+            if (currentEntityType === 'person') {
+                checkedAttr = isPerson ? 'checked' : '';
+                isDifferent = isPerson !== isOrg;
+                displayBadges = true;
+            } else if (currentEntityType === 'org') {
+                checkedAttr = isOrg ? 'checked' : '';
+            }
+            
+            var differentClass = isDifferent ? 'different' : '';
+            
+            html += '<div class="access-item ' + differentClass + '">';
+            html += '<div class="checkbox">';
+            html += '<label>';
+            html += '<input type="checkbox" class="access-checkbox" value="' + id + '" ' + checkedAttr + '>';
+            html += access.NAME;
+            
+            if (displayBadges) {
+                if (isOrg && isPerson) {
+                    html += ' <span class="badge-org"><i class="fa fa-building-o"></i> есть в организации</span>';
+                    html += ' <span class="badge-person"><i class="fa fa-user"></i> у сотрудника</span>';
+                } else if (isOrg && !isPerson) {
+                    html += ' <span class="badge-org"><i class="fa fa-building-o"></i> есть в организации</span>';
+                } else if (!isOrg && isPerson) {
+                    html += ' <span class="badge-person"><i class="fa fa-user"></i> у сотрудника</span>';
+                }
+            }
+            
+            html += '</label>';
+            html += '</div>';
+            html += '</div>';
+            
+            if (checkedAttr === 'checked') count++;
+        });
+        
+        html += '</div>';
+        
+        $container.html(html);
+        $('#access-count').text(count);
+        
+        $('.access-checkbox').on('change', function() {
+            isDirty = true;
+            $('#btn-save-access').addClass('btn-warning').removeClass('btn-success');
+            updateAccessCount();
+        });
     }
     
-    // ===== ПРИНУДИТЕЛЬНОЕ ПРЕОБРАЗОВАНИЕ В ЧИСЛА =====
-    var personIds = personAccessIds.map(Number);
-    var orgIds = orgAccessIds.map(Number);
-    console.log('personIds (converted):', personIds);
-    console.log('orgIds (converted):', orgIds);
-    // ================================================
-    
-    var html = '<div class="access-list">';
-    var count = 0;
-    
-    $.each(allAccessNames, function(index, access) {
-        var id = Number(access.ID_ACCESSNAME);
-        var isOrg = orgIds.indexOf(id) !== -1;
-        var isPerson = personIds.indexOf(id) !== -1;
-        
-        // ОТЛАДКА ДЛЯ ВАЖНЫХ ID
-        if (id === 1 || id === 86 || id === 197) {
-            console.log('=== ID:', id, 'isPerson:', isPerson, 'isOrg:', isOrg);
-        }
-        
-        var checkedAttr = '';
-        var isDifferent = false;
-        var displayBadges = false;
-        
-        if (currentEntityType === 'person') {
-            checkedAttr = isPerson ? 'checked' : '';
-            isDifferent = isPerson !== isOrg;
-            displayBadges = true;
-        } else if (currentEntityType === 'org') {
-            checkedAttr = isOrg ? 'checked' : '';
-        }
-        
-        var differentClass = isDifferent ? 'different' : '';
-        
-        html += '<div class="access-item ' + differentClass + '">';
-        html += '<div class="checkbox">';
-        html += '<label>';
-        html += '<input type="checkbox" class="access-checkbox" value="' + id + '" ' + checkedAttr + '>';
-        html += access.NAME;
-        html += ' (' + id + ')';
-        html += ' (' + checkedAttr + ')';
+    // ===== Подсветка отличий =====
+    function highlightDifferences() {
+        $('.access-item').each(function() {
+            var $item = $(this);
+            var $checkbox = $item.find('.access-checkbox');
+            var id = parseInt($checkbox.val());
+            var isOrg = orgAccessIds.indexOf(id) !== -1;
+            var isPerson = personAccessIds.indexOf(id) !== -1;
             
-        if (displayBadges) {
-            if (isOrg && isPerson) {
-                html += ' <span class="badge-org"><i class="fa fa-building-o"></i> есть в организации</span>';
-                html += ' <span class="badge-person"><i class="fa fa-user"></i> у сотрудника</span>';
-            } else if (isOrg && !isPerson) {
-                html += ' <span class="badge-org"><i class="fa fa-building-o"></i> есть в организации</span>';
-            } else if (!isOrg && isPerson) {
-                html += ' <span class="badge-person"><i class="fa fa-user"></i> у сотрудника</span>';
+            if (isPerson !== isOrg) {
+                $item.addClass('different');
+            } else {
+                $item.removeClass('different');
             }
-        }
-        
-        html += '</label>';
-        html += '</div>';
-        html += '</div>';
-        
-        if (checkedAttr === 'checked') count++;
-    });
+        });
+    }
     
-    html += '</div>';
-    
-    console.log('=== AFTER LOOP ===');
-    console.log('Total checked count:', count);
-    
-    $container.html(html);
-    $('#access-count').text(count);
-    
-    // ===== ПРОВЕРКА =====
-    console.log('=== CHECKBOXES IN DOM ===');
-    $('.access-checkbox').each(function() {
-        var id = $(this).val();
-        console.log('ID:', id, 'checked:', $(this).prop('checked'), 'attr:', $(this).attr('checked'));
-    });
-    
-    $('.access-checkbox').on('change', function() {
-        isDirty = true;
-        $('#btn-save-access').addClass('btn-warning').removeClass('btn-success');
-        updateAccessCount();
-    });
-}
-// ===== Подсветка отличий =====
-function highlightDifferences() {
-    $('.access-item').each(function() {
-        var $item = $(this);
-        var $checkbox = $item.find('.access-checkbox');
-        var id = parseInt($checkbox.val());
-        var isOrg = orgAccessIds.indexOf(id) !== -1;
-        var isPerson = personAccessIds.indexOf(id) !== -1;
-        
-        // Отличие: у сотрудника есть категория, которой нет у организации
-        // или у организации есть категория, которой нет у сотрудника
-        if (isPerson !== isOrg) {
-            $item.addClass('different');
-        } else {
-            $item.removeClass('different');
-        }
-    });
-}
-    
-// ===== Обновление счетчика =====
-function updateAccessCount() {
-    var count = $('.access-checkbox:checked').length;
-    $('#access-count').text(count);
-}
+    // ===== Обновление счетчика =====
+    function updateAccessCount() {
+        var count = $('.access-checkbox:checked').length;
+        $('#access-count').text(count);
+    }
     
     // ===== Выбрать все =====
     $('#btn-select-all-access').on('click', function() {
@@ -1299,25 +1296,132 @@ function updateAccessCount() {
         openEditPersonDialog(0, orgId);
     });
     
-    // ===== Поиск =====
+    // ===== Поиск организаций (локальный) =====
     $('#org-search').on('keyup', function() {
-        var query = $(this).val().toLowerCase();
+        var query = $(this).val().toLowerCase().trim();
+        
+        // Сначала показываем все узлы
+        $('.tree-node').show();
         
         if (query.length < 2) {
-            $('.tree-node').show();
             return;
         }
         
-        $('.tree-node').each(function() {
-            var text = $(this).find('.item-name').text().toLowerCase();
-            if (text.indexOf(query) > -1) {
-                $(this).show();
-                $(this).parents('.tree-node').show();
-            } else {
-                $(this).hide();
+        // Скрываем все узлы
+        $('.tree-node').hide();
+        
+        // Ищем организации
+        $('.tree-item-org').each(function() {
+            var $org = $(this);
+            var orgName = $org.find('.org-name').text().toLowerCase();
+            
+            if (orgName.indexOf(query) > -1) {
+                var $node = $org.closest('.tree-node');
+                $node.show();
+                $node.parents('.tree-node').each(function() {
+                    var $parent = $(this);
+                    $parent.show();
+                    var $children = $parent.children('.tree-children');
+                    var $icon = $parent.find('.tree-toggle .fa');
+                    if ($children.length > 0) {
+                        $children.show();
+                        $icon.removeClass('fa-folder-o').addClass('fa-folder-open-o');
+                        $parent.data('expanded', true);
+                    }
+                });
             }
         });
     });
+    
+    // ===== Поиск сотрудников (через AJAX) =====
+// ===== Поиск сотрудников =====
+$('#person-search').on('keyup', function() {
+    var query = $(this).val().toLowerCase().trim();
+    
+    clearTimeout(searchTimeout);
+    
+    if (query.length < 2) {
+        $('#search-results').hide();
+        $('#search-results-list').empty();
+        $('.tree-node').show();
+        $('#person-search').removeClass('searching');
+        return;
+    }
+    
+    $('#person-search').addClass('searching');
+    
+    searchTimeout = setTimeout(function() {
+        $.ajax({
+            url: '<?php echo URL::site('mancard/search_people'); ?>',
+            type: 'POST',
+            data: { query: query },
+            dataType: 'json',
+            success: function(response) {
+                $('#person-search').removeClass('searching');
+                console.log('Search response:', response);
+                
+                if (response.success && response.data && response.data.length > 0) {
+                    // Показываем результаты поиска
+                    showSearchResults(response.data);
+                } else {
+                    // Если ничего не найдено
+                    $('#search-results').show();
+                    $('#search-results-list').html('<li class="text-muted text-center" style="padding: 10px;">Ничего не найдено</li>');
+                    $('#search-results-count').text('0');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#person-search').removeClass('searching');
+                console.error('AJAX search error:', status, error);
+            }
+        });
+    }, 300);
+});
+
+// ===== Отображение результатов поиска =====
+function showSearchResults(people) {
+    var $list = $('#search-results-list');
+    var $container = $('#search-results');
+    
+    $list.empty();
+    
+    people.forEach(function(person) {
+        var fullName = person.SURNAME + ' ' + person.NAME + ' ' + person.PATRONYMIC;
+        var orgName = person.ORG_NAME || 'Без организации';
+        
+        var $li = $('<li>')
+            .html('<span class="result-name">' + fullName + '</span>' +
+                  '<span class="result-org"><i class="fa fa-building-o"></i> ' + orgName + '</span>' +
+                  '<span class="result-id">ID: ' + person.ID_PEP + '</span>')
+            .data('person-id', person.ID_PEP)
+            .data('org-id', person.ID_ORG)
+            .on('click', function() {
+                var personId = $(this).data('person-id');
+                var orgId = $(this).data('org-id');
+                console.log('Clicked on person:', personId, 'org:', orgId);
+                
+                // Раскрываем дерево к сотруднику
+                revealAndHighlightPerson(personId, orgId);
+                
+                // Скрываем результаты поиска
+                $('#search-results').hide();
+                $('#person-search').val('');
+            });
+        
+        $list.append($li);
+    });
+    
+    $('#search-results-count').text(people.length);
+    $container.show();
+}
+
+// ===== Очистка результатов поиска =====
+$('#clear-search-results').on('click', function() {
+    $('#search-results').hide();
+    $('#search-results-list').empty();
+    $('#person-search').val('');
+    $('.tree-node').show();
+});
     
     // ===== Развернуть всё =====
     $('#btn-expand-all').on('click', function() {
@@ -1363,5 +1467,144 @@ function updateAccessCount() {
     }
     
     loadAllAccessNames();
+
+
+
+
+// ===== Раскрытие дерева к сотруднику и подсветка =====
+function revealAndHighlightPerson(personId, orgId) {
+    console.log('Reveal and highlight person:', personId, 'in org:', orgId);
+    
+    // Находим узел организации
+    var $orgNode = $('.tree-node[data-org-id="' + orgId + '"]');
+    
+    if ($orgNode.length === 0) {
+        console.log('Organization not found in DOM:', orgId);
+        alert('Организация не найдена в дереве');
+        return;
+    }
+    
+    // === 1. Раскрываем организацию и всех родителей ===
+    function expandNode($node) {
+        var $children = $node.children('.tree-children');
+        var $icon = $node.find('.tree-toggle .fa');
+        
+        // Если узел еще не раскрыт
+        if (!$node.data('expanded')) {
+            // Если нет детей - загружаем через AJAX
+            if ($children.children().length === 0) {
+                console.log('Loading content for org:', $node.data('org-id'));
+                loadNodeContent($node);
+            }
+            // Раскрываем
+            $children.show();
+            if ($icon.length > 0) {
+                $icon.removeClass('fa-folder-o').addClass('fa-folder-open-o');
+            }
+            $node.data('expanded', true);
+            console.log('Expanded node:', $node.data('org-id'));
+        }
+        
+        // Раскрываем всех родителей
+        $node.parents('.tree-node').each(function() {
+            var $parent = $(this);
+            var $pChildren = $parent.children('.tree-children');
+            var $pIcon = $parent.find('.tree-toggle .fa');
+            
+            if ($pChildren.length > 0 && !$parent.data('expanded')) {
+                $pChildren.show();
+                if ($pIcon.length > 0) {
+                    $pIcon.removeClass('fa-folder-o').addClass('fa-folder-open-o');
+                }
+                $parent.data('expanded', true);
+            }
+        });
+    }
+    
+    // Раскрываем организацию
+    expandNode($orgNode);
+    
+    // === 2. Ждем загрузки сотрудников и подсвечиваем нужного ===
+    var attempts = 0;
+    var maxAttempts = 15; // 15 попыток по 300ms = 4.5 секунды
+    
+    var checkInterval = setInterval(function() {
+        attempts++;
+        console.log('Attempt', attempts, 'to find person:', personId);
+        
+        var $person = $('.tree-item-person[data-person-id="' + personId + '"]');
+        
+        if ($person.length > 0) {
+            // Нашли сотрудника!
+            clearInterval(checkInterval);
+            console.log('Found person in DOM!');
+            
+            // Показываем узел
+            var $node = $person.closest('.tree-node');
+            $node.show();
+            
+            // Раскрываем всех родителей еще раз (на всякий случай)
+            $node.parents('.tree-node').each(function() {
+                var $parent = $(this);
+                $parent.show();
+                var $pChildren = $parent.children('.tree-children');
+                var $pIcon = $parent.find('.tree-toggle .fa');
+                if ($pChildren.length > 0 && !$parent.data('expanded')) {
+                    $pChildren.show();
+                    $pIcon.removeClass('fa-folder-o').addClass('fa-folder-open-o');
+                    $parent.data('expanded', true);
+                }
+            });
+            
+            // Подсветка
+            $person.css({
+                'background-color': '#ffff99',
+                'border-left': '4px solid #ff6600',
+                'border-radius': '3px',
+                'padding-left': '4px'
+            });
+            
+            // Прокручиваем к сотруднику
+            var $container = $('#org-tree-container');
+            var offset = $person.offset().top - $container.offset().top + $container.scrollTop() - 80;
+            $container.animate({ scrollTop: offset }, 400);
+            
+            // Убираем подсветку через 5 секунд
+            setTimeout(function() {
+                $person.css({
+                    'background-color': '',
+                    'border-left': '',
+                    'border-radius': '',
+                    'padding-left': ''
+                });
+            }, 5000);
+            
+            // Обновляем информацию в правой панели
+            $person.trigger('click');
+            
+        } else if (attempts >= maxAttempts) {
+            clearInterval(checkInterval);
+            console.log('Timeout: Person not found');
+            
+            // Показываем сообщение с предложением раскрыть вручную
+            var orgName = $orgNode.find('.org-name').text();
+            if (confirm('Сотрудник найден в организации "' + orgName + '", но еще не загружен в дерево.\n\nРаскрыть организацию вручную?')) {
+                // Раскрываем организацию еще раз с принудительной загрузкой
+                var $children = $orgNode.children('.tree-children');
+                if ($children.children().length === 0) {
+                    loadNodeContent($orgNode);
+                }
+                $orgNode.children('.tree-children').show();
+                $orgNode.data('expanded', true);
+                
+                // Повторяем поиск через секунду
+                setTimeout(function() {
+                    revealAndHighlightPerson(personId, orgId);
+                }, 1000);
+            }
+        }
+    }, 300);
+}
+
 });
 </script>

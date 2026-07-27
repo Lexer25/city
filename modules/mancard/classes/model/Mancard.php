@@ -1142,4 +1142,58 @@ public function updatePersonAccessNames($id_pep, $access_ids)
             ->execute(Database::instance('fb'));
     }
 }
+
+
+/**
+ * Поиск сотрудников по ФИО
+ */
+public function searchPeople($query)
+{
+    $query = trim($query);
+    
+    if (empty($query) || strlen($query) < 2) {
+        return array();
+    }
+    
+    // Экранируем кавычки для безопасности
+    $query_safe = str_replace("'", "''", $query);
+    
+    $sql = 'SELECT 
+                p.ID_PEP,
+                p.SURNAME,
+                p.NAME,
+                p.PATRONYMIC,
+                p.ID_ORG,
+                o.NAME AS ORG_NAME
+            FROM PEOPLE p
+            JOIN ORGANIZATION o ON o.ID_ORG = p.ID_ORG
+            WHERE p.ID_ORG NOT IN (2, 3)
+            AND (
+                p.SURNAME CONTAINING \'' . $query_safe . '\' OR
+                p.NAME CONTAINING \'' . $query_safe . '\' OR
+                p.PATRONYMIC CONTAINING \'' . $query_safe . '\'
+            )
+            ORDER BY p.SURNAME, p.NAME';
+    
+    $query = DB::query(Database::SELECT, iconv('UTF-8', 'windows-1251', $sql))
+        ->execute(Database::instance('fb'))
+        ->as_array();
+    
+    $result = array();
+    foreach ($query as $row) {
+        $result[] = array(
+            'ID_PEP' => $row['ID_PEP'],
+            'SURNAME' => iconv('windows-1251', 'UTF-8', $row['SURNAME']),
+            'NAME' => iconv('windows-1251', 'UTF-8', $row['NAME']),
+            'PATRONYMIC' => iconv('windows-1251', 'UTF-8', $row['PATRONYMIC']),
+            'ID_ORG' => $row['ID_ORG'],
+            'ORG_NAME' => iconv('windows-1251', 'UTF-8', $row['ORG_NAME']),
+        );
+    }
+    
+    return $result;
+}
+
+
+
 }

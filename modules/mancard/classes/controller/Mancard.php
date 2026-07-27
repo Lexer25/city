@@ -763,4 +763,41 @@ public function action_get_entity_access()
             )));
         }
     }
+	
+/**
+ * AJAX: Поиск сотрудников
+ */
+public function action_search_people()
+{
+    $this->auto_render = false;
+    $post = $this->request->post();
+    $query = trim(Arr::get($post, 'query', ''));
+    
+    if (empty($query) || strlen($query) < 2) {
+        $this->response->headers('Content-Type', 'application/json');
+        $this->response->body(json_encode(array(
+            'success' => false,
+            'message' => 'Запрос слишком короткий'
+        )));
+        return;
+    }
+    
+    try {
+        // Используем поиск по полному ФИО
+       // $people = Model::factory('Mancard')->searchPeopleFull($query);
+        $people = Model::factory('Mancard')->searchPeople($query);
+        
+        $this->response->headers('Content-Type', 'application/json');
+        $this->response->body(json_encode(array(
+            'success' => true,
+            'data' => $people
+        )));
+    } catch (Exception $e) {
+        $this->response->headers('Content-Type', 'application/json');
+        $this->response->body(json_encode(array(
+            'success' => false,
+            'message' => $e->getMessage()
+        )));
+    }
+}
 }
