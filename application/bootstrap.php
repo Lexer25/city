@@ -160,7 +160,7 @@ Kohana::modules(array(
 	 'devgroup' => MODPATH.'devgroup',//группы устройств
 	 'floorplan' => MODPATH.'floorplan',//планировки
 	 'baseref' => MODPATH.'baseref',//справочники
-	 'mancard' => MODPATH.'mancard',//Менеджер пропусков
+	// 'mancard' => MODPATH.'mancard',//Менеджер пропусков
 	));
 	
 	

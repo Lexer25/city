@@ -2,7 +2,7 @@
 
 return array(
 		// Enable the API browser.  TRUE or FALSE
-		'api_browser'  => FALSE,
+		'api_browser'  => true,
 
 	// Enable these packages in the API browser.  TRUE for all packages, or a string of comma seperated packages, using 'None' for a class with no @package
 	// Example: 'api_packages' => 'Kohana,Kohana/Database,Kohana/ORM,None',
@@ -35,7 +35,7 @@ return array(
 		'kohana' => array(
 
 			// Whether this modules userguide pages should be shown
-				'enabled' => FALSE,
+				'enabled' => true,
 
 			// The name that should show up on the userguide index page
 			'name' => 'Kohana',
@@ -50,7 +50,7 @@ return array(
 		'userguide' => array(
 
 			// Whether this modules userguide pages should be shown
-				'enabled' => FALSE,
+				'enabled' => true,
 			
 			// The name that should show up on the userguide index page
 			'name' => 'Userguide',
