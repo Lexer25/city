@@ -83,3 +83,7 @@
 	path = modules/baseref
 	url = https://github.com/Lexer25/adm_baseref.git
 	branch = main
+[submodule "modules/mancard"]
+	path = modules/mancard
+	url = https://github.com/Lexer25/city_mancard.git
+	branch = main
