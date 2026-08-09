@@ -131,6 +131,7 @@ Kohana::modules(array(
 	// 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
 	// 'unittest'   => MODPATH.'unittest',   // Unit testing
 	 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
+	 'basis'  => MODPATH.'basis',  // basis
 	 'dashboard'  => MODPATH.'dashboard',  // dashboard
 	 'events'  => MODPATH.'events',  // форма для вывода различных событий
 	 'people'  => MODPATH.'people',  // форма для работы с контактами

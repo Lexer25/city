@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Dashboard extends Controller_Template {
+class Controller_dashboard extends Controller_Template {
 
    public $template = 'template';
    //Широки шаблон
@@ -14,43 +14,17 @@ class Controller_Dashboard extends Controller_Template {
 			
 			parent::before();
 			$session = Session::instance();
-			include Kohana::find_file('classes/controller','check_db_connect');
-			
-			Session::instance()->set('peopleEventsTimeFrom', date("d.m.Y H:i:s",strtotime("-1 days")));
-			Session::instance()->set('peopleEventsTimeTo', date("d.m.Y H:i:s",strtotime("now")));
-			
-			
+		
 	}
 	
 
 	
-	public function action_services()
-	{
 		
-		$serverList=Model::factory('Check')->getServerList();// получили список транспортных серверов
-		$content = View::factory('dashboard/services', array(
-			'serverList'=>$serverList,
-			));
-		$this->template->content = $content;
-		
-	}
-
-	
-	
 	public function action_index()
 	{	
 				$t1=microtime(1);
 				
-		//Проверка авторизации
-		if (!empty($_POST)) {
-             	$username = Arr::get($_POST, 'username');
-                $password = Arr::get($_POST, 'password');
-			
-                if (Auth::instance()->login($username, $password)) {
-                $user = Auth::instance()->get_user();
-				}
-			}
-			$config_windows=Kohana::$config->load('artonitcity_config')->main_windows;
+	$config_windows=Kohana::$config->load('artonitcity_config')->main_windows;
 			
 			
 	// подготовка и вывод информации для панелей №№ 1, 2, 3.
@@ -64,11 +38,10 @@ class Controller_Dashboard extends Controller_Template {
 		$list_windows3=array();
 		$t1=microtime(true);
 		
-		
 		if(Arr::get($config_windows, 'windows1', FALSE)) 
 		{
 			$list_windows1=$this->getWin1();
-			$list_windowsGuest=$this->getWin1Guest();
+			//$list_windowsGuest=$this->getWin1Guest();
 			
 		}
 		
@@ -85,7 +58,7 @@ class Controller_Dashboard extends Controller_Template {
 		$about=Model::factory('Parkdb')->aboutDB($_connectName);
 		$content = View::factory('dashboard/dashboard', array(
 			'list_windows1' => $list_windows1,
-			'list_windowsGuest' => $list_windowsGuest,
+			//'list_windowsGuest' => $list_windowsGuest,
 			'list_windows2' => $list_windows2,
 			'list_windows3' => $list_windows3,
 			'analyt_result' => $analyt_result,
@@ -108,21 +81,22 @@ class Controller_Dashboard extends Controller_Template {
 				$config = Kohana::$config->load('artonitcity_config');
 				$days = (int) $config->count_day_befor_end_time;
 				$dateExpired=date('d.m.Y', strtotime("+{$days} days"));//дата для расчета
-				$people_model = Model::factory('people');
-				$card_model = Model::factory('identifier');
-				
+				$people_model = Model::factory('summary');
+				$counts=$people_model->peopleCounts($dateExpired);
+
+	
 				$result=array();
-				$result['people_count']=$people_model->getPeopleCount();//количество пользователей
-				$result['key_people_delete']=$people_model->getDeletedPeopleCount();//количество удаленных пользователей
-				$result['getPeopleWithoutCard']=$people_model->getPeopleWithoutCard();//количество сотрудников без карты
+				$result['people_count']=Arr::get($counts, 'PEOPLE_TOTAL', 22);//количество пользователей
+				$result['key_people_delete']=Arr::get($counts, 'PEOPLE_INACTIVE');//количество удаленных пользователей
+				$result['getPeopleWithoutCard']=Arr::get($counts, 'PEOPLE_WITHOUT_CARD');//количество сотрудников без карты
 				
-                                $result['timeExpired']=$dateExpired;//дата для расчета
-				$result['count_card_late_next_week']=$card_model->getCountCardLateNextTime($result['timeExpired']);//количество карт, срок которых истечет до указанной даты
-				$result['getcardexpired']=$card_model->getcardexpired();//количество карт, у которых истек срок действия
-				$result['getCardNotActive']=$card_model->getCardNotActive();//количество неактивных идентификаторов
-				$result['getPeopleCardCount']=$card_model->getPeopleCardCount();//количество неактивных идентификаторов
+                $result['timeExpired']=$dateExpired;//дата для расчета
+				$result['count_card_late_next_week']=Arr::get($counts, 'CARD_EXPIRED_ON_DATE');//количество карт, срок которых истечет до указанной даты
+				$result['getcardexpired']=Arr::get($counts, 'CARD_EXPIRED');//количество карт, у которых истек срок действия
+				$result['getCardNotActive']=Arr::get($counts, 'CARD_INACTIVE');//количество неактивных идентификаторов
+				$result['getPeopleCardCount']=Arr::get($counts, 'CARD_TYPE1_TOTAL');//Всего карт
 				
-				
+	
 				
 				return $result;
 			}
