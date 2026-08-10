@@ -87,3 +87,11 @@
 	path = modules/mancard
 	url = https://github.com/Lexer25/city_mancard.git
 	branch = main
+[submodule "modules/basis"]
+	path = modules/basis
+	url = https://github.com/Lexer25/city_basis.git
+	branch = main
+[submodule "modules/dashboard"]
+	path = modules/dashboard
+	url = https://github.com/Lexer25/city_dashboard.git
+	branch = main
