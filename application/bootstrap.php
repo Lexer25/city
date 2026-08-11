@@ -131,6 +131,7 @@ Kohana::modules(array(
 	// 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
 	// 'unittest'   => MODPATH.'unittest',   // Unit testing
 	 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
+	  'baseref' => MODPATH.'baseref',//справочники
 	 'basis'  => MODPATH.'basis',  // basis
 	 'dashboard'  => MODPATH.'dashboard',  // dashboard
 	 'events'  => MODPATH.'events',  // форма для вывода различных событий
@@ -160,7 +161,7 @@ Kohana::modules(array(
 	 'monitors' => MODPATH.'monitors',//монитор в браузере
 	 'devgroup' => MODPATH.'devgroup',//группы устройств
 	 'floorplan' => MODPATH.'floorplan',//планировки
-	 'baseref' => MODPATH.'baseref',//справочники
+	
 	// 'mancard' => MODPATH.'mancard',//Менеджер пропусков
 	));
 	
