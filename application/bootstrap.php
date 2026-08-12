@@ -122,7 +122,9 @@ Kohana::$config->attach(new Config_File);
  * Enable modules. Modules are referenced by a relative or absolute path.
  */
 Kohana::modules(array(
- 'basis'  => MODPATH.'basis',  // basis
+'baseref' => MODPATH.'baseref',//справочники
+	'userguide'  => MODPATH.'userguide',  // User guide and API documentation
+	'basis'  => MODPATH.'basis',  // basis
 	 'auth'       => MODPATH.'auth',       // Basic authentication
 	 'cache'      => MODPATH.'cache',      // Caching with multiple backends
 	// 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
@@ -131,10 +133,10 @@ Kohana::modules(array(
 	 'minion'     => MODPATH.'minion',     // CLI Tasks
 	// 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
 	// 'unittest'   => MODPATH.'unittest',   // Unit testing
-	 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
-	  'baseref' => MODPATH.'baseref',//справочники
+	//'userguide'  => MODPATH.'userguide',  // User guide and API documentation
+	//  'baseref' => MODPATH.'baseref',//справочники
 	
-	 'dashboard'  => MODPATH.'dashboard',  // dashboard
+	  'dashboard'  => MODPATH.'dashboard',  // dashboard
 	 'events'  => MODPATH.'events',  // форма для вывода различных событий
 	 'people'  => MODPATH.'people',  // форма для работы с контактами
 	 'door'  => MODPATH.'door',  // форма для работы с точкой прохода
@@ -148,22 +150,20 @@ Kohana::modules(array(
 	 'about' => MODPATH.'about', // About module
 	 'dbsetting' => MODPATH.'dbsetting', // Database management module
 	 'eventConfig' => MODPATH.'eventConfig', // Конфигурация типов событий
-	 //'ts' => MODPATH.'ts', // 
-	 //'device' => MODPATH.'cfg/device', // 
+	
 	 'log' => MODPATH.'log', // 
 	 'bas' => MODPATH.'bas', // модуль для работы с bas-ip
 	 'accessCategory' => MODPATH.'accessCategory', // модуль для работы с категориями доступа
-	 //'accCat' => MODPATH.'accCat', // модуль для работы с категориями доступа
-	 'holiday' => MODPATH.'holiday',
+		 'holiday' => MODPATH.'holiday',
 	 'timezone' => MODPATH.'timezone',
-	 //'auditlog' => MODPATH.'auditlog',
+	//'auditlog' => MODPATH.'auditlog',
 	 'ts' => MODPATH.'ts',//управление транспортными серверами
 	 'devices' => MODPATH.'devices',//управление контроллерами
 	 'monitors' => MODPATH.'monitors',//монитор в браузере
 	 'devgroup' => MODPATH.'devgroup',//группы устройств
 	 'floorplan' => MODPATH.'floorplan',//планировки
 	
-	// 'mancard' => MODPATH.'mancard',//Менеджер пропусков
+	//'mancard' => MODPATH.'mancard',//Менеджер пропусков
 	));
 	
 	
@@ -198,7 +198,7 @@ Route::set('peoplesearcch', 'people(/peopleInfo(/<id>)(/<card>))')
     
 Route::set('default', '(<controller>(/<action>(/<id>)))')
 	->defaults(array(
-		'controller' => 'dashboard',
+		'controller' => 'welcome',
 		'action'     => 'index',
 	));
 
