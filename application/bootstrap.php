@@ -162,6 +162,7 @@ Kohana::modules(array(
 	 'monitors' => MODPATH.'monitors',//монитор в браузере
 	 'devgroup' => MODPATH.'devgroup',//группы устройств
 	 'floorplan' => MODPATH.'floorplan',//планировки
+	 'testartonit' => MODPATH.'testartonit',//testartonit
 	
 	//'mancard' => MODPATH.'mancard',//Менеджер пропусков
 	));
