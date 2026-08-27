@@ -164,7 +164,7 @@ Kohana::modules(array(
 	 'floorplan' => MODPATH.'floorplan',//планировки
 	 'testartonit' => MODPATH.'testartonit',//testartonit
 	
-	//'mancard' => MODPATH.'mancard',//Менеджер пропусков
+	'mancard' => MODPATH.'mancard',//Менеджер пропусков
 	));
 	
 	
