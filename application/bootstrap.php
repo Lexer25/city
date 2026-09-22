@@ -165,6 +165,7 @@ Kohana::modules(array(
 	 'testartonit' => MODPATH.'testartonit',//testartonit
 	
 	'mancard' => MODPATH.'mancard',//Менеджер пропусков
+	'auditlog' => MODPATH.'auditlog',//Менеджер аудит: информация об изменениях данных.
 	));
 	
 	

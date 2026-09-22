@@ -95,3 +95,7 @@
 	path = modules/dashboard
 	url = https://github.com/Lexer25/city_dashboard.git
 	branch = main
+[submodule "modules/auditlog"]
+	path = modules/auditlog
+	url = https://github.com/Lexer25/city_auditlog.git
+	branch = main
