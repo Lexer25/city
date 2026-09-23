@@ -99,3 +99,7 @@
 	path = modules/auditlog
 	url = https://github.com/Lexer25/city_auditlog.git
 	branch = main
+[submodule "modules/rest"]
+	path = modules/rest
+	url = https://github.com/Lexer25/city_rest.git
+	branch = main
