@@ -145,6 +145,7 @@ Kohana::modules(array(
 	 'dev' => MODPATH.'dev', //'форма для работы с контроллерами
 	 'apb' => MODPATH.'apb', //'раздел для работы с периметральным антипассбеком
 	 'identifier' => MODPATH.'identifier', //'раздел для работы с идентификаторами
+	 
 	 'parsec' => MODPATH.'parsec', //'раздел для работы с parsec
 	 'setting' => MODPATH . 'setting',//настройка Сити через веб-форму
 	 'about' => MODPATH.'about', // About module
@@ -166,6 +167,7 @@ Kohana::modules(array(
 	
 	'mancard' => MODPATH.'mancard',//Менеджер пропусков
 	'auditlog' => MODPATH.'auditlog',//Менеджер аудит: информация об изменениях данных.
+	'rest'   => MODPATH.'rest',      // ← ПЕРЕД parsec
 	));
 	
 	
@@ -191,12 +193,7 @@ Kohana::$log->attach(new Log_File(APPPATH.'logs'));
  */
  
 	
-	
-Route::set('peoplesearcch', 'people(/peopleInfo(/<id>)(/<card>))')
-	->defaults(array(
-		'controller' => 'people',
-		'action'     => 'peopleInfo',
-	));
+
     
 Route::set('default', '(<controller>(/<action>(/<id>)))')
 	->defaults(array(
