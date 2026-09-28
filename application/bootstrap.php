@@ -123,9 +123,8 @@ Kohana::$config->attach(new Config_File);
  */
 
 Kohana::modules(array(
-'baseref' => MODPATH.'baseref',//справочники
+//модули framework
 	'userguide'  => MODPATH.'userguide',  // User guide and API documentation
-	'basis'  => MODPATH.'basis',  // basis
 	 'auth'       => MODPATH.'auth',       // Basic authentication
 	 'cache'      => MODPATH.'cache',      // Caching with multiple backends
 	// 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
@@ -136,37 +135,48 @@ Kohana::modules(array(
 	// 'unittest'   => MODPATH.'unittest',   // Unit testing
 	//'userguide'  => MODPATH.'userguide',  // User guide and API documentation
 	
-	  'dashboard'  => MODPATH.'dashboard',  // dashboard
+//базовые модули city	
+	'baseref' => MODPATH.'baseref',//справочники
+	'basis'  => MODPATH.'basis',  // basis
+	
+//модули основного экрана city	
+	
+	 'dashboard'  => MODPATH.'dashboard',  // dashboard
 	 'events'  => MODPATH.'events',  // форма для вывода различных событий
 	 'people'  => MODPATH.'people',  // форма для работы с контактами
 	 'door'  => MODPATH.'door',  // форма для работы с точкой прохода
 	 'email' => MODPATH.'email',
 	 'eximdata' => MODPATH.'eximdata', //'экспорт и импорт данных
 	 'dev' => MODPATH.'dev', //'форма для работы с контроллерами
-	 //'apb' => MODPATH.'apb', //'раздел для работы с периметральным антипассбеком
 	 'identifier' => MODPATH.'identifier', //'раздел для работы с идентификаторами
-	 
-	 //'parsec' => MODPATH.'parsec', //'раздел для работы с parsec
+	  'about' => MODPATH.'about', // About module
+	  'monitors' => MODPATH.'monitors',//монитор в браузере
+	  'mancard' => MODPATH.'mancard',//Менеджер пропусков
+	  
+//модули конфигурации СКУД	
 	 'setting' => MODPATH . 'setting',//настройка Сити через веб-форму
-	 'about' => MODPATH.'about', // About module
-	 'dbsetting' => MODPATH.'dbsetting', // Database management module
+	 'dbsetting' => MODPATH.'dbsetting', // выбор базы данных, backup и restore
 	 'eventConfig' => MODPATH.'eventConfig', // Конфигурация типов событий
-	
-	 //'log' => MODPATH.'log', // 
-	 //'bas' => MODPATH.'bas', // модуль для работы с bas-ip
 	 'accessCategory' => MODPATH.'accessCategory', // модуль для работы с категориями доступа
-		 'holiday' => MODPATH.'holiday',
+	 'holiday' => MODPATH.'holiday',
 	 'timezone' => MODPATH.'timezone',
 	 'ts' => MODPATH.'ts',//управление транспортными серверами
 	 'devices' => MODPATH.'devices',//управление контроллерами
-	 'monitors' => MODPATH.'monitors',//монитор в браузере
 	 'devgroup' => MODPATH.'devgroup',//группы устройств
 	 'floorplan' => MODPATH.'floorplan',//планировки
-	 //'testartonit' => MODPATH.'testartonit',//testartonit
+	 
 	
-	//'mancard' => MODPATH.'mancard',//Менеджер пропусков
+	
+	
+	
+	//специализированные модули
 	//'auditlog' => MODPATH.'auditlog',//Менеджер аудит: информация об изменениях данных.
 	//'rest'   => MODPATH.'rest',      // ← ПЕРЕД parsec
+	'testartonit' => MODPATH.'testartonit',//testartonit
+	'log' => MODPATH.'log', // 
+	 'apb' => MODPATH.'apb', //'раздел для работы с периметральным антипассбеком
+	 'parsec' => MODPATH.'parsec', //'раздел для работы с parsec
+	 'bas' => MODPATH.'bas', // модуль для работы с bas-ip
 	));
 	
 	
