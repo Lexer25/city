@@ -6,7 +6,7 @@ return array
 				'type'			=> 'pdo',
 				'connection'	=> array(
 
-					'dsn' => 'odbc:HL2',
+					'dsn' => 'odbc:SDuo',
 
 					'charset'   => 'windows-1251',
 					)

@@ -121,6 +121,7 @@ Kohana::$config->attach(new Config_File);
 /**
  * Enable modules. Modules are referenced by a relative or absolute path.
  */
+
 Kohana::modules(array(
 'baseref' => MODPATH.'baseref',//справочники
 	'userguide'  => MODPATH.'userguide',  // User guide and API documentation
@@ -134,7 +135,6 @@ Kohana::modules(array(
 	// 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
 	// 'unittest'   => MODPATH.'unittest',   // Unit testing
 	//'userguide'  => MODPATH.'userguide',  // User guide and API documentation
-	//  'baseref' => MODPATH.'baseref',//справочники
 	
 	  'dashboard'  => MODPATH.'dashboard',  // dashboard
 	 'events'  => MODPATH.'events',  // форма для вывода различных событий
@@ -143,31 +143,30 @@ Kohana::modules(array(
 	 'email' => MODPATH.'email',
 	 'eximdata' => MODPATH.'eximdata', //'экспорт и импорт данных
 	 'dev' => MODPATH.'dev', //'форма для работы с контроллерами
-	 'apb' => MODPATH.'apb', //'раздел для работы с периметральным антипассбеком
+	 //'apb' => MODPATH.'apb', //'раздел для работы с периметральным антипассбеком
 	 'identifier' => MODPATH.'identifier', //'раздел для работы с идентификаторами
 	 
-	 'parsec' => MODPATH.'parsec', //'раздел для работы с parsec
+	 //'parsec' => MODPATH.'parsec', //'раздел для работы с parsec
 	 'setting' => MODPATH . 'setting',//настройка Сити через веб-форму
 	 'about' => MODPATH.'about', // About module
 	 'dbsetting' => MODPATH.'dbsetting', // Database management module
 	 'eventConfig' => MODPATH.'eventConfig', // Конфигурация типов событий
 	
-	 'log' => MODPATH.'log', // 
-	 'bas' => MODPATH.'bas', // модуль для работы с bas-ip
+	 //'log' => MODPATH.'log', // 
+	 //'bas' => MODPATH.'bas', // модуль для работы с bas-ip
 	 'accessCategory' => MODPATH.'accessCategory', // модуль для работы с категориями доступа
 		 'holiday' => MODPATH.'holiday',
 	 'timezone' => MODPATH.'timezone',
-	//'auditlog' => MODPATH.'auditlog',
 	 'ts' => MODPATH.'ts',//управление транспортными серверами
 	 'devices' => MODPATH.'devices',//управление контроллерами
 	 'monitors' => MODPATH.'monitors',//монитор в браузере
 	 'devgroup' => MODPATH.'devgroup',//группы устройств
 	 'floorplan' => MODPATH.'floorplan',//планировки
-	 'testartonit' => MODPATH.'testartonit',//testartonit
+	 //'testartonit' => MODPATH.'testartonit',//testartonit
 	
-	'mancard' => MODPATH.'mancard',//Менеджер пропусков
-	'auditlog' => MODPATH.'auditlog',//Менеджер аудит: информация об изменениях данных.
-	'rest'   => MODPATH.'rest',      // ← ПЕРЕД parsec
+	//'mancard' => MODPATH.'mancard',//Менеджер пропусков
+	//'auditlog' => MODPATH.'auditlog',//Менеджер аудит: информация об изменениях данных.
+	//'rest'   => MODPATH.'rest',      // ← ПЕРЕД parsec
 	));
 	
 	
