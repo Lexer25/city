@@ -123,8 +123,50 @@ Kohana::$config->attach(new Config_File);
  */
 
 Kohana::modules(array(
-//модули framework
 	'userguide'  => MODPATH.'userguide',  // User guide and API documentation
+//базовые модули Сити
+	'basis'  => MODPATH.'basis',  // basis
+	'baseref' => MODPATH.'baseref',//справочники
+
+//модули раздела Сити Цент
+	
+	'dashboard'  => MODPATH.'dashboard',  // dashboard
+	 'events'  => MODPATH.'events',  // форма для вывода различных событий
+	 'people'  => MODPATH.'people',  // форма для работы с контактами
+	 'door'  => MODPATH.'door',  // форма для работы с точкой прохода
+	 'eximdata' => MODPATH.'eximdata', //'экспорт и импорт данных
+	 'dev' => MODPATH.'dev', //'форма для работы с контроллерами
+	 'identifier' => MODPATH.'identifier', //'раздел для работы с идентификаторами
+	 'setting' => MODPATH . 'setting',//настройка Сити через веб-форму
+	 'about' => MODPATH.'about', // About module
+	 'dbsetting' => MODPATH.'dbsetting', // Database management module
+	 'eventConfig' => MODPATH.'eventConfig', // Конфигурация типов событий
+	 'monitors' => MODPATH.'monitors',//монитор в браузере	
+	 'devices' => MODPATH.'devices',//управление контроллерами	 
+	 'floorplan' => MODPATH.'floorplan',//планировки	 
+	 
+	 
+//модули раздела Сити конфигуратор
+
+	 'accessCategory' => MODPATH.'accessCategory', // модуль для работы с категориями доступа
+	 'holiday' => MODPATH.'holiday',
+	 'timezone' => MODPATH.'timezone',
+	 'ts' => MODPATH.'ts',//управление транспортными серверами
+	 'devgroup' => MODPATH.'devgroup',//группы устройств
+
+
+//специлизированные модули
+	 //'testartonit' => MODPATH.'testartonit',//testartonit
+	 //'log' => MODPATH.'log', // 
+	 //'bas' => MODPATH.'bas', // модуль для работы с bas-ip	
+	'mancard' => MODPATH.'mancard',//Менеджер пропусков
+	//'auditlog' => MODPATH.'auditlog',//Менеджер аудит: информация об изменениях данных.
+	'rest'   => MODPATH.'rest',      // ← ПЕРЕД parsec
+	 'parsec' => MODPATH.'parsec', //'раздел для работы с parsec
+	 //'apb' => MODPATH.'apb', //'раздел для работы с периметральным антипассбеком
+	
+//модули framwork Kohana	
+
 	 'auth'       => MODPATH.'auth',       // Basic authentication
 	 'cache'      => MODPATH.'cache',      // Caching with multiple backends
 	// 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
@@ -133,54 +175,20 @@ Kohana::modules(array(
 	 'minion'     => MODPATH.'minion',     // CLI Tasks
 	// 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
 	// 'unittest'   => MODPATH.'unittest',   // Unit testing
-	//'userguide'  => MODPATH.'userguide',  // User guide and API documentation
+
+//модули сторонних разработчиков	
 	
-//базовые модули city	
-	'baseref' => MODPATH.'baseref',//справочники
-	'basis'  => MODPATH.'basis',  // basis
-	
-//модули основного экрана city	
-	
-	 'dashboard'  => MODPATH.'dashboard',  // dashboard
-	 'events'  => MODPATH.'events',  // форма для вывода различных событий
-	 'people'  => MODPATH.'people',  // форма для работы с контактами
-	 'door'  => MODPATH.'door',  // форма для работы с точкой прохода
-	 'email' => MODPATH.'email',
-	 'eximdata' => MODPATH.'eximdata', //'экспорт и импорт данных
-	 'dev' => MODPATH.'dev', //'форма для работы с контроллерами
-	 'identifier' => MODPATH.'identifier', //'раздел для работы с идентификаторами
-	  'about' => MODPATH.'about', // About module
-	  'monitors' => MODPATH.'monitors',//монитор в браузере
-	  'mancard' => MODPATH.'mancard',//Менеджер пропусков
-	  
-//модули конфигурации СКУД	
-	 'setting' => MODPATH . 'setting',//настройка Сити через веб-форму
-	 'dbsetting' => MODPATH.'dbsetting', // выбор базы данных, backup и restore
-	 'eventConfig' => MODPATH.'eventConfig', // Конфигурация типов событий
-	 'accessCategory' => MODPATH.'accessCategory', // модуль для работы с категориями доступа
-	 'holiday' => MODPATH.'holiday',
-	 'timezone' => MODPATH.'timezone',
-	 'ts' => MODPATH.'ts',//управление транспортными серверами
-	 'devices' => MODPATH.'devices',//управление контроллерами
-	 'devgroup' => MODPATH.'devgroup',//группы устройств
-	 'floorplan' => MODPATH.'floorplan',//планировки
-	 
-	
-	
-	
-	
-	//специализированные модули
-	//'auditlog' => MODPATH.'auditlog',//Менеджер аудит: информация об изменениях данных.
-	//'rest'   => MODPATH.'rest',      // ← ПЕРЕД parsec
-	'testartonit' => MODPATH.'testartonit',//testartonit
-	'log' => MODPATH.'log', // 
-	 'apb' => MODPATH.'apb', //'раздел для работы с периметральным антипассбеком
-	 'parsec' => MODPATH.'parsec', //'раздел для работы с parsec
-	 'bas' => MODPATH.'bas', // модуль для работы с bas-ip
+		 'email' => MODPATH.'email',
 	));
 	
-	
-	
+/* $ref = new ReflectionClass('Auth_File');
+echo 'Exception file: '.$ref->getFileName().'<br>';
+exit;	
+	 */
+	 
+
+ 
+ 
 /**
  * Attach the file write to logging. Multiple writers are supported.
  */
@@ -209,5 +217,4 @@ Route::set('default', '(<controller>(/<action>(/<id>)))')
 		'controller' => 'welcome',
 		'action'     => 'index',
 	));
-
-
+//echo Debug::vars('179', Route::all());exit; 
