@@ -158,7 +158,7 @@ Kohana::modules(array(
 //специлизированные модули
 	 //'testartonit' => MODPATH.'testartonit',//testartonit
 	 //'log' => MODPATH.'log', // 
-	 //'bas' => MODPATH.'bas', // модуль для работы с bas-ip	
+	 'bas' => MODPATH.'bas', // модуль для работы с bas-ip	
 	'mancard' => MODPATH.'mancard',//Менеджер пропусков
 	//'auditlog' => MODPATH.'auditlog',//Менеджер аудит: информация об изменениях данных.
 	'rest'   => MODPATH.'rest',      // ← ПЕРЕД parsec
@@ -214,7 +214,7 @@ Kohana::$log->attach(new Log_File(APPPATH.'logs'));
     
 Route::set('default', '(<controller>(/<action>(/<id>)))')
 	->defaults(array(
-		'controller' => 'welcome',
+		'controller' => 'dashboard',
 		'action'     => 'index',
 	));
 //echo Debug::vars('179', Route::all());exit; 

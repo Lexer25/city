@@ -7,6 +7,8 @@
 
 return array(
     'dir_log' => 'C:\\Program Files (x86)\\Cardsoft\\DuoSE\\Access\\Log',
+    'dir_log_framework' => 'C:\\xampp\\htdocs\\city\\application\logs',
+    'dir_log_ArtonitServices' => 'C:\\ArtonitServices',
     'dir_compare' => 'C:\\xampp\\htdocs\\city',
     'stat_day_befor' => 2,
     'city_name' => 'ЖК Хедлайнер',
