@@ -156,7 +156,8 @@ Kohana::modules(array(
 
 
 //специлизированные модули
-	 //'testartonit' => MODPATH.'testartonit',//testartonit
+	 'testartonit' => MODPATH.'testartonit',//testartonit
+	 'devicedriver' => MODPATH.'devicedriver',//devicedriver
 	 //'log' => MODPATH.'log', // 
 	 'bas' => MODPATH.'bas', // модуль для работы с bas-ip	
 	'mancard' => MODPATH.'mancard',//Менеджер пропусков

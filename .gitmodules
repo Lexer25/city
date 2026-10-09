@@ -103,3 +103,7 @@
 	path = modules/rest
 	url = https://github.com/Lexer25/city_rest.git
 	branch = main
+[submodule "modules/devicedriver"]
+	path = modules/devicedriver
+	url = https://github.com/Lexer25/adm_devicedriver.git
+	branch = main
