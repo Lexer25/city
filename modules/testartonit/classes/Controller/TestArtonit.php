@@ -522,7 +522,7 @@ class Controller_TestArtonit extends Controller
                     $diff = time() - strtotime($matches[1]);
                     $result['time_diff'] = $diff . ' сек';
                     $result['time_diff_abs'] = abs($diff) . ' сек';
-                    $result['status'] = abs($diff) < 5 ? '✅ Время синхронизировано' : '⚠️ Требуется синхронизация времени';
+                    $result['status'] = abs($diff) < 5 ? 'Время синхронизировано' : 'Требуется синхронизация времени';
                 } else {
                     $result['raw'] = $clean;
                 }
@@ -535,14 +535,14 @@ class Controller_TestArtonit extends Controller
                     $result['raw'] = $jmp;
                     $result['binary'] = sprintf('%08b', $jmp);
                     $result['bits'] = array(
-                        'bit0 (WP)' => ($jmp & 1) ? '1 ✅' : '0 ❌',
-                        'bit1 (Test)' => ($jmp & 2) ? '1 ✅' : '0 ❌',
+                        'bit0 (WP)' => ($jmp & 1) ? '1' : '0',
+                        'bit1 (Test)' => ($jmp & 2) ? '1' : '0',
                     );
                     $result['description'] = array();
-                    if ($jmp & 1) $result['description'][] = '🔒 WP включен (защита от записи)';
-                    if ($jmp & 2) $result['description'][] = '🧪 Test режим включен';
+                    if ($jmp & 1) $result['description'][] = 'WP включен (защита от записи)';
+                    if ($jmp & 2) $result['description'][] = 'Test режим включен';
                     if (!($jmp & 1) && !($jmp & 2)) {
-                        $result['description'][] = '✅ Нормальный режим работы';
+                        $result['description'][] = 'Нормальный режим работы';
                     }
                 } else {
                     $result['raw'] = $clean;
@@ -573,7 +573,7 @@ class Controller_TestArtonit extends Controller
     private function getCommandList()
     {
         return array(
-            '📡 TS2 Команды' => array(
+            'TS2 Команды' => array(
                 'getversion' => 'Получить версию',
                 'getdevicetime' => 'Получить время устройства',
                 'getjmp' => 'Получить состояние джамперов',
@@ -583,7 +583,7 @@ class Controller_TestArtonit extends Controller
                 'opendoor' => 'Открыть дверь',
                 'closedoor' => 'Закрыть дверь',
             ),
-            '🌐 HTTP Команды' => array(
+            'HTTP Команды' => array(
                 'getversion' => 'Получить версию',
                 'getdevicemode' => 'Состояние WP/Test/MAC',
                 'getdoormode' => 'Режим работы дверей',
