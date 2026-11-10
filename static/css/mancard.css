@@ -1,0 +1,127 @@
+@charset "UTF-8";
+/* ============================================================================
+   Модуль mancard — общие компактные стили дерева организаций и сотрудников.
+   Подключается на страницах mancard/index (Управление) и mancard/move
+   (Массовое перемещение): modules/mancard/views/mancard/index.php и move.php.
+
+   Раньше деревья выглядели по-разному: стили дерева были только в index.php,
+   а на странице перемещения браузер рисовал голые ul — маркеры списка,
+   отступ 40px на уровень и шрифт 14px от Bootstrap.
+   ========================================================================== */
+
+/* --- Списки: без маркеров и без браузерного отступа ---------------------- */
+.file-tree,
+.file-tree ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- Дерево целиком ------------------------------------------------------ */
+.file-tree {
+    font-size: 12px;
+    line-height: 1.35;
+    color: #333;
+}
+
+/* Вложенность: тонкая направляющая вместо 40px отступа на уровень */
+.file-tree ul.tree-children {
+    margin-left: 7px;
+    padding-left: 12px;
+    border-left: 1px dashed #e4e8ec;
+}
+
+.tree-node {
+    margin: 0;
+}
+
+/* --- Строка дерева ------------------------------------------------------- */
+.tree-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 1px 5px;
+    border-radius: 3px;
+    cursor: default;
+    transition: background 0.15s;
+}
+
+.tree-item:hover {
+    background: #f2f6fb;
+}
+
+/* --- Иконка-переключатель ------------------------------------------------- */
+.tree-item .tree-toggle {
+    flex: 0 0 16px;
+    width: 16px;
+    text-align: center;
+    cursor: pointer;
+    line-height: 1;
+}
+
+/* Размер эмодзи-иконок папок и людей: в разметке он задан инлайном 16/18px,
+   поэтому перебиваем его важным правилом в одном месте */
+.tree-item .tree-toggle span {
+    font-size: 12px !important;
+    line-height: 1;
+}
+
+.tree-item .tree-toggle .glyphicon {
+    font-size: 12px;
+    color: #8a97a3;
+}
+
+/* --- Название, ID, должность --------------------------------------------- */
+.tree-item .item-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-left: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ID и должность: тоже инлайн в разметке (11px), приводим к одному размеру */
+.tree-item .org-id,
+.tree-item .person-id {
+    flex: 0 0 auto;
+    margin-left: 3px;
+    font-family: Consolas, "Courier New", monospace !important;
+    font-size: 10px !important;
+    color: #aeb6be !important;
+}
+
+.tree-item .person-post {
+    flex: 0 0 auto;
+    margin-left: 5px;
+    font-size: 10px !important;
+    color: #9aa4ae !important;
+}
+
+/* --- Чекбокс выбора элемента --------------------------------------------- */
+.tree-item .item-checkbox {
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+    margin: 0 2px 0 0;
+}
+
+/* --- Бейджи-счётчики (сотрудники / подразделения) ------------------------ */
+.tree-item .badge {
+    flex: 0 0 auto;
+    min-width: 0;
+    margin-left: 4px;
+    padding: 1px 5px;
+    font-size: 9px !important;
+    font-weight: 600;
+    line-height: 1.4;
+    border-radius: 8px;
+}
+
+/* --- Прокручиваемый контейнер дерева ------------------------------------- */
+.move-list {
+    border: 1px solid #e7e7e7;
+    border-radius: 4px;
+    background: #fafafa;
+    padding: 4px;
+}
