@@ -47,6 +47,8 @@ return array(
         658,
         46,
         481,
+		5071,
+		5091,
     ),
     'analit_transit' => array(
         5001,
