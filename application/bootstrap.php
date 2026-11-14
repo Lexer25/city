@@ -157,6 +157,7 @@ Kohana::modules(array(
 
 //специлизированные модули
 	 'testartonit' => MODPATH.'testartonit',//testartonit
+	 'task' => MODPATH.'task', // служебные CLI-задачи (checkAnalitCode)
 	 'devicedriver' => MODPATH.'devicedriver',//devicedriver
 	 //'log' => MODPATH.'log', // 
 	 'bas' => MODPATH.'bas', // модуль для работы с bas-ip	
