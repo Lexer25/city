@@ -111,3 +111,7 @@
 	path = modules/task
 	url = https://github.com/Lexer25/city_task.git
 	branch = main
+[submodule "modules/restmancard"]
+	path = modules/restmancard
+	url = https://github.com/Lexer25/restmancard.git
+	branch = main

@@ -1,0 +1,440 @@
+@charset "UTF-8";
+/* ============================================================================
+   Модуль restmancard — стили формы «Организации и сотрудники» (REST API v2).
+
+   Базовая часть (дерево, строки, бейджи) повторяет static/css/mancard.css,
+   чтобы форма выглядела как mancard/index, но модуль не зависел от mancard.
+
+   Дополнительно: заголовок с адресом API, поиск, панель свойств,
+   бейджи идентификаторов, подсветка выбранного элемента.
+   ========================================================================== */
+
+/* --- Списки: без маркеров и без браузерного отступа ---------------------- */
+.file-tree,
+.file-tree ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- Дерево целиком ------------------------------------------------------ */
+.file-tree {
+    font-size: 12px;
+    line-height: 1.35;
+    color: #333;
+}
+
+/* Вложенность: тонкая направляющая вместо 40px отступа на уровень */
+.file-tree ul.tree-children {
+    margin-left: 7px;
+    padding-left: 12px;
+    border-left: 1px dashed #e4e8ec;
+}
+
+.tree-node {
+    margin: 0;
+}
+
+/* --- Строка дерева ------------------------------------------------------- */
+.tree-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 1px 5px;
+    border-radius: 3px;
+    cursor: default;
+    transition: background 0.15s;
+}
+
+.tree-item:hover {
+    background: #f2f6fb;
+}
+
+/* --- Иконка-переключатель ------------------------------------------------- */
+.tree-item .tree-toggle {
+    flex: 0 0 16px;
+    width: 16px;
+    text-align: center;
+    cursor: pointer;
+    line-height: 1;
+}
+
+/* Размер эмодзи-иконок папок и людей: в разметке он задан инлайном 16px */
+.tree-item .tree-toggle span {
+    font-size: 12px !important;
+    line-height: 1;
+}
+
+.tree-item .tree-toggle .glyphicon {
+    font-size: 12px;
+    color: #8a97a3;
+}
+
+/* --- Название, ID, должность --------------------------------------------- */
+.tree-item .item-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-left: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tree-item .org-id,
+.tree-item .person-id {
+    flex: 0 0 auto;
+    margin-left: 3px;
+    font-family: Consolas, "Courier New", monospace !important;
+    font-size: 10px !important;
+    color: #aeb6be !important;
+}
+
+.tree-item .person-post {
+    flex: 0 0 auto;
+    margin-left: 5px;
+    font-size: 10px !important;
+    color: #9aa4ae !important;
+}
+
+/* --- Бейджи-счётчики (сотрудники / подразделения) ------------------------ */
+.tree-item .badge {
+    flex: 0 0 auto;
+    min-width: 0;
+    margin-left: 4px;
+    padding: 1px 5px;
+    font-size: 9px !important;
+    font-weight: 600;
+    line-height: 1.4;
+    border-radius: 8px;
+}
+
+.tree-item .badge-empty {
+    background-color: #f5f5f5;
+    color: #c6ccd2;
+}
+
+.rc-badge-people {
+    background-color: #337ab7;
+    color: #fff;
+}
+
+.rc-badge-children {
+    background-color: #5bc0de;
+    color: #fff;
+}
+
+/* --- Прокручиваемый контейнер дерева ------------------------------------- */
+.move-list {
+    border: 1px solid #e7e7e7;
+    border-radius: 4px;
+    background: #fafafa;
+    padding: 4px;
+}
+
+/* ============================================================================
+   Заголовок и общая компоновка
+   ========================================================================== */
+.rc-root .panel-title {
+    font-size: 15px;
+}
+
+.rc-api-version {
+    margin-left: 6px;
+    font-size: 10px;
+    vertical-align: middle;
+}
+
+.rc-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rc-api-url {
+    font-size: 11px;
+    font-weight: normal;
+    opacity: 0.9;
+    white-space: nowrap;
+    max-width: 380px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rc-main {
+    margin-top: 2px;
+}
+
+.rc-org-body {
+    padding: 5px;
+}
+
+.rc-search {
+    margin-bottom: 6px;
+}
+
+.rc-add-org-btn {
+    margin-right: 4px;
+}
+
+.rc-add-person-btn {
+    margin-right: 4px;
+}
+
+#rc-add-org-alert,
+#rc-add-person-alert {
+    margin-bottom: 12px;
+}
+
+#rc-add-org-form .help-block,
+#rc-add-person-form .help-block {
+    margin-bottom: 0;
+    font-size: 11px;
+}
+
+.rc-form-note {
+    margin-bottom: 12px;
+    font-size: 12px;
+}
+
+/* Чекбоксы «Автоматически» у полей divcode и tabnum */
+.rc-divcode-auto,
+.rc-tabnum-auto {
+    margin: 5px 0 0;
+}
+
+.rc-divcode-auto label,
+.rc-tabnum-auto label {
+    font-size: 12px;
+    font-weight: normal;
+    color: #555;
+    cursor: pointer;
+}
+
+#rc-add-org-divcode:disabled,
+#rc-add-person-tabnum:disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+/* Действия в панели «Свойства» */
+.rc-props-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.rc-delete-hint {
+    margin-top: 12px;
+    font-size: 11px;
+}
+
+.rc-search-info {
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #666;
+}
+
+#rc-tree-container {
+    max-height: 450px;
+    overflow: auto;
+    padding: 5px;
+}
+
+.rc-empty {
+    padding: 30px 10px;
+}
+
+.rc-footer-row {
+    margin-top: 2px;
+}
+
+.rc-error-hint {
+    margin-top: 6px;
+}
+
+.rc-limit-note {
+    font-size: 11px;
+}
+
+/* ============================================================================
+   Поиск по дереву
+   ========================================================================== */
+#rc-tree.rc-searching li.tree-node {
+    display: none;
+}
+
+#rc-tree.rc-searching li.tree-node.rc-visible {
+    display: block;
+}
+
+/* ============================================================================
+   Выбранный элемент
+   ========================================================================== */
+.tree-item.rc-selected {
+    background: #e8f1fb;
+    box-shadow: inset 3px 0 0 #337ab7;
+}
+
+.tree-item.rc-selected .item-name {
+    font-weight: 600;
+}
+
+/* ============================================================================
+   Панель «Свойства»
+   ========================================================================== */
+.props-panel {
+    min-height: 300px;
+}
+
+.props-panel .panel-body {
+    padding: 15px;
+    min-height: 360px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.props-entity-title {
+    display: block;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e7e7e7;
+    font-weight: 600;
+    color: #337ab7;
+}
+
+.props-entity-title .glyphicon {
+    margin-right: 4px;
+}
+
+.info-item {
+    padding: 5px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-item .label {
+    display: inline-block;
+    width: 160px;
+    font-weight: 600;
+    color: #555;
+    white-space: normal;
+    text-align: left;
+    font-size: 12px;
+}
+
+.info-item .value {
+    color: #333;
+    word-wrap: break-word;
+}
+
+.rc-placeholder {
+    padding: 40px 0;
+}
+
+.rc-note {
+    margin-top: 12px;
+    margin-bottom: 0;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+/* ============================================================================
+   Панель «Категории доступа» (раздел нарисован, но не заполняется)
+   ========================================================================== */
+.access-panel {
+    min-height: 300px;
+}
+
+.access-panel .panel-body {
+    padding: 15px;
+    min-height: 360px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* ============================================================================
+   Бейджи идентификаторов (карт)
+   ========================================================================== */
+.card-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    margin: 1px 2px;
+    font-size: 9px;
+    font-weight: bold;
+    border-radius: 3px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.card-badge-rfid {
+    background-color: #d9edf7;
+    color: #31708f;
+    border: 1px solid #bce8f1;
+}
+
+.card-badge-fp {
+    background-color: #fcf8e3;
+    color: #8a6d3b;
+    border: 1px solid #faebcc;
+}
+
+.card-badge-barcode {
+    background-color: #dff0d8;
+    color: #3c763d;
+    border: 1px solid #d6e9c6;
+}
+
+.card-badge-grz {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.card-badge-faceid {
+    background-color: #e8d5f5;
+    color: #6f2c8a;
+    border: 1px solid #d4b8e8;
+}
+
+.card-badge-default {
+    background-color: #eee;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.tree-item-person .cards-container {
+    display: inline-block;
+    flex: 0 0 auto;
+    margin-left: 5px;
+}
+
+.tree-item-person .cards-container .card-badge {
+    font-size: 8px;
+    padding: 1px 4px;
+}
+
+.tree-item-person .person-name {
+    font-weight: 500;
+}
+
+/* ============================================================================
+   Адаптация под узкие экраны
+   ========================================================================== */
+@media (max-width: 992px) {
+    .rc-api-url {
+        display: none;
+    }
+
+    .props-panel .panel-body,
+    .access-panel .panel-body {
+        min-height: 240px;
+        max-height: none;
+    }
+}

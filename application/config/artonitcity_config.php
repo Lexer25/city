@@ -2,17 +2,16 @@
 
 /**
  * Конфигурационный файл Artonit City
- * Сгенерировано: 2026-04-01 22:06:50
+ * Сгенерировано: 2026-11-19 11:29:48
  */
 
 return array(
     'dir_log' => 'C:\\Program Files (x86)\\Cardsoft\\DuoSE\\Access\\Log',
-    'dir_log_framework' => 'C:\\xampp\\htdocs\\city\\application\logs',
+    'dir_log_framework' => 'C:\\xampp\\htdocs\\city\\application\\logs',
     'dir_log_ArtonitServices' => 'C:\\ArtonitServices',
     'dir_compare' => 'C:\\xampp\\htdocs\\city',
     'stat_day_befor' => 2,
     'city_name' => 'ЖК Хедлайнер',
- 
     'developer' => 'www.artonit.ru',
     'main_windows' => array(
         'windows1' => true,
@@ -47,8 +46,8 @@ return array(
         658,
         46,
         481,
-		5071,
-		5091,
+        5071,
+        5091,
     ),
     'analit_transit' => array(
         5001,
@@ -69,5 +68,5 @@ return array(
         'log' => true,
     ),
     'curl_place' => 'C:\\xampp\\curl.exe -L',
-    'baseFormatRfid' => 0,
+    'baseFormatRfid' => 1,
 );

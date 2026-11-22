@@ -162,10 +162,14 @@ Kohana::modules(array(
 	 //'log' => MODPATH.'log', // 
 	 'bas' => MODPATH.'bas', // модуль для работы с bas-ip	
 	'mancard' => MODPATH.'mancard',//Менеджер пропусков
+	
 	//'auditlog' => MODPATH.'auditlog',//Менеджер аудит: информация об изменениях данных.
 	'rest'   => MODPATH.'rest',      // ← ПЕРЕД parsec
 	 'parsec' => MODPATH.'parsec', //'раздел для работы с parsec
 	 //'apb' => MODPATH.'apb', //'раздел для работы с периметральным антипассбеком
+	 
+	 //модули rest
+'restmancard' => MODPATH.'restmancard',//Менеджер пропусков на данных REST API v2
 	
 //модули framwork Kohana	
 
@@ -177,6 +181,8 @@ Kohana::modules(array(
 	 'minion'     => MODPATH.'minion',     // CLI Tasks
 	// 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
 	// 'unittest'   => MODPATH.'unittest',   // Unit testing
+	
+
 
 //модули сторонних разработчиков	
 	
