@@ -181,12 +181,14 @@
 }
 
 #rc-add-org-alert,
-#rc-add-person-alert {
+#rc-add-person-alert,
+#rc-edit-org-alert {
     margin-bottom: 12px;
 }
 
 #rc-add-org-form .help-block,
-#rc-add-person-form .help-block {
+#rc-add-person-form .help-block,
+#rc-edit-org-form .help-block {
     margin-bottom: 0;
     font-size: 11px;
 }
@@ -214,6 +216,13 @@
 #rc-add-person-tabnum:disabled {
     background-color: #f5f5f5;
     color: #999;
+    cursor: not-allowed;
+}
+
+/* Код организации в окне редактирования — только для справки */
+#rc-edit-org-divcode:disabled {
+    background-color: #f5f5f5;
+    color: #777;
     cursor: not-allowed;
 }
 
@@ -498,6 +507,71 @@
     font-weight: 600;
 }
 
+/* --- Режим изменения набора категорий организации ------------------------ */
+.rc-access-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rc-access-edit-btn {
+    font-size: 10px;
+    padding: 1px 6px;
+}
+
+.rc-access-editbar {
+    margin-bottom: 8px;
+    padding: 6px 8px;
+    background: #fcf8e3;
+    border: 1px solid #faebcc;
+    border-radius: 4px;
+}
+
+.rc-access-edithint {
+    margin-bottom: 6px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #8a6d3b;
+}
+
+.rc-access-editactions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rc-access-editcount {
+    margin-left: auto;
+    font-size: 11px;
+}
+
+/* В режиме правки строка списка становится «флажком» */
+.rc-access-list.rc-access-editing .rc-access-item {
+    cursor: pointer;
+}
+
+.rc-access-list.rc-access-editing .rc-access-item:hover {
+    background: #eef6ff;
+}
+
+.rc-access-list.rc-access-editing .rc-access-item .rc-access-name {
+    cursor: pointer;
+}
+
+/* Категория включена в сохраняемый набор */
+.rc-access-item.rc-access-checked {
+    background: #eaf6ea;
+    border-left-color: #5cb85c;
+}
+
+.rc-access-item.rc-access-checked .rc-access-icon {
+    color: #5cb85c;
+}
+
+.rc-access-item.rc-access-checked .rc-access-name {
+    font-weight: 600;
+}
+
 /* ============================================================================
    Бейджи идентификаторов (карт)
    ========================================================================== */
@@ -576,4 +650,180 @@
         min-height: 240px;
         max-height: none;
     }
+}
+
+/* ============================================================================
+   Отдельная форма организаций (restmancard/organizations)
+   ========================================================================== */
+.rc-orgs .panel-title {
+    font-size: 15px;
+}
+
+/* Дерево организаций выше, чем в общей форме: сотрудников в нём нет */
+.rc-orgs-tree #rc-tree-container {
+    max-height: 520px;
+}
+
+.rc-orgs-props {
+    min-height: 300px;
+}
+
+/* Свойства организации — форма без модальных окон */
+.rc-orgs-form .form-group {
+    margin-bottom: 10px;
+}
+
+.rc-orgs-form .help-block {
+    margin-bottom: 0;
+    font-size: 11px;
+}
+
+.rc-orgs-divcode {
+    margin-bottom: 0;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 12px;
+}
+
+.rc-orgs-form-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.rc-orgs-dirty {
+    margin-left: auto;
+    font-size: 11px;
+    color: #d9534f;
+}
+
+.rc-orgs-hint {
+    margin-top: 6px;
+    margin-bottom: 0;
+}
+
+/* --- Блок категорий доступа внутри формы -------------------------------- */
+.rc-orgs-access {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid #e7e7e7;
+}
+
+.rc-orgs-access-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.rc-orgs-access-title {
+    font-weight: 600;
+    color: #555;
+}
+
+.rc-orgs-access-head .badge {
+    background-color: #337ab7;
+    font-size: 10px;
+}
+
+.rc-orgs-access-actions {
+    margin-left: auto;
+}
+
+.rc-orgs-access-note {
+    margin-bottom: 6px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #8a6d3b;
+}
+
+.rc-orgs-access-status {
+    margin-bottom: 6px;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.rc-orgs-access-empty {
+    font-size: 12px;
+    padding: 10px 0;
+}
+
+.rc-orgs-access-list {
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid #eeeeee;
+    border-radius: 4px;
+    padding: 2px 4px;
+    background: #fff;
+}
+
+.rc-orgs-access-list label.rc-access-item {
+    margin-bottom: 0;
+    padding: 3px 4px;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.rc-orgs-access-list .rc-access-check {
+    flex: 0 0 auto;
+    margin: 0 6px 0 0;
+    cursor: pointer;
+}
+
+.rc-orgs-access-list .rc-access-check:disabled {
+    cursor: not-allowed;
+}
+
+.rc-orgs-access-list .rc-access-item.rc-access-checked {
+    background: #eaf6ea;
+    border-left-color: #5cb85c;
+}
+
+/* --- Три колонки формы организаций ------------------------------------- */
+/* Панель категорий — отдельная колонка со своей кнопкой «Сохранить». */
+.rc-orgs-access-panel {
+    min-height: 300px;
+}
+
+.rc-orgs-access-form {
+    margin-bottom: 0;
+}
+
+.rc-orgs-access-panel .panel-title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    white-space: normal;
+    line-height: 1.35;
+}
+
+.rc-orgs-access-panel .panel-title .pull-right {
+    float: none;
+    margin-left: auto;
+}
+
+.rc-orgs-access-panel .panel-title .badge {
+    margin-left: 6px;
+    font-size: 10px;
+}
+
+.rc-orgs-access-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+#rc-access-alert {
+    margin-bottom: 10px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* В узкой колонке длинные названия организаций переносятся по словам. */
+.rc-orgs .tree-item .org-name {
+    word-wrap: break-word;
+    word-break: break-word;
 }
