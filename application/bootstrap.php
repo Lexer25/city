@@ -170,6 +170,7 @@ Kohana::modules(array(
 	 
 	 //модули rest
 'restmancard' => MODPATH.'restmancard',//Менеджер пропусков на данных REST API v2
+'restdashboard' => MODPATH.'restdashboard',//REST API v2 dashboard
 	
 //модули framwork Kohana	
 

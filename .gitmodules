@@ -115,3 +115,7 @@
 	path = modules/restmancard
 	url = https://github.com/Lexer25/restmancard.git
 	branch = main
+[submodule "modules/restdashboard"]
+	path = modules/restdashboard
+	url = https://github.com/Lexer25/city_restdashboard.git
+	branch = main
